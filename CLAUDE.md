@@ -3,9 +3,14 @@
 You are working in the `wnba-2026-deadline-framework` repo. The single source of truth for
 this project is `HANDOFF_wnba_deadline_framework.md` in the repo root, as amended by
 `AMENDMENT_01_trajectory_workflow_agents.md` (trajectory layer / §5c-bis, EDA gate,
-three review agents in `.claude/agents/`). Read both fully before doing anything —
-where the amendment conflicts with the handoff, the amendment wins; where either
-conflicts with an instruction here, flag the conflict rather than silently picking one.
+three review agents in `.claude/agents/`) and
+`AMENDMENT_02_contracts_cba_cap.md` (cap-context layer, contract typology,
+feasibility-conditioned lever calls — wins over the handoff and AMENDMENT_01, but
+*only* on contract/cap matters; everything else stands as amended by AMENDMENT_01).
+Read all three fully before doing anything — where an amendment conflicts with the
+handoff, the amendment wins (within its own stated scope); where either amendment or
+this file conflicts with something else, flag the conflict rather than silently
+picking one.
 
 **Live status and next steps live in `PLAN.md`, not here.** Check it first — it has
 the checked-off history, the current gate, and the "Next session should" line. The
@@ -19,10 +24,21 @@ roxygen stubs/`stop()` guard each), named empty-bodied `tests/testthat/` files,
 `analysis/case_study_template.Rmd` (Synergy quarantine stub), `PLAN.md`, first commit.
 No data downloaded, no logic implemented, no Python.
 
-Session 1b (2026-07-18, amendment intake): read `AMENDMENT_01_...md`, updated
+Session 1b (2026-07-18, AMENDMENT_01 intake): read `AMENDMENT_01_...md`, updated
 `PLAN.md` to the amended session flow, added the trajectory-layer spec (§5c-bis) to
 the `R/06_models.R` skeleton, added the `analysis/eda_midseason.Rmd` stub, installed
 the three review agents to `.claude/agents/`. Still no data downloaded.
+
+Session 2b (2026-07-18, AMENDMENT_02 intake): read `AMENDMENT_02_...md`, folded the
+cap-context layer into `PLAN.md` (Jul 23 cap-context CSV gathering, Jul 24-25 contract
+typology, Jul 25-26 structural paragraph + 4-item pre-publish verification checklist,
+updated cut order), added the `cap_context` column and feasibility-conditioned lever
+rule to the `R/08_deadline_read.R` skeleton, created `data/reference/` (tracked, not
+gitignored — attributed reference data, not raw data) with a
+`cap_context_2026.csv` header-only template and a `README.md` stating the
+hand-curation/attribution and tiers-not-dollars rules, and appended the amendment's
+cap-conditioning checks to `.claude/agents/gm-agent.md` and `analytics-reviewer.md`.
+Still no data downloaded, no script logic implemented beyond skeleton documentation.
 
 ## Standing rules for all future sessions
 

@@ -2,8 +2,9 @@
 
 Timeline from `HANDOFF_wnba_deadline_framework.md` §6, amended 2026-07-18 by
 `AMENDMENT_01_trajectory_workflow_agents.md` (trajectory layer, EDA gate, review
-agents — amendment wins on conflicts with the handoff). Hard deadline: publish July
-26-27, 2026.
+agents) and `AMENDMENT_02_contracts_cba_cap.md` (cap-context layer, contract
+typology, feasibility-conditioned lever — wins over the handoff and AMENDMENT_01 on
+contract/cap matters only). Hard deadline: publish July 26-27, 2026.
 
 ## Session flow (per AMENDMENT_01 Part 2, supersedes the prior 6-step roadmap)
 
@@ -40,12 +41,23 @@ Setup (session 1b, amendment intake):
 - [x] Three review agents installed to `.claude/agents/`
       (`analytics-reviewer`, `coach-agent`, `gm-agent`)
 
-Not yet done (next session, implementation — still no data downloaded):
-- [ ] Implement `R/01_download.R`; run deliberately so download date is logged
+Session 2 (2026-07-18):
+- [x] Implement and run `R/01_download.R` — data in `data/raw/`, manifest written,
+      counts confirmed against handoff §4
 - [ ] Implement `R/02_parse_pbp.R`
 - [ ] Implement `R/03_possessions.R`
 - [ ] Implement `R/04_reconcile.R`; get all `tests/testthat/` assertions passing
 - [ ] **Gate: show the reconciliation report before proceeding**
+
+Session 2b (2026-07-18, AMENDMENT_02 intake — scaffold/documentation only, no data
+downloads, no analysis execution):
+- [x] `AMENDMENT_02_contracts_cba_cap.md` read and incorporated into PLAN.md
+- [x] `R/08_deadline_read.R` skeleton gains the `cap_context` column and
+      feasibility-conditioned lever rule
+- [x] `data/reference/cap_context_2026.csv` template (header only) + `data/reference/README.md`
+      created — tracked in git, not gitignored
+- [x] `.claude/agents/gm-agent.md` and `analytics-reviewer.md` updated with the
+      cap-conditioning / tiers-not-dollars checks from AMENDMENT_02 §4
 
 ## EDA & Hypotheses Registry — new gate (AMENDMENT_01 §2a-2b)
 
@@ -90,15 +102,15 @@ written until this gate clears.
       4. Live-ball TOV rate (H2)
       5. Optional: shot-making residual from script 07 (H3, GSV-relevant) — cut first
          if the block is threatened
-      Cut order if time-constrained: optional 5th metric, then H1's efficiency side,
-      never the deadline-read `trajectory` column itself (fall back to raw trends
-      with a stated caveat before dropping the column).
+      **Superseded by the project-wide cut order below (AMENDMENT_02 §4)** — the
+      `trajectory` column itself is still never cut; the optional 5th metric is now
+      the first thing to go project-wide, not just within this block.
 - [ ] Present BLUP/ICC results and raw-vs-adjusted rank deltas
 - [ ] **Run `analytics-reviewer` agent on script 06 results (BLUPs, ICCs, trajectory
       slopes) — triage feedback (accept / reject with one-line reason / defer
       post-deadline), log the triage below**
 
-## Jul 23 — Data refresh check; expected-points baseline; deadline-read table
+## Jul 23 — Data refresh check; expected-points baseline; deadline-read table; cap-context CSV
 
 - [ ] Check `shufinskiy/nba_data` for a commit newer than `773ce29`; re-pin and re-run
       01-04 if found, confirm tests still pass; update baseline expectations
@@ -106,16 +118,33 @@ written until this gate clears.
 - [ ] Implement `R/07_expected_points.R` (stratified xPTS baseline, not a trained model)
 - [ ] Implement `R/08_deadline_read.R` — skeleton now includes the `trajectory`
       column (improving / flat / declining, footnoted when the interval spans zero,
-      via `format_trajectory_column()`) and a `team_trajectories` input from script
-      06; implement against that skeleton
+      via `format_trajectory_column()`), the `cap_context` column (room / tight /
+      capped, AMENDMENT_02 §3b), the feasibility-conditioned `lever` rule (an
+      "acquire" read under a capped context becomes `acquire (constrained: requires
+      salary out)` or downgrades — never silently recommend a move the cap forbids),
+      and a `team_trajectories` input from script 06 plus a `cap_context` input from
+      `data/reference/cap_context_2026.csv`; implement against that skeleton
+- [ ] **Gather `data/reference/cap_context_2026.csv` (AMENDMENT_02 §3a/§4) — all 15
+      teams, hand-curated by Wendy from Spotrac WNBA team pages and Her Hoop Stats
+      contract data, NOT scripted scraping. ~1 hour, same day as script 08. Every row
+      needs a `source` and `as_of_date`. Tiers, not to-the-dollar figures.**
 - [ ] Present the deadline-read table (the core deliverable)
 - [ ] **Run `gm-agent` on the deadline-read table before any prose is written around
-      it — triage feedback, log below**
+      it — triage feedback, log below. Includes the cap-conditioning check added by
+      AMENDMENT_02 §4.**
 
 ## Jul 24-25 — Synergy case-study enrichment + fit reads (time-boxed)
 
 - [ ] GSV full case study, Toronto and Portland lighter treatment
 - [ ] If not converging by Jul 25, drop and ship diagnosis-only — still a complete piece
+- [ ] **Contract typology folded into fit reads (AMENDMENT_02 §3c):** each named
+      candidate profile gains a contract line — years remaining, 2026 salary tier
+      (min/mid/max/supermax), expiring or not, protection status if verifiable, and
+      the resulting asset class (expiring mid-tier = classic deadline chip;
+      multi-year mid-tier = costlier, keeps the fit past September; supermax =
+      immobile, do not propose as a target; minimum/depth = the feasible move for
+      capped teams). Profiles stay profiles, not trade proposals — no fake-trade
+      content.
 
 ## Jul 25-26 — Writing, graphics, methodology notes
 
@@ -125,10 +154,26 @@ written until this gate clears.
 - [ ] Draft `output/findings.md`, including framework evaluation criteria
       (AMENDMENT_01 §2c: face validity, split-half stability, sensitivity check,
       garbage-time disposition)
+- [ ] **Structural paragraph (AMENDMENT_02 §3d, league-wide, findings draft):** what
+      the first post-CBA deadline means structurally — contract-length distribution
+      after the 2026 free agency rush, what that implies about market liquidity
+      (movable expirings league-wide), the supermax immobility rule, the World Cup
+      break as a hold incentive. Prose plus one summary count from the cap-context
+      table — not a model.
+- [ ] **Four-item pre-publish verification checklist (AMENDMENT_02 §4):**
+      1. Re-check cap figures for the three case-study teams against Spotrac/Her Hoop
+         Stats within 48 hours of publish.
+      2. Confirm the hard-cap trade-fitting rule under the new CBA from a primary or
+         top-tier source before the structural paragraph states it.
+      3. Confirm protection/guarantee rules before any candidate's contract security
+         is characterized.
+      4. Date-stamp the cap-context table in the piece ("cap figures as of [date]")
+         since deadline-week moves will stale it within days.
 - [ ] **Run `coach-agent` on case-study sections (GSV, TOR, PDX) once fit reads are
       drafted — triage feedback, log below**
 - [ ] **Run `analytics-reviewer` on the full findings draft — triage feedback, log
-      below**
+      below. Includes the cap-figure traceability and tiers-only checks added by
+      AMENDMENT_02 §4.**
 
 ## Jul 26-27 — Publish (repo + writeup + WHoopsLab version)
 
@@ -158,23 +203,47 @@ post-deadline. Log each triage decision here as it happens:
 
 - (none yet — agents have not been run; no script 06 results exist)
 
-## Known issues to verify in session 2 (before trusting related outputs)
+## Data download (session 2, 2026-07-18)
 
-1. **shotdetail may be missing Toronto Tempo entirely.** A prior exploratory pull
-   against commit `773ce29` (before this repo's setup pass, not yet re-verified in
-   this repo's history) found `wnba_shotdetail_2026.csv` had 0 rows for Toronto — 14
-   of 15 teams. **Per AMENDMENT_01 §2a, this is resolved in `analysis/eda_midseason.Rmd`
-   as a required coverage check — not left as a passing flag.** If confirmed, the
-   `R/07_expected_points.R` shot geometry for Toronto must come from `cdn` (`x`/`y` +
-   `area`/`areaDetail`), not `shotdetail`.
-2. **Commit hash resolution.** `773ce29` is a short hash; confirm it resolves
-   unambiguously on the live repo when `R/01_download.R` runs (a prior check, not
-   re-verified in this repo's history, found it resolves to
-   `773ce292bb2cd9bc6ec98d70de95176607ccbaeb`, "add wnba 2026 data (ID 1 to 182)").
-3. **§4 baseline table provenance.** The exact filter used for "paint share (of FGM)"
-   (e.g. Restricted Area + In The Paint Non-RA, backcourt heaves excluded) is not
-   stated in the handoff — `R/04_reconcile.R` should determine empirically which
-   definition reproduces the table, and record it.
+`R/01_download.R` run against commit `773ce292bb2cd9bc6ec98d70de95176607ccbaeb`.
+Downloaded and extracted `data/raw/{wnba_cdnnba_2026,wnba_shotdetail_2026,
+wnba_nbastats_2026}.csv`. Manifest confirms 89,735 / 23,163 / 74,224 rows, 182
+distinct games in each file — matches handoff §4 exactly. A follow-up raw-file
+inspection (columns, date range, rows per team, actionType distribution, LAS/LVA
+map, key-column missingness) confirmed every §4 figure reproduces exactly, including
+the 66.0% assisted rate and the §4 baseline FGA-per-team column.
+
+## Known issues (status after session 2 download)
+
+1. **shotdetail is missing Toronto Tempo entirely — CONFIRMED, not just flagged.**
+   Re-verified directly against this repo's own downloaded data (not a prior
+   scratch pull): `wnba_shotdetail_2026.csv` has 0 rows for Toronto, 14 of 15 teams;
+   `cdn` and `nbastats v2` both have all 15. **Per AMENDMENT_01 §2a, the *implication*
+   for feature-building is still resolved formally in `analysis/eda_midseason.Rmd`**
+   (as part of its required coverage check), but the underlying fact no longer needs
+   re-verification. `R/07_expected_points.R` shot geometry for Toronto must come from
+   `cdn` (`x`/`y` + `area`/`areaDetail`), not `shotdetail`.
+2. **Commit hash resolution — CONFIRMED.** `773ce29` resolves to
+   `773ce292bb2cd9bc6ec98d70de95176607ccbaeb` ("add wnba 2026 data (ID 1 to 182)");
+   `R/01_download.R` ran successfully against it 2026-07-18.
+3. **§4 baseline table provenance — still open.** The exact filter used for "paint
+   share (of FGM)" (e.g. Restricted Area + In The Paint Non-RA, backcourt heaves
+   excluded) is not stated in the handoff — `R/04_reconcile.R` should determine
+   empirically which definition reproduces the table, and record it.
+
+## Cut order under time pressure (AMENDMENT_02 §4 — supersedes AMENDMENT_01's narrower version)
+
+If the schedule collapses, degrade in this order:
+
+1. Optional trajectory metric (the 5th, shot-making-residual one)
+2. Synergy enrichment (case-study time-box, ship diagnosis-only)
+3. The AMENDMENT_02 §3d structural paragraph
+4. Contract typology in fit reads
+
+**Never cut, regardless of time pressure:** the `trajectory` column, the `cap_context`
+column, and the feasibility conditioning of the `lever` call. These are now part of
+the core deliverable, not optional extras — an acquire read the cap forbids is worse
+than no read at all.
 
 ## Cut list (explicitly out of scope this cycle)
 
@@ -183,13 +252,20 @@ xPTS model, possession-value model, Synergy-PBP joins. Post-deadline (September+
 separate decision): trained shot-quality model; possession-value framework timed for
 the November hiring window.
 
-Amendment adds no new cuts to this list; it hardens process around the existing scope
-(trajectory is a required deadline-read column, not scope creep — see AMENDMENT_01 §1
-rationale).
+Neither amendment adds new cuts to this list; both harden process around the existing
+scope (trajectory and cap-context are required deadline-read columns, not scope
+creep — see AMENDMENT_01 §1 and AMENDMENT_02 §1 rationale). AMENDMENT_02 explicitly
+excludes: a cap model, trade machine, or salary-matching calculator; player-level
+contract data beyond case-study rosters and named candidates; multi-year cap
+projections or 2027 free-agency analysis; any contract-protection claim without a
+source.
 
 ## Next session should
 
-Implement `R/01_download.R` through `R/04_reconcile.R` per the plan above, get the
-`tests/testthat/` suite green, and stop to present the reconciliation report — per
+Finish `R/02_parse_pbp.R` through `R/04_reconcile.R` (in progress as of 2026-07-18 —
+02/03 have real logic and have been run once; 04 and the `tests/testthat/` suite are
+not yet calibrated/green), then stop to present the reconciliation report — per
 CLAUDE.md, do not proceed past that gate. After the gate, the next stop is the new EDA
 notebook (`analysis/eda_midseason.Rmd`) before any feature/model script is written.
+`data/reference/cap_context_2026.csv` still needs Wendy's manual entry (AMENDMENT_02
+§3a/§4, Jul 23 block) before script 08 can be implemented against real cap data.

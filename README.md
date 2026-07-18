@@ -9,26 +9,37 @@ break); decision-relevant only through the August 2 trade deadline.
 > ET), every WNBA front office must decide whether their first half reflects a talent
 > problem, a process problem, or a luck problem — because those imply opposite
 > deadline strategies: acquire, adjust, or hold. Box-score results conflate all three.
-> This framework decomposes each team's first-half offense into **schedule-adjusted
-> identity** (what they choose to do), **shot generation** (the quality of looks the
-> process creates), and **shot making** (whether they convert those looks) — so the
-> deadline question "what do we actually need?" is answered from evidence rather than
-> record.
+> This framework decomposes each team's first-half offense into schedule-adjusted
+> identity (what they choose to do), shot generation (the quality of looks the
+> process creates), shot making (whether they convert those looks), and trajectory
+> (what they are becoming), then filters the resulting deadline read through cap and
+> contract feasibility, so the deadline question "what do we actually need, and what
+> can we actually do about it?" is answered from evidence rather than record.
 
-Two questions, two rooms:
+*(Extended sentence 2 verbatim per AMENDMENT_02 Part 1 — supersedes the original
+handoff §1 wording, which is left untouched in `HANDOFF_wnba_deadline_framework.md`
+itself.)*
+
+Three questions, three rooms (the third added by AMENDMENT_02 §1):
 
 1. **What do we need?** — front-office question, answered by the open-PBP
    decomposition framework. This is the load-bearing analysis.
 2. **Who fits how we play?** — coaching-staff question, triggered only when the
    answer to (1) is "acquire." Answered by Synergy play-type profiles and the
    existing WHoopsLab archetype/synergy-delta machinery. Case-study teams only.
+3. **Can we do it?** — front-office question, answered by the cap-context layer (cap
+   position, tradeable contracts, CBA mechanics). Gates question 2: fit reads are only
+   generated for moves the cap-context layer says are feasible.
 
 Full spec: [HANDOFF_wnba_deadline_framework.md](HANDOFF_wnba_deadline_framework.md),
 amended by [AMENDMENT_01_trajectory_workflow_agents.md](AMENDMENT_01_trajectory_workflow_agents.md)
-(trajectory layer, EDA gate, review agents — amendment wins on conflicts).
+(trajectory layer, EDA gate, review agents) and
+[AMENDMENT_02_contracts_cba_cap.md](AMENDMENT_02_contracts_cba_cap.md) (cap-context
+layer, contract typology, feasibility-conditioned lever calls — wins over both the
+handoff and AMENDMENT_01 on contract/cap matters only).
 Agent operating rules: [CLAUDE.md](CLAUDE.md). Live task tracker: [PLAN.md](PLAN.md).
 
-### What the amendment adds
+### What AMENDMENT_01 adds
 
 - **Trajectory layer (§5c-bis):** the deadline-read table gains a required
   `trajectory` column (improving / flat / declining), fit as
@@ -40,6 +51,28 @@ Agent operating rules: [CLAUDE.md](CLAUDE.md). Live task tracker: [PLAN.md](PLAN
   rigor), `gm-agent` (deadline-read decision-usefulness), `coach-agent` (case-study
   usefulness for a coaching staff) — run on artifacts, feedback triaged and logged in
   `PLAN.md`, not auto-applied.
+
+### What AMENDMENT_02 adds
+
+- **Cap-context layer:** a hand-curated, attributed reference table,
+  [data/reference/cap_context_2026.csv](data/reference/cap_context_2026.csv) (all 15
+  teams — committed salary, cap room, expiring/max counts, a flexibility tier). Exempt
+  from the pipeline-reproducibility rule (it's not scraped) but not from the
+  traceability rule (every figure carries a source and date). See
+  [data/reference/README.md](data/reference/README.md).
+- **Deadline-read table gains two more columns:** `cap_context` (room / tight /
+  capped) and a feasibility-conditioned `lever` — an "acquire" read under a capped
+  context becomes `acquire (constrained: requires salary out)` or downgrades, never
+  silently recommends a move the cap forbids.
+- **Contract typology in case-study fit reads:** each candidate profile gains a
+  contract line (years remaining, salary tier, expiring/not, asset class). Supermax
+  targets are excluded from fit reads (immobile at the deadline). Profiles stay
+  profiles, never trade proposals.
+- **One structural paragraph** in the findings draft on what the first post-CBA
+  deadline means league-wide (contract-length distribution, market liquidity,
+  supermax immobility, the World Cup break as a hold incentive).
+- Precision discipline: cap figures are **tiers, not to-the-dollar claims** — public
+  WNBA contract data is thin and year one of a new CBA is exactly when trackers lag.
 
 ## Data architecture — two layers, hard boundary
 
@@ -61,23 +94,22 @@ https://github.com/shufinskiy/nba_data/raw/main/datasets/wnba_shotdetail_2026.ta
 https://github.com/shufinskiy/nba_data/raw/main/datasets/wnba_nbastats_2026.tar.xz
 ```
 
-`R/01_download.R` (session 2) will resolve the pinned commit against a full commit
-hash, download and extract the files, and write `data/raw/download_manifest.txt`
-recording the exact commit hash, download timestamp, and per-file row counts — so
-every later result states exactly what snapshot it used. A `--latest` flag will swap
-the pin for `main` for the planned July 23 data-refresh check (handoff §3, §6).
+`R/01_download.R` downloads and extracts the files and writes
+`data/raw/download_manifest.txt` recording the exact commit hash, download timestamp,
+and per-file row/game counts, so every later result states exactly what snapshot it
+used. Run 2026-07-18 against `773ce292bb2cd9bc6ec98d70de95176607ccbaeb`: 89,735 /
+23,163 / 74,224 rows, 182 games each — matches handoff §4 exactly. A `--latest` flag
+swaps the pin for `main` for the planned July 23 data-refresh check (handoff §3, §6).
 
-## Known issue to verify on first download
+## Known issue: shotdetail is missing Toronto Tempo (confirmed 2026-07-18)
 
-A prior exploratory pull against this same commit (before this repo's setup pass)
-found that `wnba_shotdetail_2026.csv` contains **zero rows for Toronto Tempo** — 14 of
-15 teams only, while the primary `cdn` feed has all 15. This has not been re-verified
-in this repo's history. `R/04_reconcile.R` does the raw coverage test; per
-AMENDMENT_01 §2a, `analysis/eda_midseason.Rmd` is where it must be substantively
-**resolved** (not just flagged) as part of the required missingness/coverage check,
-before any shotdetail-based feature (including the §5d expected-points layer) is
-trusted for Toronto. If confirmed, Toronto's shot geometry for that layer should come
-from `cdn` (`x`/`y` + `area`/`areaDetail`), not `shotdetail`. See `PLAN.md`.
+`wnba_shotdetail_2026.csv` contains **zero rows for Toronto Tempo** — 14 of 15 teams
+only, while `cdn` and `nbastats v2` both have all 15. Confirmed directly against this
+repo's own downloaded data in `data/raw/` (not a prior scratch pull). Per
+AMENDMENT_01 §2a, `analysis/eda_midseason.Rmd` still formally resolves the
+*implication* for feature-building as part of its required coverage check, but the
+underlying fact is settled: Toronto's shot geometry for the §5d expected-points layer
+must come from `cdn` (`x`/`y` + `area`/`areaDetail`), not `shotdetail`. See `PLAN.md`.
 
 ## Run instructions
 
