@@ -1,0 +1,81 @@
+---
+title: "Mid-Season EDA — WNBA 2026 Trade Deadline Framework"
+output: html_document
+---
+
+<!--
+NEW GATE (AMENDMENT_01 §2a-2b). Runs after R/04_reconcile.R tests pass and
+BEFORE R/05_features.R is written. Models are not written until this exists.
+EDA that changes the plan is the point of EDA — if a finding here forces a
+spec change (e.g. dropping a metric, changing a threshold), say so and
+update PLAN.md, don't silently absorb it downstream.
+
+Required contents (all must be addressed, not just present as headers):
+  1. Distributions of every planned style metric at the team-game level.
+  2. Missingness and coverage checks — including RESOLVING (not flagging)
+     the Toronto shotdetail zero-row question noted in README.md/PLAN.md.
+  3. Game-level variance per metric (previews which ICCs will be meaningful
+     in R/06_models.R).
+  4. Outlier games identified and dispositioned: keep / exclude / flag
+     (blowouts, OT games) — state the rule, apply it consistently.
+  5. Raw trajectory eyeball plots for the AMENDMENT_01 §1 metric shortlist
+     (transition share, transition pts/possession, assisted rate, live-ball
+     TOV rate), before any trajectory model runs.
+  6. Garbage-time decision (AMENDMENT_01 §2c): include / exclude / flag
+     possessions above a margin threshold in Q4. Decide explicitly here.
+
+Output: this notebook must produce output/eda_notes.md, containing (a) the
+findings above, (b) any spec changes they force, and (c) the hypotheses
+registry (H1, H2, H3, H-null — see AMENDMENT_01 §1 and PLAN.md) copied in
+verbatim BEFORE R/06_models.R runs. Findings in later scripts are written
+against this registry; do not invent hypotheses after seeing results.
+-->
+
+```{r setup}
+library(tidyverse)
+# pbp <- readRDS("../data/processed/pbp_events.rds")
+# possessions <- readRDS("../data/processed/possessions.rds")
+```
+
+## 1. Style metric distributions (team-game level)
+
+<!-- One subsection per planned R/05_features.R metric: pace, 3PA rate,
+     assisted rate, transition share, points-off-TOV share, second-chance
+     share, paint FGM share, zone profile shares, shot-descriptor mix,
+     FT rate, TOV rate. Histogram/density + summary stats per metric. -->
+
+## 2. Missingness and coverage
+
+<!-- Full 15-team x game coverage check across cdn, shotdetail, nbastats v2.
+     RESOLVE the Toronto/shotdetail question here: confirm or refute, and if
+     confirmed, state the R/07_expected_points.R implication (cdn-derived
+     geometry for Toronto, not shotdetail) explicitly. -->
+
+## 3. Game-level variance per metric
+
+<!-- Within-team, between-game variance vs. between-team variance, informal
+     preview of what R/06_models.R's ICCs will show. -->
+
+## 4. Outlier games
+
+<!-- Identify blowouts / OT games / other anomalies. State disposition rule
+     and which games it affects. -->
+
+## 5. Raw trajectory eyeball plots (pre-model)
+
+<!-- game_index (each team's own game number, not calendar date) on x-axis,
+     one panel per AMENDMENT_01 §1 shortlist metric, teams as separate lines
+     or small multiples. No model fit yet — this is a visual gut check
+     before R/06_models.R's trajectory extension runs. -->
+
+## 6. Garbage-time decision
+
+<!-- State the rule (e.g. margin threshold in Q4) and whether it's applied
+     as include / exclude / flag. This decision feeds R/03_possessions.R and
+     R/05_features.R if not already finalized there. -->
+
+## Output
+
+<!-- Write output/eda_notes.md here (findings 1-6 above, any spec changes
+     forced, and the hypotheses registry H1/H2/H3/H-null copied in) before
+     ending this notebook. -->

@@ -23,8 +23,23 @@ Two questions, two rooms:
    answer to (1) is "acquire." Answered by Synergy play-type profiles and the
    existing WHoopsLab archetype/synergy-delta machinery. Case-study teams only.
 
-Full spec: [HANDOFF_wnba_deadline_framework.md](HANDOFF_wnba_deadline_framework.md).
-Agent operating rules: [CLAUDE.md](CLAUDE.md).
+Full spec: [HANDOFF_wnba_deadline_framework.md](HANDOFF_wnba_deadline_framework.md),
+amended by [AMENDMENT_01_trajectory_workflow_agents.md](AMENDMENT_01_trajectory_workflow_agents.md)
+(trajectory layer, EDA gate, review agents — amendment wins on conflicts).
+Agent operating rules: [CLAUDE.md](CLAUDE.md). Live task tracker: [PLAN.md](PLAN.md).
+
+### What the amendment adds
+
+- **Trajectory layer (§5c-bis):** the deadline-read table gains a required
+  `trajectory` column (improving / flat / declining), fit as
+  `metric ~ game_index + (1 + game_index | team) + (1 | opponent)` on a four-metric
+  shortlist, registered against hypotheses H1-H3 before modeling.
+- **EDA gate:** `analysis/eda_midseason.Rmd` runs after reconciliation and before any
+  feature/model script, producing `output/eda_notes.md` with the hypotheses registry.
+- **Three review-agent gates** (`.claude/agents/`): `analytics-reviewer` (methodology
+  rigor), `gm-agent` (deadline-read decision-usefulness), `coach-agent` (case-study
+  usefulness for a coaching staff) — run on artifacts, feedback triaged and logged in
+  `PLAN.md`, not auto-applied.
 
 ## Data architecture — two layers, hard boundary
 
@@ -57,10 +72,12 @@ the pin for `main` for the planned July 23 data-refresh check (handoff §3, §6)
 A prior exploratory pull against this same commit (before this repo's setup pass)
 found that `wnba_shotdetail_2026.csv` contains **zero rows for Toronto Tempo** — 14 of
 15 teams only, while the primary `cdn` feed has all 15. This has not been re-verified
-in this repo's history and must be confirmed by `R/04_reconcile.R` before any
-shotdetail-based feature (including the §5d expected-points layer) is trusted for
-Toronto. If confirmed, Toronto's shot geometry for that layer should come from `cdn`
-(`x`/`y` + `area`/`areaDetail`), not `shotdetail`. See `PLAN.md`.
+in this repo's history. `R/04_reconcile.R` does the raw coverage test; per
+AMENDMENT_01 §2a, `analysis/eda_midseason.Rmd` is where it must be substantively
+**resolved** (not just flagged) as part of the required missingness/coverage check,
+before any shotdetail-based feature (including the §5d expected-points layer) is
+trusted for Toronto. If confirmed, Toronto's shot geometry for that layer should come
+from `cdn` (`x`/`y` + `area`/`areaDetail`), not `shotdetail`. See `PLAN.md`.
 
 ## Run instructions
 
@@ -72,4 +89,16 @@ To be completed as scripts land. Planned invocation pattern (R 4.3.1 is not on P
 
 ## Repo structure
 
-See `HANDOFF_wnba_deadline_framework.md` §7 for the full script-by-script spec.
+See `HANDOFF_wnba_deadline_framework.md` §7 for the full script-by-script spec, and
+`AMENDMENT_01_trajectory_workflow_agents.md` for what changed:
+
+```
+.claude/agents/          # analytics-reviewer, gm-agent, coach-agent (review gates)
+analysis/
+  case_study_template.Rmd  # Synergy-quarantined case-study stub
+  eda_midseason.Rmd        # new EDA gate (AMENDMENT_01 §2a), before R/05
+R/01-09_*.R               # numbered pipeline; 06 includes the trajectory extension
+tests/testthat/
+data/raw/  data/processed/  # gitignored, empty until R/01_download.R runs
+output/
+```
