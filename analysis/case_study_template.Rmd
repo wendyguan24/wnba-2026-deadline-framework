@@ -1,0 +1,55 @@
+---
+title: "Case Study Template — WNBA 2026 Trade Deadline Framework"
+output: html_document
+---
+
+<!--
+SYNERGY QUARANTINE RULE (see HANDOFF §3 Layer 2, and CLAUDE.md):
+- Synergy numbers are TEAM-AGGREGATE ONLY (play-type frequency, PPP per team).
+- Type them in below as cited CONSTANTS in an R chunk. Never load a Synergy
+  export file into this repo; never commit anything under analysis/*.csv or
+  analysis/*.xlsx (gitignored); never join Synergy data to the open PBP at
+  the possession level, under any circumstances.
+- Every Synergy-sourced number must carry the citation string exactly:
+    "Source: Synergy Sports | 2026 WNBA"
+- Fit reads reuse EXISTING WHoopsLab app outputs (ball-handler behavioral
+  archetypes, BH-screener synergy deltas) built on 2025 data. State plainly
+  that these are priors on player style, not current-season measurements,
+  when used.
+- Time-box: this Synergy layer of work happens July 24-25 only, after the
+  open-data framework (R/01-08) is complete. If not converging by July 25,
+  ship diagnosis-only (open-data framework alone) — that is still complete.
+-->
+
+```{r setup}
+library(tidyverse)
+# Open-PBP framework outputs load here once R/01-08 have been run, e.g.:
+# team_blups <- readRDS("../data/processed/team_blups.rds")
+# deadline_read <- read_csv("../output/deadline_read.csv")
+```
+
+## [Team Name] — Case Study
+
+### What the open-data framework says
+
+<!-- Populate from output/deadline_read.csv: adjusted identity summary,
+     generation percentile, making percentile, lever (acquire/adjust/hold). -->
+
+### Synergy play-type context (cited constants only)
+
+```{r synergy-constants}
+# Pattern — replace with real cited numbers, one constant per line, full
+# citation in the comment:
+# synergy_pnr_ppp  <- NA_real_  # Source: Synergy Sports | 2026 WNBA, [Team], P&R ball handler PPP, accessed [date]
+# synergy_iso_freq <- NA_real_  # Source: Synergy Sports | 2026 WNBA, [Team], Isolation frequency, accessed [date]
+```
+
+### Fit read (coaching-staff question: "who fits how we play?")
+
+<!-- WHoopsLab archetype/synergy-delta output -> named candidate profile(s).
+     One or two fit reads maximum. If archetype data is 2025-based, say so
+     explicitly here. No league-wide fit matrix, no refreshed clustering. -->
+
+### Deadline read
+
+<!-- One sentence: acquire / adjust / hold, and why. -->

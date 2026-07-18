@@ -1,0 +1,21 @@
+# Raw and intermediate data are regenerable from R/01_download.R
+data/raw/
+data/processed/
+
+# Synergy data is quarantined: team-aggregate numbers are typed in as cited
+# constants in analysis/ prose, never committed as data files. See HANDOFF §3
+# (Layer 2) and CLAUDE.md.
+**/synergy*
+**/*synergy*
+analysis/*.csv
+analysis/*.xlsx
+
+# R artifacts
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# OS
+Thumbs.db
+Desktop.ini
