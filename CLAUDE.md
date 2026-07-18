@@ -1,6 +1,6 @@
 # CLAUDE.md — WNBA Trade Deadline Framework
 
-You are working in the `wnba-deadline-framework` repo. The single source of truth for
+You are working in the `wnba-2026-deadline-framework` repo. The single source of truth for
 this project is `HANDOFF_wnba_deadline_framework.md` in the repo root, as amended by
 `AMENDMENT_01_trajectory_workflow_agents.md` (trajectory layer / §5c-bis, EDA gate,
 three review agents in `.claude/agents/`). Read both fully before doing anything —
