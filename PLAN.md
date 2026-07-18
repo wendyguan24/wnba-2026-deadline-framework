@@ -44,10 +44,22 @@ Setup (session 1b, amendment intake):
 Session 2 (2026-07-18):
 - [x] Implement and run `R/01_download.R` — data in `data/raw/`, manifest written,
       counts confirmed against handoff §4
-- [ ] Implement `R/02_parse_pbp.R`
-- [ ] Implement `R/03_possessions.R`
-- [ ] Implement `R/04_reconcile.R`; get all `tests/testthat/` assertions passing
-- [ ] **Gate: show the reconciliation report before proceeding**
+- [x] Implement `R/02_parse_pbp.R` — clock parsing (WNBA quarters are PT10M, not
+      PT12M — verified, corrected from an NBA-template placeholder), qualifier
+      expansion, full 15-team tricode map with `team_full_name`
+- [x] Implement `R/03_possessions.R` — possession segmentation via the `possession`
+      column; found and fixed a real bug (technical FTs misattributed to the
+      fouling team instead of the shooting team, causing a systematic +-1/+-2 point
+      mismatch in 78 of 364 team-games); after the fix, possession points sum to
+      final box score exactly in all 364 team-games (independent check against
+      shotdetail HTM/VTM + cdn scoreHome/scoreAway, not tautological)
+- [x] Implement `R/04_reconcile.R` — `tests/testthat/` suite passing (0
+      failures, 0 errors; `tests/testthat.R` + `tests/testthat/setup.R` added
+      as the runner, since `test_dir()` changes the working directory and
+      test-file environment, which needed a `proj_path()` helper and
+      testthat's `setup.R` convention rather than a plain source-then-run script)
+- [x] **Gate cleared — reconciliation report at `output/reconciliation_report.md`,
+      summarized below**
 
 Session 2b (2026-07-18, AMENDMENT_02 intake — scaffold/documentation only, no data
 downloads, no analysis execution):
@@ -226,10 +238,42 @@ the 66.0% assisted rate and the §4 baseline FGA-per-team column.
 2. **Commit hash resolution — CONFIRMED.** `773ce29` resolves to
    `773ce292bb2cd9bc6ec98d70de95176607ccbaeb` ("add wnba 2026 data (ID 1 to 182)");
    `R/01_download.R` ran successfully against it 2026-07-18.
-3. **§4 baseline table provenance — still open.** The exact filter used for "paint
-   share (of FGM)" (e.g. Restricted Area + In The Paint Non-RA, backcourt heaves
-   excluded) is not stated in the handoff — `R/04_reconcile.R` should determine
-   empirically which definition reproduces the table, and record it.
+3. **§4 baseline table provenance — RESOLVED.** Paint share (of FGM) = made shots
+   with `area` in {"Restricted Area", "In The Paint (Non-RA)"} / FGM. Confirmed by
+   reproducing all 8 teams x 6 metrics in the §4 table exactly (0 delta at
+   3-decimal rounding) — see `R/04_reconcile.R` `validate_baseline_table()` and
+   `output/reconciliation_report.md`.
+
+## Reconciliation gate results (session 2, 2026-07-18) — GATE CLEARED
+
+Full report: `output/reconciliation_report.md`. `tests/testthat/` suite: 0 failures,
+0 errors (run via `tests/testthat.R`).
+
+- **§4 baseline table:** reproduces exactly, all 8 teams, all 6 metrics.
+- **cdn vs nbastats v2:** essentially exact — across 364 team-games, sum|FGA delta|
+  = 1, sum|FGM delta| = 1 (same single game, IND game `1022600004`), sum|AST delta|
+  = 4, sum|FG3A delta| = 0. Analogous to the NCAA project's documented small gap;
+  does not block feature-building.
+- **shotdetail coverage:** 14/15 teams, Toronto missing — confirmed (see Known
+  issue 1 above).
+- **Real bug found and fixed:** technical free throws are shot by the team that did
+  NOT commit the foul, but cdn's `possession` column stays with the fouling team
+  throughout the technical-FT sequence. The original possession-points calculation
+  credited technical-FT points to the possession-holding (fouling) team instead of
+  the actual shooter's team — a systematic +-1/+-2 point mismatch in 78 of 364
+  team-games against final box scores. Fixed in `R/03_possessions.R`
+  `segment_possessions()`: technical FTs are now excluded from their enclosing
+  possession's points and emitted as their own single-event possession rows
+  (`outcome == "technical_ft"`), credited to the shooting team. After the fix,
+  possession points sum to the final box score exactly in all 364 team-games,
+  verified independently via shotdetail's `HTM`/`VTM` + cdn's `scoreHome`/
+  `scoreAway` (not a tautology of the pipeline's own point computation).
+- **Documented residual:** `handle_and_ones()` finds 1 violation in 476 true
+  and-one candidates (0.2%) — a team-foul bonus free throw awarded to the scoring
+  team on the very next possession, surface-identical to a true and-one (made shot
+  -> foul -> same-team FT) and not distinguishable from event fields alone. Does
+  not affect `segment_possessions()`, which reads the `possession` column directly
+  rather than this heuristic. Accepted and documented rather than chased further.
 
 ## Cut order under time pressure (AMENDMENT_02 §4 — supersedes AMENDMENT_01's narrower version)
 
@@ -262,10 +306,11 @@ source.
 
 ## Next session should
 
-Finish `R/02_parse_pbp.R` through `R/04_reconcile.R` (in progress as of 2026-07-18 —
-02/03 have real logic and have been run once; 04 and the `tests/testthat/` suite are
-not yet calibrated/green), then stop to present the reconciliation report — per
-CLAUDE.md, do not proceed past that gate. After the gate, the next stop is the new EDA
-notebook (`analysis/eda_midseason.Rmd`) before any feature/model script is written.
+Reconciliation gate is cleared (see "Reconciliation gate results" above; 0 test
+failures). Per CLAUDE.md and the EDA gate (AMENDMENT_01 §2a-2b), the next stop is
+`analysis/eda_midseason.Rmd` -> `output/eda_notes.md` (hypotheses registry) — do
+not write `R/05_features.R` before that exists. `data/reference/cap_context_2026.csv`
+also still needs Wendy's manual entry (AMENDMENT_02 §3a/§4) before `R/08` can be
+implemented against real cap data, though that's a later (Jul 23) block.
 `data/reference/cap_context_2026.csv` still needs Wendy's manual entry (AMENDMENT_02
 §3a/§4, Jul 23 block) before script 08 can be implemented against real cap data.
