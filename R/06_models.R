@@ -48,15 +48,18 @@ IDENTITY_METRICS <- c(
 # names match data/processed/team_game_features.rds (05_features.R); the
 # skeleton's original placeholder names (transition_pts_per_possession,
 # assisted_rate_of_fgm) are renamed here to the columns 05 actually produced.
-# Optional 5th metric and cut order documented in PLAN.md; never cut the
-# deadline-read `trajectory` column itself — fall back to raw trends with a
-# stated caveat first.
+# shot_making_residual (H3, GSV-relevant) is now built by 07_expected_points.R
+# and joined onto features in main() below. Per PLAN.md's cut order it
+# remains the first metric to cut under time pressure -- cleanly removable
+# by deleting this vector's shot_making_residual line and the two main()
+# join lines; never cut the deadline-read `trajectory` column itself --
+# fall back to raw trends with a stated caveat first.
 TRAJECTORY_METRICS <- c(
   "transition_share",         # H1
   "transition_pts_per_poss",  # H1, efficiency side (cut first if time-constrained)
   "assisted_rate",             # H2
-  "live_ball_tov_rate"         # H2
-  # optional 5th: shot_making_residual (H3, from 07_expected_points.R) — GSV-relevant
+  "live_ball_tov_rate",        # H2
+  "shot_making_residual"       # H3, GSV-relevant (from 07_expected_points.R)
 )
 
 # Metrics fit with possession-count weights per the EDA gate's weighting
@@ -306,6 +309,11 @@ fit_all_trajectory_models <- function(features) {
 
 main <- function() {
   features <- readRDS("data/processed/team_game_features.rds")
+
+  tg_making <- readRDS("data/processed/team_game_shot_making.rds")
+  features <- features %>%
+    left_join(select(tg_making, gameId, team, shot_making_residual),
+              by = c("gameId", "team"))
 
   identity <- fit_all_identity_models(features)
   trajectory <- fit_all_trajectory_models(features)
