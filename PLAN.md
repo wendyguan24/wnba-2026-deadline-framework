@@ -116,6 +116,33 @@ written until this gate clears.
    not a pace signal.
 3. Add a `garbage_time_poss_share` column per team-game (flag, not exclude) per the
    Section 6 decision above.
+4. Add an `is_home` column (joined from shotdetail `HTM`/`VTM`, covers all 182 games
+   including Toronto's); `R/06_models.R`'s identity models include it as a fixed
+   effect rather than an unmodeled confounder — added after mentor review flagged it
+   as the one genuine gap in the original EDA pass.
+
+**Weighting decision for `R/06_models.R` (from mentor review, documented rather than
+left to `lme4`'s default equal weighting):** weight team-game observations by
+`transition_poss` when fitting `transition_pts_per_poss` specifically — its
+denominator ranges from single digits to 20+ per team-game, unlike FGA-based
+denominators which stay in a tight, larger band. All other shortlist/identity
+metrics use equal weighting.
+
+**Follow-up EDA additions from mentor review (2026-07-19), all now in
+`analysis/eda_midseason.Rmd` and `output/eda_notes.md`:**
+- Full 21-metric ICC table (not just the range) saved to `output/eda_icc_table.csv`
+  — a methodology exhibit and the selection rule for which metrics the identity
+  layer emphasizes. Highest ICC is actually `mid_share` (~0.53, mid-range shot
+  frequency), not `fg3a_rate` (~0.35, second) as the original 11-metric pass implied.
+  Shot selection/location separates WNBA teams; ball movement (`assisted_rate`,
+  ICC ~ 0.00) does not — read as either talent compression across a 15-team elite
+  league (vs. 300+ heterogeneous college programs) or as the one-way ICC ignoring
+  opponent effects that the mixed model will partially recover. Practical rule:
+  identity summaries in the deadline-read table should lead with high-ICC metrics,
+  not `assisted_rate`.
+- Home/away added (see spec change 4 above).
+- Schedule density (rest days between games) checked per team — no meaningful
+  imbalance found, one sentence in methodology notes, not a model term this cycle.
 
 ### Hypotheses registry (write results against these; do not invent hypotheses after seeing results)
 

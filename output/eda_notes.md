@@ -11,6 +11,7 @@ descriptive team-game-level checks, not modeling results.
 Pace: `pace_poss` (possession-table count) and `pace_formula` (FGA + 0.44*FTA - OREB + TOV) correlate at 0.899, mean absolute gap 4.6 possessions per team-game.
 Spec decision: `pace_poss` is the primary pace figure for R/05_features.R (possession-table-derived, already verified against final box scores); `pace_formula` is kept only as a secondary cross-check column.
 Zone-profile shares (RA/paint/mid/corner3/ATB3) sum to 1 in every team-game, confirmed directly.
+Home/away, added per review feedback: joined from shotdetail's HTM/VTM (covers all 182 games including Toronto's), no missing values. Spec addition: R/05_features.R carries an is_home column; R/06_models.R's identity models include it as a fixed effect rather than an unmodeled confounder.
 
 ## 2. Missingness and coverage
 
@@ -20,9 +21,10 @@ Conclusion: the Toronto gap has no implication for R/05_features.R. R/07_expecte
 
 ## 3. Game-level variance
 
-Approximate one-way ICC (between-team / total variance) ranges from -0.00 (assisted_rate) to 0.35 (fg3a_rate) across the 11 rate/context metrics checked.
-Most rate stats show low ICC (well under 0.2), meaning game-to-game noise dominates raw team averages -- this previews substantial shrinkage in R/06_models.R's BLUPs, especially for assisted_rate, off_tov_share, and secondchance_share.
-H2 note: assisted_rate's near-zero cross-sectional ICC does not contradict H2 (a trajectory claim, not a cross-sectional one) but does mean the trajectory interval on assisted rate should be reported honestly, expecting it may span zero.
+Approximate one-way ICC (between-team / total variance) computed for the full 21-metric style list, saved to output/eda_icc_table.csv. Ranges from -0.00 (assisted_rate) to 0.53 (mid_share).
+Reading across the full table: shot selection and shot location separate WNBA teams (fg3a_rate and the zone-profile shares all land well above the rate/context metrics); ball movement does not (assisted_rate sits at essentially zero ICC). Two plausible readings: WNBA offenses may be more homogeneous on ball movement than a 300+-program college sample would be (talent compression across 15 teams from one elite pool), or the one-way ICC understates team signal by ignoring opponent effects that R/06_models.R's (1|team) + (1|opponent) structure will partially recover. Both plausible; the BLUPs are the actual test.
+Practical implication: BLUPs on near-zero-ICC metrics (assisted_rate, off_tov_share, secondchance_share) will shrink almost entirely to the league mean and should not anchor identity claims in the deadline-read table -- lead identity summaries with the high-ICC metrics (fg3a_rate, zone-profile shares) and treat assisted_rate as trajectory-only (H2), not identity.
+Weighting decision, documented rather than left to lme4's default: R/06_models.R will weight team-game observations by transition_poss when fitting transition_pts_per_poss specifically (its denominator ranges from single digits to 20+ per team-game, unlike FGA which stays in a tight, larger band). All other shortlist/identity metrics use equal weighting, since their denominators are large and stable enough not to need it.
 
 ## 4. Outlier games
 
@@ -44,11 +46,17 @@ Rule: a possession is flagged garbage_time when period >= 4 and |score margin| >
 Decision: flag, do not exclude, in the main R/05_features.R feature table -- a 3.9% possession share is consistent with Section 4's finding of no strong aggregate distortion from blowouts, and exclusion would shrink denominators unevenly across teams. R/05_features.R should carry a garbage_time_poss_share column per team-game.
 R/06_models.R's AMENDMENT_01 Section 2c sensitivity check should re-run shortlist trajectory metrics excluding garbage_time possessions and confirm no finding flips direction; if one does, report it as a caveat rather than silently picking a threshold.
 
+## 7. Schedule density (rest days) -- added per review feedback
+
+Rest days between consecutive games, per team, checked for imbalance that could contaminate trajectory slopes. Every team's median rest sits close to the league median with no team showing a wildly compressed or stretched schedule. Not added as a model term this cycle -- one sentence for the methodology notes, not a spec change.
+
 ## Spec changes forced by this EDA pass (logged in PLAN.md)
 
 1. R/05_features.R: use pace_poss (not pace_formula) as the primary pace column; keep pace_formula only as a secondary cross-check.
 2. R/05_features.R: add an is_ot flag alongside pace_poss so OT team-games' mechanically higher possession counts are not read as a pace signal.
 3. R/05_features.R: add a garbage_time_poss_share column per team-game (flag, not exclude, per the Section 6 decision).
+4. R/05_features.R: add an is_home column (joined from shotdetail HTM/VTM); R/06_models.R's identity models include it as a fixed effect.
+5. R/06_models.R: weight team-game observations by transition_poss specifically when fitting transition_pts_per_poss; equal weighting elsewhere (documented, not a default left unstated).
 
 ## Hypotheses registry
 

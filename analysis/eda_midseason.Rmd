@@ -10,6 +10,7 @@ library(tidyverse)
 
 pbp <- readRDS("../data/processed/pbp_events.rds")
 possessions <- readRDS("../data/processed/possessions.rds")
+sd_raw <- read_csv("../data/raw/wnba_shotdetail_2026.csv", show_col_types = FALSE)
 ```
 
 This is the EDA gate required by AMENDMENT_01 Section 2a-2b. It runs after the
@@ -119,6 +120,32 @@ nrow(tg)
 `r nrow(tg)` team-game rows, matching the 364 team-games from the
 reconciliation gate.
 
+**Home/away, added per review feedback.** Not in the original stub's required
+list, but home effects on pace, shot selection, and shooting are a standard
+confounder and the cdn feed does not carry a direct home/away flag (its `side`
+column is a court-side indicator, left/right, that switches at halftime -- not
+usable for this). `shotdetail`'s `HTM`/`VTM` columns cover all 182 games,
+including Toronto's (via the opponent's row, the same property the
+possession-invariant tests already rely on), so home/away is joined from
+there.
+
+```{r add-home-flag}
+home_away <- sd_raw %>% distinct(GAME_ID, HTM, VTM) %>% distinct(GAME_ID, .keep_all = TRUE)
+
+tg <- tg %>%
+  left_join(home_away, by = c("gameId" = "GAME_ID")) %>%
+  mutate(is_home = team == HTM) %>%
+  select(-HTM, -VTM)
+
+sum(is.na(tg$is_home))
+tg %>% count(is_home)
+```
+
+No missing values; every team-game resolves to exactly one of home/away, as
+expected. **Spec addition for `R/05_features.R`: carry `is_home` as a column,
+and `R/06_models.R`'s identity models should include it as a fixed effect
+(`+ home`) rather than leave it as an unmodeled confounder.**
+
 ## 1. Style metric distributions (team-game level)
 
 Pace has two estimates per HANDOFF Section 5b: the possession-table count
@@ -211,8 +238,6 @@ assumed. No metric above has a missing value in any of the 364 rows.
 ## 2. Missingness and coverage
 
 ```{r coverage-check}
-sd_raw <- read_csv("../data/raw/wnba_shotdetail_2026.csv", show_col_types = FALSE)
-
 coverage <- tibble(
   source = c("cdn (pbp_events, team-game features)", "shotdetail (raw)", "nbastats v2 (reconciliation only)"),
   teams_covered = c(
@@ -258,10 +283,20 @@ An informal one-way ICC (between-team variance over total variance, via
 `aov()`) previews which metrics will show meaningful team-level shrinkage
 targets in `R/06_models.R`'s BLUPs.
 
+`metrics` below is the full 21-metric HANDOFF Section 5b style-metric list
+(the original 11-metric pass only covered pace and rate/context metrics --
+per review feedback, the zone-profile and descriptor-mix shares are added so
+this table can double as a methodology exhibit and the selection rule for
+which metrics the identity layer emphasizes, not an implicit choice).
+
 ```{r icc-preview}
-metrics <- c("pace_poss", "fg3a_rate", "assisted_rate", "transition_share",
-             "transition_pts_per_poss", "off_tov_share", "secondchance_share",
-             "paint_fgm_share", "ft_rate", "tov_rate", "live_ball_tov_rate")
+metrics <- c("pace_poss", "pace_formula", "fg3a_rate", "assisted_rate",
+             "transition_share", "transition_pts_per_poss", "off_tov_share",
+             "secondchance_share", "paint_fgm_share", "ra_share", "paint_share",
+             "mid_share", "corner3_share", "atb3_share", "driving_share",
+             "pullup_share", "cutting_share", "putback_share", "ft_rate",
+             "tov_rate", "live_ball_tov_rate")
+length(metrics)
 
 icc_preview <- map_dfr(metrics, function(m) {
   fit <- aov(as.formula(paste(m, "~ team")), data = tg)
@@ -274,13 +309,72 @@ icc_preview <- map_dfr(metrics, function(m) {
 }) %>% arrange(desc(icc_approx))
 
 knitr::kable(icc_preview, digits = 3)
+
+dir.create("../output", recursive = TRUE, showWarnings = FALSE)
+write_csv(icc_preview, "../output/eda_icc_table.csv")
 ```
 
-Highest: `r icc_preview$metric[1]` (ICC ~ `r round(icc_preview$icc_approx[1], 2)`),
-a stylistic choice (3PA volume) that is already visibly stable at 23-26 games
-per team. Lowest: `r icc_preview$metric[nrow(icc_preview)]` (ICC ~
-`r round(icc_preview$icc_approx[nrow(icc_preview)], 2)`), meaning most of its
-team-game-to-team-game movement is noise, not team identity.
+Saved as `output/eda_icc_table.csv` -- a methodology exhibit (which metrics
+carry team identity) and the selection rule for what the deadline-read
+identity summaries should emphasize, rather than an implicit choice buried in
+script 06.
+
+Highest: `r icc_preview$metric[1]` (ICC ~ `r round(icc_preview$icc_approx[1], 2)`)
+-- a team's mid-range shot frequency is the single most stable, most
+identity-driven metric in the whole list, already visibly stable at 23-26
+games per team, more so than 3PA rate (`fg3a_rate`, second at
+`r round(icc_preview$icc_approx[icc_preview$metric == "fg3a_rate"], 2)`). That
+is a more specific and less expected version of "shot selection separates
+teams" than 3PA volume alone. Lowest: `r icc_preview$metric[nrow(icc_preview)]`
+(ICC ~ `r round(icc_preview$icc_approx[nrow(icc_preview)], 2)`), meaning most
+of its team-game-to-team-game movement is noise, not team identity.
+
+**Reading across the full table: shot selection and shot location separate
+WNBA teams; ball movement does not.** `fg3a_rate` and the zone-profile shares
+(`ra_share`, `mid_share`, `atb3_share`) all land well above the rate/context
+metrics. `assisted_rate` in particular sits at essentially zero. One
+plausible reading: with only 15 teams drawn from a single elite talent pool
+(versus 300+ college programs spanning wildly different systems and talent
+tiers), WNBA offenses may simply be more homogeneous on ball movement than
+shot selection, which stays a coaching-staff choice regardless of roster
+talent. A second, more mechanical reading: the one-way ICC here ignores
+opponent effects (unlike `R/06_models.R`'s planned
+`(1|team) + (1|opponent)` structure), so some team signal may be getting
+folded into residual noise and could partially resolve once the opponent
+term is in the model. Both are plausible; `R/06_models.R`'s BLUPs are the
+actual test. **Practical implication: BLUPs on near-zero-ICC metrics like
+`assisted_rate` will shrink almost entirely to the league mean and should not
+anchor an identity claim in the deadline-read table -- lead with the
+high-ICC metrics (`fg3a_rate`, zone-profile shares) for "who this team is,"
+and treat `assisted_rate` as a trajectory-only metric (H2), not an identity
+one.**
+
+**Weighting decision for `R/06_models.R`, decided explicitly here rather than
+left to `lme4`'s default equal weighting.** Some of these ratios have small,
+uneven denominators per team-game -- `transition_pts_per_poss` divides by
+`transition_poss`, which is itself a possession-count column:
+
+```{r denominator-check}
+tg %>% summarise(
+  min_transition_poss = min(transition_poss), median_transition_poss = median(transition_poss),
+  max_transition_poss = max(transition_poss),
+  min_FGA = min(FGA), median_FGA = median(FGA), max_FGA = max(FGA)
+)
+```
+
+`transition_poss` ranges from single digits to over 20 per team-game (a
+possession-count denominator, not a shot-count one), while `FGA` stays in a
+much tighter, larger band. A team-game with 4 transition possessions and one
+with 20 carry very different amounts of information about that team's true
+transition efficiency, but `lme4`'s default treats both team-game
+observations as equally informative. **Decision: `R/06_models.R` will weight
+team-game observations by their relevant possession-count denominator
+(`weights = transition_poss` for `transition_pts_per_poss` specifically) when
+fitting that metric's model; all other metrics in the shortlist and identity
+layer use FGA- or possession-count denominators large and stable enough
+(minimum `r min(tg$FGA)` FGA per team-game) that equal weighting is left as
+the default rather than treated as a special case.** This is stated here so
+it is a documented choice, not a silent default.
 
 **Relevant to H2:** `assisted_rate`'s near-zero cross-sectional ICC means
 teams do not differ much from each other on average -- but H2 is a trajectory
@@ -464,6 +558,40 @@ trajectory metrics with `garbage_time` possessions excluded and confirm the
 direction of any finding does not flip -- if it does, that becomes a
 reported caveat, not a silently chosen threshold.
 
+## 7. Schedule density (rest days) -- added per review feedback
+
+Not one of the original 6 required sections, but a cheap check worth doing
+before trajectory slopes are trusted: if rest days between games are wildly
+imbalanced across teams, that is a confound the trajectory model does not
+currently account for.
+
+```{r rest-days}
+rest_days <- tg %>%
+  arrange(team, game_index) %>%
+  group_by(team) %>%
+  mutate(days_since_last = as.numeric(difftime(game_time, lag(game_time), units = "days"))) %>%
+  ungroup() %>%
+  filter(!is.na(days_since_last))
+
+rest_days %>%
+  group_by(team) %>%
+  summarise(median_rest = median(days_since_last), min_rest = min(days_since_last),
+            max_rest = max(days_since_last), .groups = "drop") %>%
+  arrange(median_rest) %>%
+  knitr::kable(digits = 1)
+
+rest_days %>% summarise(league_median = median(days_since_last), league_iqr_low = quantile(days_since_last, 0.25),
+                         league_iqr_high = quantile(days_since_last, 0.75))
+```
+
+Rest looks unremarkable: every team's median sits close to the league median,
+with no team showing a wildly compressed or stretched schedule relative to
+the rest of the league. One sentence for the methodology notes: schedule
+density does not look imbalanced enough across teams to be a first-order
+confound on the trajectory slopes, so it is not added as a model term this
+cycle, consistent with the cut-list discipline of not adding scope beyond
+what the data actually calls for.
+
 ## Output
 
 ```{r write-notes}
@@ -477,10 +605,11 @@ notes <- c(
   "",
   "## 1. Style metric distributions",
   "",
-  sprintf("364 team-games (182 games x 2 teams), no missing values in any of the %d planned style metrics.", length(metrics) + 10),
+  sprintf("364 team-games (182 games x 2 teams), no missing values in any of the %d planned style metrics.", length(metrics)),
   sprintf("Pace: `pace_poss` (possession-table count) and `pace_formula` (FGA + 0.44*FTA - OREB + TOV) correlate at %.3f, mean absolute gap %.1f possessions per team-game.", cor(tg$pace_poss, tg$pace_formula), mean(abs(tg$pace_poss - tg$pace_formula))),
   "Spec decision: `pace_poss` is the primary pace figure for R/05_features.R (possession-table-derived, already verified against final box scores); `pace_formula` is kept only as a secondary cross-check column.",
   "Zone-profile shares (RA/paint/mid/corner3/ATB3) sum to 1 in every team-game, confirmed directly.",
+  "Home/away, added per review feedback: joined from shotdetail's HTM/VTM (covers all 182 games including Toronto's), no missing values. Spec addition: R/05_features.R carries an is_home column; R/06_models.R's identity models include it as a fixed effect rather than an unmodeled confounder.",
   "",
   "## 2. Missingness and coverage",
   "",
@@ -490,9 +619,10 @@ notes <- c(
   "",
   "## 3. Game-level variance",
   "",
-  sprintf("Approximate one-way ICC (between-team / total variance) ranges from %.2f (%s) to %.2f (%s) across the 11 rate/context metrics checked.", min(icc_preview$icc_approx), icc_preview$metric[which.min(icc_preview$icc_approx)], max(icc_preview$icc_approx), icc_preview$metric[which.max(icc_preview$icc_approx)]),
-  "Most rate stats show low ICC (well under 0.2), meaning game-to-game noise dominates raw team averages -- this previews substantial shrinkage in R/06_models.R's BLUPs, especially for assisted_rate, off_tov_share, and secondchance_share.",
-  "H2 note: assisted_rate's near-zero cross-sectional ICC does not contradict H2 (a trajectory claim, not a cross-sectional one) but does mean the trajectory interval on assisted rate should be reported honestly, expecting it may span zero.",
+  sprintf("Approximate one-way ICC (between-team / total variance) computed for the full %d-metric style list, saved to output/eda_icc_table.csv. Ranges from %.2f (%s) to %.2f (%s).", length(metrics), min(icc_preview$icc_approx), icc_preview$metric[which.min(icc_preview$icc_approx)], max(icc_preview$icc_approx), icc_preview$metric[which.max(icc_preview$icc_approx)]),
+  "Reading across the full table: shot selection and shot location separate WNBA teams (fg3a_rate and the zone-profile shares all land well above the rate/context metrics); ball movement does not (assisted_rate sits at essentially zero ICC). Two plausible readings: WNBA offenses may be more homogeneous on ball movement than a 300+-program college sample would be (talent compression across 15 teams from one elite pool), or the one-way ICC understates team signal by ignoring opponent effects that R/06_models.R's (1|team) + (1|opponent) structure will partially recover. Both plausible; the BLUPs are the actual test.",
+  "Practical implication: BLUPs on near-zero-ICC metrics (assisted_rate, off_tov_share, secondchance_share) will shrink almost entirely to the league mean and should not anchor identity claims in the deadline-read table -- lead identity summaries with the high-ICC metrics (fg3a_rate, zone-profile shares) and treat assisted_rate as trajectory-only (H2), not identity.",
+  "Weighting decision, documented rather than left to lme4's default: R/06_models.R will weight team-game observations by transition_poss when fitting transition_pts_per_poss specifically (its denominator ranges from single digits to 20+ per team-game, unlike FGA which stays in a tight, larger band). All other shortlist/identity metrics use equal weighting, since their denominators are large and stable enough not to need it.",
   "",
   "## 4. Outlier games",
   "",
@@ -514,11 +644,17 @@ notes <- c(
   "Decision: flag, do not exclude, in the main R/05_features.R feature table -- a 3.9% possession share is consistent with Section 4's finding of no strong aggregate distortion from blowouts, and exclusion would shrink denominators unevenly across teams. R/05_features.R should carry a garbage_time_poss_share column per team-game.",
   "R/06_models.R's AMENDMENT_01 Section 2c sensitivity check should re-run shortlist trajectory metrics excluding garbage_time possessions and confirm no finding flips direction; if one does, report it as a caveat rather than silently picking a threshold.",
   "",
+  "## 7. Schedule density (rest days) -- added per review feedback",
+  "",
+  "Rest days between consecutive games, per team, checked for imbalance that could contaminate trajectory slopes. Every team's median rest sits close to the league median with no team showing a wildly compressed or stretched schedule. Not added as a model term this cycle -- one sentence for the methodology notes, not a spec change.",
+  "",
   "## Spec changes forced by this EDA pass (logged in PLAN.md)",
   "",
   "1. R/05_features.R: use pace_poss (not pace_formula) as the primary pace column; keep pace_formula only as a secondary cross-check.",
   "2. R/05_features.R: add an is_ot flag alongside pace_poss so OT team-games' mechanically higher possession counts are not read as a pace signal.",
   "3. R/05_features.R: add a garbage_time_poss_share column per team-game (flag, not exclude, per the Section 6 decision).",
+  "4. R/05_features.R: add an is_home column (joined from shotdetail HTM/VTM); R/06_models.R's identity models include it as a fixed effect.",
+  "5. R/06_models.R: weight team-game observations by transition_poss specifically when fitting transition_pts_per_poss; equal weighting elsewhere (documented, not a default left unstated).",
   "",
   "## Hypotheses registry",
   "",
