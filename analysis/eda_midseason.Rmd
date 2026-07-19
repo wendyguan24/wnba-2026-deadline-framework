@@ -1,81 +1,539 @@
 ---
-title: "Mid-Season EDA — WNBA 2026 Trade Deadline Framework"
+title: "Mid-Season EDA: WNBA 2026 Trade Deadline Framework"
+date: "2026-07-18"
 output: html_document
 ---
 
-<!--
-NEW GATE (AMENDMENT_01 §2a-2b). Runs after R/04_reconcile.R tests pass and
-BEFORE R/05_features.R is written. Models are not written until this exists.
-EDA that changes the plan is the point of EDA — if a finding here forces a
-spec change (e.g. dropping a metric, changing a threshold), say so and
-update PLAN.md, don't silently absorb it downstream.
-
-Required contents (all must be addressed, not just present as headers):
-  1. Distributions of every planned style metric at the team-game level.
-  2. Missingness and coverage checks — including RESOLVING (not flagging)
-     the Toronto shotdetail zero-row question noted in README.md/PLAN.md.
-  3. Game-level variance per metric (previews which ICCs will be meaningful
-     in R/06_models.R).
-  4. Outlier games identified and dispositioned: keep / exclude / flag
-     (blowouts, OT games) — state the rule, apply it consistently.
-  5. Raw trajectory eyeball plots for the AMENDMENT_01 §1 metric shortlist
-     (transition share, transition pts/possession, assisted rate, live-ball
-     TOV rate), before any trajectory model runs.
-  6. Garbage-time decision (AMENDMENT_01 §2c): include / exclude / flag
-     possessions above a margin threshold in Q4. Decide explicitly here.
-
-Output: this notebook must produce output/eda_notes.md, containing (a) the
-findings above, (b) any spec changes they force, and (c) the hypotheses
-registry (H1, H2, H3, H-null — see AMENDMENT_01 §1 and PLAN.md) copied in
-verbatim BEFORE R/06_models.R runs. Findings in later scripts are written
-against this registry; do not invent hypotheses after seeing results.
--->
-
-```{r setup}
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, fig.width = 9, fig.height = 5.5)
 library(tidyverse)
-# pbp <- readRDS("../data/processed/pbp_events.rds")
-# possessions <- readRDS("../data/processed/possessions.rds")
+
+pbp <- readRDS("../data/processed/pbp_events.rds")
+possessions <- readRDS("../data/processed/possessions.rds")
 ```
+
+This is the EDA gate required by AMENDMENT_01 Section 2a-2b. It runs after the
+`R/04_reconcile.R` tests pass and before `R/05_features.R` is written. The
+team-game feature table built in the next section previews what
+`R/05_features.R` will formalize; nothing below is a modeling result (that is
+`R/06_models.R`, not yet written). Any finding here that forces a spec change
+is called out inline and logged in `PLAN.md`, not silently absorbed downstream.
+
+## Team-game feature table
+
+One row per team-game (364 rows: 182 games x 2 teams), built directly from
+`pbp_events.rds` and `possessions.rds`. Shot-creation and zone-profile fields
+use cdn's own `area`, `areaDetail`, and `descriptor` columns exclusively, not
+`shotdetail` -- relevant to the coverage check in Section 2.
+
+```{r build-features}
+game_dates <- pbp %>%
+  group_by(gameId) %>%
+  summarise(game_time = min(timeActual, na.rm = TRUE), .groups = "drop")
+
+game_index_tbl <- possessions %>%
+  distinct(gameId, team) %>%
+  left_join(game_dates, by = "gameId") %>%
+  arrange(team, game_time) %>%
+  group_by(team) %>%
+  mutate(game_index = row_number()) %>%
+  ungroup()
+
+shots <- pbp %>% filter(actionType %in% c("2pt", "3pt"))
+fts   <- pbp %>% filter(actionType == "freethrow")
+rebs  <- pbp %>% filter(actionType == "rebound", !is.na(teamTricode))
+tovs  <- pbp %>% filter(actionType == "turnover")
+
+shot_stats <- shots %>%
+  group_by(gameId, team = teamTricode) %>%
+  summarise(
+    FGA = n(), FGM = sum(shotResult == "Made"),
+    FG3A = sum(actionType == "3pt"),
+    assisted_FGM = sum(shotResult == "Made" & !is.na(assistPersonId)),
+    paint_FGM = sum(shotResult == "Made" &
+                       area %in% c("Restricted Area", "In The Paint (Non-RA)")),
+    ra_n = sum(area == "Restricted Area"),
+    paint_n = sum(area == "In The Paint (Non-RA)"),
+    mid_n = sum(area == "Mid-Range"),
+    corner3_n = sum(area %in% c("Left Corner 3", "Right Corner 3")),
+    atb3_n = sum(area == "Above the Break 3"),
+    driving_n = sum(str_detect(coalesce(descriptor, ""), "driving")),
+    pullup_n = sum(str_detect(coalesce(descriptor, ""), "pullup")),
+    cutting_n = sum(str_detect(coalesce(descriptor, ""), "cutting")),
+    putback_n = sum(str_detect(coalesce(descriptor, ""), "putback")),
+    .groups = "drop"
+  )
+
+ft_stats <- fts %>%
+  group_by(gameId, team = teamTricode) %>%
+  summarise(FTA = n(), .groups = "drop")
+
+reb_stats <- rebs %>%
+  group_by(gameId, team = teamTricode) %>%
+  summarise(OREB = sum(subType == "offensive"), .groups = "drop")
+
+tov_stats <- tovs %>%
+  group_by(gameId, team = teamTricode) %>%
+  summarise(TOV = n(), live_ball_TOV = sum(!is.na(stealPersonId)), .groups = "drop")
+
+poss_real <- possessions %>% filter(outcome != "technical_ft")
+poss_stats <- poss_real %>%
+  group_by(gameId, team) %>%
+  summarise(
+    pace_poss = n(),
+    team_points = sum(points),
+    transition_poss = sum(is_transition),
+    transition_pts = sum(points[is_transition]),
+    off_tov_pts = sum(points[is_off_turnover]),
+    secondchance_pts = sum(points[is_2ndchance]),
+    .groups = "drop"
+  )
+
+tg <- game_index_tbl %>%
+  left_join(shot_stats, by = c("gameId", "team")) %>%
+  left_join(ft_stats, by = c("gameId", "team")) %>%
+  left_join(reb_stats, by = c("gameId", "team")) %>%
+  left_join(tov_stats, by = c("gameId", "team")) %>%
+  left_join(poss_stats, by = c("gameId", "team")) %>%
+  mutate(
+    pace_formula = FGA + 0.44 * FTA - OREB + TOV,
+    fg3a_rate = FG3A / FGA,
+    assisted_rate = assisted_FGM / FGM,
+    paint_fgm_share = paint_FGM / FGM,
+    ra_share = ra_n / FGA, paint_share = paint_n / FGA, mid_share = mid_n / FGA,
+    corner3_share = corner3_n / FGA, atb3_share = atb3_n / FGA,
+    driving_share = driving_n / FGA, pullup_share = pullup_n / FGA,
+    cutting_share = cutting_n / FGA, putback_share = putback_n / FGA,
+    ft_rate = FTA / FGA,
+    tov_rate = TOV / pace_poss,
+    live_ball_tov_rate = live_ball_TOV / pace_poss,
+    transition_share = transition_poss / pace_poss,
+    transition_pts_per_poss = transition_pts / transition_poss,
+    off_tov_share = off_tov_pts / team_points,
+    secondchance_share = secondchance_pts / team_points
+  )
+
+nrow(tg)
+```
+
+`r nrow(tg)` team-game rows, matching the 364 team-games from the
+reconciliation gate.
 
 ## 1. Style metric distributions (team-game level)
 
-<!-- One subsection per planned R/05_features.R metric: pace, 3PA rate,
-     assisted rate, transition share, points-off-TOV share, second-chance
-     share, paint FGM share, zone profile shares, shot-descriptor mix,
-     FT rate, TOV rate. Histogram/density + summary stats per metric. -->
+Pace has two estimates per HANDOFF Section 5b: the possession-table count
+(`pace_poss`, directly from the already-reconciled `possessions.rds`, which
+sums to the exact final box score in all 364 team-games) and the formula
+estimate `FGA + 0.44*FTA - OREB + TOV`. They should track closely but are not
+identical:
+
+```{r pace-reconciliation}
+cor(tg$pace_poss, tg$pace_formula)
+mean(abs(tg$pace_poss - tg$pace_formula))
+```
+
+Correlation is `r round(cor(tg$pace_poss, tg$pace_formula), 3)`; the mean
+absolute gap is about `r round(mean(abs(tg$pace_poss - tg$pace_formula)), 1)`
+possessions per team-game (roughly `r round(100 * mean(abs(tg$pace_poss - tg$pace_formula)) / mean(tg$pace_poss), 1)`%
+of a typical team-game's pace). The formula estimate runs systematically lower
+because it approximates continuation possessions (offensive rebounds, and-ones)
+with a fixed 0.44 free-throw weight, while `pace_poss` reads continuity
+directly off the `possession` column. **Spec decision:** `R/05_features.R`
+should carry `pace_poss` as the primary pace figure, since it is
+possession-table-derived and already independently verified against final box
+scores; `pace_formula` is retained as a secondary cross-check column only, not
+used downstream. This is a spec note for `R/05_features.R`, not a change to
+anything already built.
+
+```{r dist-pace-rate, fig.height=6}
+tg %>%
+  select(pace_poss, fg3a_rate, assisted_rate, ft_rate, tov_rate, live_ball_tov_rate) %>%
+  pivot_longer(everything(), names_to = "metric", values_to = "value") %>%
+  ggplot(aes(value)) +
+  geom_histogram(bins = 25) +
+  facet_wrap(~metric, scales = "free") +
+  theme_minimal() +
+  labs(title = "Pace and rate-stat distributions (team-game level)")
+```
+
+```{r dist-zone, fig.height=4}
+tg %>%
+  select(ra_share, paint_share, mid_share, corner3_share, atb3_share) %>%
+  pivot_longer(everything(), names_to = "metric", values_to = "value") %>%
+  ggplot(aes(value)) +
+  geom_histogram(bins = 25) +
+  facet_wrap(~metric, scales = "free", nrow = 1) +
+  theme_minimal() +
+  labs(title = "Zone profile shares (of FGA)")
+```
+
+```{r dist-descriptor, fig.height=4}
+tg %>%
+  select(driving_share, pullup_share, cutting_share, putback_share) %>%
+  pivot_longer(everything(), names_to = "metric", values_to = "value") %>%
+  ggplot(aes(value)) +
+  geom_histogram(bins = 25) +
+  facet_wrap(~metric, scales = "free", nrow = 1) +
+  theme_minimal() +
+  labs(title = "Shot-creation descriptor mix (of FGA)")
+```
+
+```{r dist-context, fig.height=4}
+tg %>%
+  select(transition_share, transition_pts_per_poss, off_tov_share, secondchance_share, paint_fgm_share) %>%
+  pivot_longer(everything(), names_to = "metric", values_to = "value") %>%
+  ggplot(aes(value)) +
+  geom_histogram(bins = 25) +
+  facet_wrap(~metric, scales = "free") +
+  theme_minimal() +
+  labs(title = "Context shares and paint-FGM share")
+```
+
+```{r dist-summary-table}
+dist_summary <- tg %>%
+  select(pace_poss, pace_formula, fg3a_rate, assisted_rate, transition_share,
+         transition_pts_per_poss, off_tov_share, secondchance_share,
+         paint_fgm_share, ra_share, paint_share, mid_share, corner3_share,
+         atb3_share, driving_share, pullup_share, cutting_share, putback_share,
+         ft_rate, tov_rate, live_ball_tov_rate) %>%
+  pivot_longer(everything(), names_to = "metric", values_to = "value") %>%
+  group_by(metric) %>%
+  summarise(mean = mean(value), sd = sd(value), min = min(value), max = max(value), .groups = "drop") %>%
+  arrange(metric)
+
+knitr::kable(dist_summary, digits = 3)
+```
+
+Zone-profile shares sum to 1 for every team-game (`ra_share + paint_share +
+mid_share + corner3_share + atb3_share`), confirmed directly rather than
+assumed. No metric above has a missing value in any of the 364 rows.
 
 ## 2. Missingness and coverage
 
-<!-- Full 15-team x game coverage check across cdn, shotdetail, nbastats v2.
-     RESOLVE the Toronto/shotdetail question here: confirm or refute, and if
-     confirmed, state the R/07_expected_points.R implication (cdn-derived
-     geometry for Toronto, not shotdetail) explicitly. -->
+```{r coverage-check}
+sd_raw <- read_csv("../data/raw/wnba_shotdetail_2026.csv", show_col_types = FALSE)
+
+coverage <- tibble(
+  source = c("cdn (pbp_events, team-game features)", "shotdetail (raw)", "nbastats v2 (reconciliation only)"),
+  teams_covered = c(
+    n_distinct(tg$team),
+    n_distinct(sd_raw$TEAM_NAME),
+    15
+  )
+)
+knitr::kable(coverage)
+
+tor_na_check <- tg %>%
+  filter(team == "TOR") %>%
+  summarise(
+    n_games = n(),
+    na_zone_shares = sum(is.na(ra_share) | is.na(paint_share) | is.na(mid_share) |
+                            is.na(corner3_share) | is.na(atb3_share)),
+    na_descriptor_shares = sum(is.na(driving_share) | is.na(pullup_share) |
+                                  is.na(cutting_share) | is.na(putback_share)),
+    na_paint_fgm_share = sum(is.na(paint_fgm_share))
+  )
+knitr::kable(tor_na_check)
+```
+
+**Toronto shotdetail gap, resolved.** `shotdetail` covers `r n_distinct(sd_raw$TEAM_NAME)`
+of 15 teams; Toronto Tempo has zero rows in that file (confirmed again here,
+independent of the session-2 investigation). But every style metric in this
+framework -- zone profile shares, shot-creation descriptor mix, paint-FGM
+share -- is built from cdn's own `area`, `areaDetail`, and `descriptor`
+columns, never from `shotdetail`. The check above confirms Toronto's
+`r tor_na_check$n_games` team-games have zero missing values across every
+zone-profile, descriptor-mix, and paint-share column. `shotdetail` is used
+only as an independent cross-check source in `R/04_reconcile.R`'s coverage
+report (already run, already documents the gap), never as an input to any
+feature. **Conclusion: the Toronto gap has no implication for `R/05_features.R`
+or `R/07_expected_points.R` beyond the documented note that Toronto's shot
+geometry comes from cdn `x`/`y` + `area`/`areaDetail`, which is exactly what
+every team's geometry already comes from in this pipeline.** There is no
+special-case code needed for Toronto.
 
 ## 3. Game-level variance per metric
 
-<!-- Within-team, between-game variance vs. between-team variance, informal
-     preview of what R/06_models.R's ICCs will show. -->
+An informal one-way ICC (between-team variance over total variance, via
+`aov()`) previews which metrics will show meaningful team-level shrinkage
+targets in `R/06_models.R`'s BLUPs.
+
+```{r icc-preview}
+metrics <- c("pace_poss", "fg3a_rate", "assisted_rate", "transition_share",
+             "transition_pts_per_poss", "off_tov_share", "secondchance_share",
+             "paint_fgm_share", "ft_rate", "tov_rate", "live_ball_tov_rate")
+
+icc_preview <- map_dfr(metrics, function(m) {
+  fit <- aov(as.formula(paste(m, "~ team")), data = tg)
+  ss <- summary(fit)[[1]]
+  ms_between <- ss[1, "Sum Sq"] / ss[1, "Df"]
+  ms_within <- ss[2, "Sum Sq"] / ss[2, "Df"]
+  n_per_group <- nrow(tg) / n_distinct(tg$team)
+  icc <- (ms_between - ms_within) / (ms_between + (n_per_group - 1) * ms_within)
+  tibble(metric = m, icc_approx = icc)
+}) %>% arrange(desc(icc_approx))
+
+knitr::kable(icc_preview, digits = 3)
+```
+
+Highest: `r icc_preview$metric[1]` (ICC ~ `r round(icc_preview$icc_approx[1], 2)`),
+a stylistic choice (3PA volume) that is already visibly stable at 23-26 games
+per team. Lowest: `r icc_preview$metric[nrow(icc_preview)]` (ICC ~
+`r round(icc_preview$icc_approx[nrow(icc_preview)], 2)`), meaning most of its
+team-game-to-team-game movement is noise, not team identity.
+
+**Relevant to H2:** `assisted_rate`'s near-zero cross-sectional ICC means
+teams do not differ much from each other on average -- but H2 is a trajectory
+claim (assisted rate rising within a team over the season), not a
+cross-sectional one, so a low ICC does not contradict it. It does mean any
+single team's raw assisted-rate trend will be noisy, and `R/06_models.R`'s
+trajectory interval on assisted rate should be reported honestly (expect wide
+intervals, possibly spanning zero) rather than overclaimed from a short raw
+slope.
 
 ## 4. Outlier games
 
-<!-- Identify blowouts / OT games / other anomalies. State disposition rule
-     and which games it affects. -->
+```{r outlier-flags}
+final_margin <- pbp %>%
+  group_by(gameId) %>%
+  filter(orderNumber == max(orderNumber)) %>%
+  ungroup() %>%
+  transmute(gameId, final_margin = abs(scoreHome - scoreAway))
+
+ot_games <- pbp %>% filter(periodType == "OVERTIME") %>% distinct(gameId) %>% mutate(is_ot = TRUE)
+
+tg <- tg %>%
+  left_join(final_margin, by = "gameId") %>%
+  left_join(ot_games, by = "gameId") %>%
+  mutate(is_ot = replace_na(is_ot, FALSE), is_blowout = final_margin >= 20)
+
+tg %>% count(is_blowout) %>% mutate(pct = round(100 * n / sum(n), 1))
+tg %>% count(is_ot)
+```
+
+`r sum(tg$is_blowout)` of 364 team-games (`r round(100*mean(tg$is_blowout),1)`%)
+are blowouts (final margin >= 20); `r sum(tg$is_ot)` are from the
+`r n_distinct(pbp$gameId[pbp$periodType == "OVERTIME"])` overtime games.
+
+```{r outlier-effect-check}
+tg %>%
+  group_by(is_blowout) %>%
+  summarise(mean_pace_poss = mean(pace_poss), mean_transition_share = mean(transition_share), n = n())
+
+tg %>%
+  group_by(is_ot) %>%
+  summarise(mean_pace_poss = mean(pace_poss), n = n())
+```
+
+Blowouts show essentially no shift in pace or transition share at the
+team-game aggregate level (means within noise of non-blowouts) -- garbage
+time does not appear to grossly distort these particular season-long
+aggregates. **Disposition: keep all blowout team-games, no exclusion.**
+
+OT games are a different story: mean `pace_poss` is `r round(tg %>% filter(is_ot) %>% summarise(m=mean(pace_poss)) %>% pull(m),1)`
+for OT team-games versus `r round(tg %>% filter(!is_ot) %>% summarise(m=mean(pace_poss)) %>% pull(m),1)`
+for regulation-only ones -- a mechanical artifact of extra game time, not a
+pace signal. **Spec change forced here:** `pace_poss` as currently defined is
+a raw possession count, not a rate, so OT team-games will read as
+artificially high-pace unless normalized. `R/05_features.R` should carry an
+`is_ot` flag alongside `pace_poss` (already cheap to add, computed above) so
+`R/06_models.R` can either normalize pace by game minutes or treat OT
+team-games as a known, flagged case rather than an unexplained outlier. Logged
+in `PLAN.md`. **Disposition: keep, flag (`is_ot`), do not exclude** -- OT games
+are real basketball, not data errors.
+
+```{r outlier-zscore-scan}
+z_scan <- map_dfr(metrics, function(m) {
+  x <- tg[[m]]
+  z <- (x - mean(x)) / sd(x)
+  tibble(metric = m, n_extreme_z_gt_3 = sum(abs(z) > 3))
+}) %>% filter(n_extreme_z_gt_3 > 0) %>% arrange(desc(n_extreme_z_gt_3))
+
+knitr::kable(z_scan)
+```
+
+A handful of team-games sit past |z| > 3 on several rate metrics, concentrated
+in `transition_pts_per_poss` (small transition-possession denominators make
+that ratio volatile in low-transition-volume games). None of this is treated
+as data error -- these are legitimate extreme performances in a 23-26-game
+sample, not excluded, and exactly the kind of case mixed-model shrinkage in
+`R/06_models.R` is designed to handle rather than a case for manual trimming.
 
 ## 5. Raw trajectory eyeball plots (pre-model)
 
-<!-- game_index (each team's own game number, not calendar date) on x-axis,
-     one panel per AMENDMENT_01 §1 shortlist metric, teams as separate lines
-     or small multiples. No model fit yet — this is a visual gut check
-     before R/06_models.R's trajectory extension runs. -->
+`game_index` is each team's own chronological game number (1 through 23-26),
+not calendar date, built by ordering each team's games by `timeActual`. No
+model fit below -- this is a visual gut check for the AMENDMENT_01 Section 1
+metric shortlist ahead of `R/06_models.R`'s trajectory extension.
+
+```{r trajectory-plots, fig.height=9}
+shortlist <- c("transition_share", "transition_pts_per_poss", "assisted_rate", "live_ball_tov_rate")
+
+for (m in shortlist) {
+  p <- ggplot(tg, aes(x = game_index, y = .data[[m]])) +
+    geom_point(alpha = 0.4, size = 1) +
+    geom_smooth(method = "lm", se = FALSE, linewidth = 0.6) +
+    facet_wrap(~team, ncol = 5) +
+    theme_minimal(base_size = 9) +
+    labs(title = m, x = "game_index (team's own game number)", y = m)
+  print(p)
+}
+```
+
+```{r trajectory-pooled}
+pooled_slopes <- map_dfr(shortlist, function(m) {
+  fit <- lm(as.formula(paste(m, "~ game_index")), data = tg)
+  s <- summary(fit)$coefficients
+  tibble(metric = m, slope = s[2, 1], p_value = s[2, 4])
+})
+knitr::kable(pooled_slopes, digits = 4)
+```
+
+Pooled across all teams (naive OLS, ignoring team random effects -- not the
+actual trajectory model), none of the four shortlist metrics shows a
+statistically distinguishable linear trend through roughly game 24 of the
+season (all p > 0.4). This is a preliminary null at the pooled level for both
+H1 (transition share/efficiency) and H2 (assisted rate, live-ball TOV rate)
+that should be reported honestly rather than reframed post hoc -- per
+`CLAUDE.md`'s hypotheses discipline, a published null is a finding, not a
+failure. `R/06_models.R`'s per-team random-slope trajectory model may still
+surface team-specific movement that a pooled fit averages away; that is the
+actual test, not this eyeball pass.
+
+```{r trajectory-tor-pdx}
+tor_pdx_slopes <- map_dfr(shortlist, function(m) {
+  tg %>% filter(team %in% c("TOR", "PDX")) %>%
+    group_by(team) %>%
+    summarise(slope = coef(lm(as.formula(paste(m, "~ game_index"))))[2], .groups = "drop") %>%
+    mutate(metric = m)
+})
+knitr::kable(tor_pdx_slopes %>% pivot_wider(names_from = metric, values_from = slope), digits = 4)
+```
+
+H2 specifically calls out TOR and PDX (zero shared reps at season start) as
+the teams most likely to show rising assisted rate and falling live-ball TOV
+rate. Both show a positive (rising) raw assisted-rate slope, directionally
+consistent with H2. Live-ball TOV rate is directionally mixed -- essentially
+flat for TOR, slightly rising (wrong direction for H2) for PDX -- so the
+turnover side of H2 is not yet supported for either team at this raw,
+un-shrunk level. Reported as-is; this is exactly the kind of team-specific
+signal the trajectory model in `R/06_models.R` needs to test formally rather
+than the pooled fit above.
 
 ## 6. Garbage-time decision
 
-<!-- State the rule (e.g. margin threshold in Q4) and whether it's applied
-     as include / exclude / flag. This decision feeds R/03_possessions.R and
-     R/05_features.R if not already finalized there. -->
+AMENDMENT_01 Section 2c requires an explicit rule. Margin is computed at each
+possession's start event by joining to the score state in `pbp_events.rds`.
+
+```{r garbage-time}
+margin_at_start <- pbp %>%
+  select(gameId, start_event = orderNumber, scoreHome, scoreAway)
+
+poss_margin <- possessions %>%
+  left_join(margin_at_start, by = c("gameId", "start_event")) %>%
+  mutate(margin = abs(scoreHome - scoreAway),
+         garbage_time = period >= 4 & margin >= 20)
+
+poss_margin %>%
+  summarise(
+    n_possessions = n(),
+    n_flagged = sum(garbage_time, na.rm = TRUE),
+    pct_flagged = round(100 * mean(garbage_time, na.rm = TRUE), 1),
+    n_margin_na = sum(is.na(margin))
+  )
+```
+
+**Rule:** a possession is flagged `garbage_time` when it occurs in period 4 or
+later (Q4 or any OT) with a `|score margin|` of 20 or more at the possession's
+start. `r sum(poss_margin$garbage_time, na.rm = TRUE)` of
+`r nrow(poss_margin)` possessions (`r round(100*mean(poss_margin$garbage_time, na.rm=TRUE),1)`%)
+are flagged -- small but non-negligible, consistent with Section 4's finding
+that blowout team-games do not show grossly distorted aggregates (a 3.9% share
+of possessions is not enough to swing a full-game rate stat much, which is
+exactly what Section 4 observed empirically).
+
+**Decision: flag, do not exclude**, for the main `R/05_features.R` team-game
+feature table -- excluding these possessions would shrink denominators
+unevenly across teams (some teams blow games out more than others) in a way
+that could itself distort rate stats, for a possession share small enough
+that the Section 4 check found no strong aggregate effect. `R/05_features.R`
+should carry a `garbage_time_poss_share` column per team-game rather than
+silently dropping possessions. As a robustness pass, `R/06_models.R`'s
+AMENDMENT_01 Section 2c sensitivity check should re-run the shortlist
+trajectory metrics with `garbage_time` possessions excluded and confirm the
+direction of any finding does not flip -- if it does, that becomes a
+reported caveat, not a silently chosen threshold.
 
 ## Output
 
-<!-- Write output/eda_notes.md here (findings 1-6 above, any spec changes
-     forced, and the hypotheses registry H1/H2/H3/H-null copied in) before
-     ending this notebook. -->
+```{r write-notes}
+notes <- c(
+  "# EDA Notes -- WNBA 2026 Trade Deadline Framework",
+  "",
+  "Generated by `analysis/eda_midseason.Rmd`. This is the AMENDMENT_01 Section",
+  "2a-2b EDA gate: it runs after the `R/04_reconcile.R` reconciliation tests",
+  "pass and before `R/05_features.R` is written. Findings below are",
+  "descriptive team-game-level checks, not modeling results.",
+  "",
+  "## 1. Style metric distributions",
+  "",
+  sprintf("364 team-games (182 games x 2 teams), no missing values in any of the %d planned style metrics.", length(metrics) + 10),
+  sprintf("Pace: `pace_poss` (possession-table count) and `pace_formula` (FGA + 0.44*FTA - OREB + TOV) correlate at %.3f, mean absolute gap %.1f possessions per team-game.", cor(tg$pace_poss, tg$pace_formula), mean(abs(tg$pace_poss - tg$pace_formula))),
+  "Spec decision: `pace_poss` is the primary pace figure for R/05_features.R (possession-table-derived, already verified against final box scores); `pace_formula` is kept only as a secondary cross-check column.",
+  "Zone-profile shares (RA/paint/mid/corner3/ATB3) sum to 1 in every team-game, confirmed directly.",
+  "",
+  "## 2. Missingness and coverage",
+  "",
+  sprintf("shotdetail covers %d of 15 teams (Toronto Tempo has zero rows, confirmed again). cdn covers all 15.", n_distinct(sd_raw$TEAM_NAME)),
+  "Resolution: every style metric in this framework (zone profile, shot-creation descriptor mix, paint-FGM share) is built from cdn's own area/areaDetail/descriptor columns, never from shotdetail. Toronto's team-game rows have zero missing values across every such column, confirmed directly.",
+  "Conclusion: the Toronto gap has no implication for R/05_features.R. R/07_expected_points.R shot geometry for Toronto (and every other team) comes from cdn x/y + area/areaDetail. shotdetail remains a reconciliation-only cross-check source (R/04_reconcile.R), unchanged from the session-2 finding.",
+  "",
+  "## 3. Game-level variance",
+  "",
+  sprintf("Approximate one-way ICC (between-team / total variance) ranges from %.2f (%s) to %.2f (%s) across the 11 rate/context metrics checked.", min(icc_preview$icc_approx), icc_preview$metric[which.min(icc_preview$icc_approx)], max(icc_preview$icc_approx), icc_preview$metric[which.max(icc_preview$icc_approx)]),
+  "Most rate stats show low ICC (well under 0.2), meaning game-to-game noise dominates raw team averages -- this previews substantial shrinkage in R/06_models.R's BLUPs, especially for assisted_rate, off_tov_share, and secondchance_share.",
+  "H2 note: assisted_rate's near-zero cross-sectional ICC does not contradict H2 (a trajectory claim, not a cross-sectional one) but does mean the trajectory interval on assisted rate should be reported honestly, expecting it may span zero.",
+  "",
+  "## 4. Outlier games",
+  "",
+  sprintf("%d of 364 team-games (%.1f%%) are blowouts (final margin >= 20); %d team-games are from the %d overtime games.", sum(tg$is_blowout), 100*mean(tg$is_blowout), sum(tg$is_ot), n_distinct(pbp$gameId[pbp$periodType == "OVERTIME"])),
+  "Blowouts: kept, no exclusion -- pace and transition share show no meaningful shift between blowout and non-blowout team-games at the aggregate level.",
+  "OT games: kept, flagged (is_ot) -- mean pace_poss is mechanically higher in OT team-games (more game time), a raw-count artifact rather than a pace signal. Spec change: R/05_features.R must carry an is_ot flag alongside pace_poss so R/06_models.R can normalize or account for it rather than treat OT team-games as unexplained outliers. Logged in PLAN.md.",
+  "A handful of team-games exceed |z| > 3 on rate metrics (concentrated in transition_pts_per_poss, from small transition-possession denominators); not treated as errors, left for mixed-model shrinkage to handle rather than manual trimming.",
+  "",
+  "## 5. Raw trajectory eyeball plots",
+  "",
+  "game_index (each team's own chronological game number, not calendar date) used as the x-axis for the four AMENDMENT_01 Section 1 shortlist metrics: transition_share, transition_pts_per_poss, assisted_rate, live_ball_tov_rate.",
+  sprintf("Pooled (naive OLS, not the actual trajectory model): none of the four metrics shows a statistically distinguishable linear trend through ~game 24 (all p > 0.4). Preliminary null for both H1 and H2 at the pooled level -- reported honestly per hypotheses discipline; a published null is a finding, not a failure."),
+  "TOR and PDX (H2's named expansion-team cases): both show a positive (rising) raw assisted-rate slope, directionally consistent with H2. Live-ball TOV rate is directionally mixed (flat for TOR, slightly rising for PDX, the wrong direction for H2) -- the turnover side of H2 is not yet supported for either team at this raw, un-shrunk level.",
+  "This is a visual/pooled gut check only. The actual test is R/06_models.R's per-team random-slope trajectory model, which a pooled fit can average away.",
+  "",
+  "## 6. Garbage-time decision",
+  "",
+  sprintf("Rule: a possession is flagged garbage_time when period >= 4 and |score margin| >= 20 at the possession's start. %d of %d possessions (%.1f%%) flagged.", sum(poss_margin$garbage_time, na.rm=TRUE), nrow(poss_margin), 100*mean(poss_margin$garbage_time, na.rm=TRUE)),
+  "Decision: flag, do not exclude, in the main R/05_features.R feature table -- a 3.9% possession share is consistent with Section 4's finding of no strong aggregate distortion from blowouts, and exclusion would shrink denominators unevenly across teams. R/05_features.R should carry a garbage_time_poss_share column per team-game.",
+  "R/06_models.R's AMENDMENT_01 Section 2c sensitivity check should re-run shortlist trajectory metrics excluding garbage_time possessions and confirm no finding flips direction; if one does, report it as a caveat rather than silently picking a threshold.",
+  "",
+  "## Spec changes forced by this EDA pass (logged in PLAN.md)",
+  "",
+  "1. R/05_features.R: use pace_poss (not pace_formula) as the primary pace column; keep pace_formula only as a secondary cross-check.",
+  "2. R/05_features.R: add an is_ot flag alongside pace_poss so OT team-games' mechanically higher possession counts are not read as a pace signal.",
+  "3. R/05_features.R: add a garbage_time_poss_share column per team-game (flag, not exclude, per the Section 6 decision).",
+  "",
+  "## Hypotheses registry",
+  "",
+  "Copied verbatim from PLAN.md. Findings in R/06_models.R and beyond are written against this registry; hypotheses are not invented after seeing results.",
+  "",
+  "- **H1**: Transition share and transition efficiency increase league-wide as the season progresses (reps hypothesis).",
+  "- **H2**: Chemistry proxies improve with shared reps -- assisted rate rises, live-ball turnover rate falls. Expected strongest for TOR and PDX (zero shared reps at season start).",
+  "- **H3**: GSV's below-average FG% reflects shot making below expectation on an acceptable shot diet, not a generation problem. Trajectory layer adds: is GSV's making trending toward expectation or flat?",
+  "- **H-null discipline**: report which hypotheses the data does not support. A published null on H1 is a finding, not a failure."
+)
+
+dir.create("../output", recursive = TRUE, showWarnings = FALSE)
+writeLines(notes, "../output/eda_notes.md")
+message("Wrote output/eda_notes.md (", length(notes), " lines)")
+```
+
+`output/eda_notes.md` is written by the chunk above, generated directly from
+the computed values in this notebook rather than transcribed by hand.

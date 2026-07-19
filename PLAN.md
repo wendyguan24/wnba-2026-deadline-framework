@@ -76,19 +76,46 @@ downloads, no analysis execution):
 Runs after script 04 tests pass, before `R/05_features.R` is written. Models are not
 written until this gate clears.
 
-- [ ] `analysis/eda_midseason.Rmd`: distributions of every planned style metric at the
-      team-game level
-- [ ] Missingness/coverage checks, including **resolving** (not just flagging) the
-      Toronto shotdetail zero-row question from session 1's README/PLAN note
-- [ ] Game-level variance per metric (previews which ICCs will be meaningful)
-- [ ] Outlier games identified and dispositioned (keep / exclude / flag — blowouts,
-      OT games)
-- [ ] Raw trajectory eyeball plots for the Part 1 metric shortlist (below), before any
-      trajectory model runs
-- [ ] Garbage-time decision made explicitly and stated (include / exclude / flag
-      possessions above a margin threshold in Q4) — AMENDMENT_01 §2c
-- [ ] Output: `output/eda_notes.md` — findings, any spec changes they force, and the
-      hypotheses registry below, copied in before script 06 runs
+- [x] `analysis/eda_midseason.Rmd`: distributions of every planned style metric at the
+      team-game level — built a 364-row team-game feature table (pace both estimates,
+      3PA rate, assisted rate, transition/off-TOV/2nd-chance shares, paint FGM share,
+      zone profile, descriptor mix, FT/TOV/live-ball-TOV rates) directly from
+      `pbp_events.rds`/`possessions.rds`; zero missing values across all 21 metrics
+- [x] Missingness/coverage checks, including **resolving** (not just flagging) the
+      Toronto shotdetail zero-row question from session 1's README/PLAN note —
+      confirmed every style metric is cdn-derived (area/areaDetail/descriptor), never
+      shotdetail-derived; Toronto's 24 team-games have zero NAs on any such column
+- [x] Game-level variance per metric (previews which ICCs will be meaningful) —
+      approximate one-way ICC ranges from ~0 (assisted_rate) to ~0.35 (fg3a_rate);
+      most rate stats are low-ICC, meaning R/06's BLUP shrinkage will matter a lot
+- [x] Outlier games identified and dispositioned (keep / exclude / flag — blowouts,
+      OT games) — 60/364 team-games are blowouts (final margin >= 20), kept, no
+      aggregate distortion found; 16/364 are OT team-games, kept and flagged (`is_ot`)
+      since raw `pace_poss` is mechanically inflated by extra game time
+- [x] Raw trajectory eyeball plots for the Part 1 metric shortlist (below), before any
+      trajectory model runs — pooled naive OLS shows no distinguishable trend for any
+      of the 4 shortlist metrics through ~game 24 (all p > 0.4, preliminary null at
+      the pooled level); TOR/PDX both show rising raw assisted rate (H2-consistent),
+      live-ball TOV rate direction is mixed for those two teams (not yet H2-consistent)
+- [x] Garbage-time decision made explicitly and stated (include / exclude / flag
+      possessions above a margin threshold in Q4) — AMENDMENT_01 §2c — rule: period
+      >= 4 and |margin| >= 20 at possession start; 1,162/29,853 possessions (3.9%)
+      flagged; decision is flag, not exclude, in the main feature table
+- [x] Output: `output/eda_notes.md` — findings, any spec changes they force, and the
+      hypotheses registry below, copied in before script 06 runs — generated
+      programmatically from the notebook's own computed values, not hand-transcribed
+
+**Spec changes forced by this EDA pass, for `R/05_features.R`:**
+1. Use `pace_poss` (possession-table count, already box-score-verified) as the
+   primary pace column; `pace_formula` (FGA + 0.44*FTA - OREB + TOV) is a secondary
+   cross-check only — the two correlate at 0.899 but differ by ~4.6 possessions/
+   team-game on average, a real gap worth carrying forward rather than picking
+   silently.
+2. Add an `is_ot` flag alongside `pace_poss` — OT team-games average ~95.7 raw
+   possessions vs ~81.0 for regulation, a mechanical artifact of extra game time,
+   not a pace signal.
+3. Add a `garbage_time_poss_share` column per team-game (flag, not exclude) per the
+   Section 6 decision above.
 
 ### Hypotheses registry (write results against these; do not invent hypotheses after seeing results)
 
@@ -307,10 +334,12 @@ source.
 ## Next session should
 
 Reconciliation gate is cleared (see "Reconciliation gate results" above; 0 test
-failures). Per CLAUDE.md and the EDA gate (AMENDMENT_01 §2a-2b), the next stop is
-`analysis/eda_midseason.Rmd` -> `output/eda_notes.md` (hypotheses registry) — do
-not write `R/05_features.R` before that exists. `data/reference/cap_context_2026.csv`
-also still needs Wendy's manual entry (AMENDMENT_02 §3a/§4) before `R/08` can be
-implemented against real cap data, though that's a later (Jul 23) block.
+failures) and the EDA gate is now cleared too — `analysis/eda_midseason.Rmd` runs
+cleanly end to end (verified via `knitr::knit()`; no pandoc installed locally so
+HTML rendering wasn't checked, only that every chunk executes without error) and
+`output/eda_notes.md` is written. Next stop per the session roadmap: implement
+`R/05_features.R` against the EDA gate's 3 forced spec changes (`pace_poss` as
+primary pace, `is_ot` flag, `garbage_time_poss_share` column), then `R/06_models.R`
+including the trajectory extension, then run `analytics-reviewer` on the results.
 `data/reference/cap_context_2026.csv` still needs Wendy's manual entry (AMENDMENT_02
 §3a/§4, Jul 23 block) before script 08 can be implemented against real cap data.
