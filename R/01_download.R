@@ -58,8 +58,15 @@ resolve_commit_ref <- function(args = commandArgs(trailingOnly = TRUE)) {
 download_dataset <- function(dataset_name, commit_ref, dest_dir = "data/raw") {
   dir.create(dest_dir, recursive = TRUE, showWarnings = FALSE)
 
+  # Use raw.githubusercontent.com directly rather than github.com/<repo>/raw/,
+  # which merely 302-redirects here anyway. The direct host is reachable from
+  # Claude Code on the web's cloud sandbox (it is on the network allowlist and
+  # served by the security proxy), whereas github.com/.../raw/ routes through
+  # the GitHub proxy, which gates access per-repo to the session's own
+  # repositories and 403s a third-party repo like shufinskiy/nba_data. Same
+  # repo, same pinned commit, same bytes; works identically for local runs.
   url <- sprintf(
-    "https://github.com/%s/raw/%s/datasets/%s.tar.xz",
+    "https://raw.githubusercontent.com/%s/%s/datasets/%s.tar.xz",
     REPO, commit_ref, dataset_name
   )
   tar_path <- file.path(dest_dir, paste0(dataset_name, ".tar.xz"))
