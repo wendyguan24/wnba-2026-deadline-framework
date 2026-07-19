@@ -189,7 +189,10 @@ metrics use equal weighting.
       3. Assisted rate of FGM (H2)
       4. Live-ball TOV rate (H2)
       5. Optional: shot-making residual from script 07 (H3, GSV-relevant) — cut first
-         if the block is threatened (not built this pass, script 07 doesn't exist yet)
+         if the block is threatened (NOW BUILT 2026-07-19: R/07 produces the team-game
+         `shot_making_residual` and R/06 fits it as the 5th trajectory metric, unweighted,
+         via the same random-slope + documented-fallback machinery; league trend
+         +0.115/game, p=0.199, fallback fired like the other four)
       **Superseded by the project-wide cut order below (AMENDMENT_02 §4)** — the
       `trajectory` column itself is still never cut; the optional 5th metric is now
       the first thing to go project-wide, not just within this block.
@@ -206,16 +209,26 @@ metrics use equal weighting.
       `output/team_rank_deltas.csv`, `output/team_trajectories.csv`,
       `output/trajectory_league_trends.csv` (all human-readable, alongside the `.rds`
       versions in `data/processed/`)
-- [ ] **Run `analytics-reviewer` agent on script 06 results (BLUPs, ICCs, trajectory
+- [x] **Run `analytics-reviewer` agent on script 06 results (BLUPs, ICCs, trajectory
       slopes) — triage feedback (accept / reject with one-line reason / defer
-      post-deadline), log the triage below**
+      post-deadline), log the triage below** -- RUN 2026-07-19, scoped to the trajectory
+      layer (incl. the new 5th metric) and the R/07 expected-points outputs. Findings
+      logged below under "analytics-reviewer, post-06/07 gate run." Triage is PROPOSED,
+      NOT yet accepted -- awaiting Wendy's decision on each item before any fix is applied.
 
 ## Jul 23 — Data refresh check; expected-points baseline; deadline-read table; cap-context CSV
 
 - [ ] Check `shufinskiy/nba_data` for a commit newer than `773ce29`; re-pin and re-run
       01-04 if found, confirm tests still pass; update baseline expectations
       deliberately if counts shift
-- [ ] Implement `R/07_expected_points.R` (stratified xPTS baseline, not a trained model)
+- [x] Implement `R/07_expected_points.R` (stratified expected-points baseline / qSQ-lite,
+      NOT a trained model) -- 49 strata over zone x shot_class x context, cdn-only, 2026
+      in-season, MIN_CELL_N=100 collapse cascade (full cell -> zone x context -> zone ->
+      global). Outputs `expected_points_baseline.rds` (49 strata), season per-team
+      `team_generation_making.rds` (generation/making per 100 poss), and team-game
+      `team_game_shot_making.rds` (the `shot_making_residual` column feeding R/06's
+      trajectory layer). Season identity generation + making = actual holds < 1e-8 for all
+      15 teams; all xpts in [0.66, 1.54]. Run 2026-07-19 on the clean VM.
 - [ ] Implement `R/08_deadline_read.R` — skeleton now includes the `trajectory`
       column (improving / flat / declining, footnoted when the interval spans zero,
       via `format_trajectory_column()`), the `cap_context` column (room / tight /
@@ -365,6 +378,65 @@ contradictions. Triage of its findings, all applied 2026-07-19:
   notes. Exception: the accepted fixes above correct errors that existed at
   generation time (self-contradictions, missing disclosures), which is
   legitimate correction, not post-hoc rewriting.
+
+**analytics-reviewer, post-06/07 gate run (2026-07-19).** The formal AMENDMENT_01
+Part 3 gate after R/07 (expected-points baseline) was implemented and
+shot_making_residual was added to R/06's trajectory layer. Reviewed the R/07
+source, the R/06 trajectory block plus main() join, and a human-readable snapshot
+of every R/07 output and the 5-metric trajectory tables. Positive traceability the
+reviewer confirmed: R/07 is cdn-only (never shotdetail), calls itself a qSQ-lite
+baseline, reports per 100 possessions with a denominator basis matching R/05's
+pace_poss, season FGA reconcile to the HANDOFF baseline table, no Synergy, no
+play-type language, no absolute-skill overclaim.
+
+**Triage below is PROPOSED by Claude, NOT accepted. No fix has been applied to any
+finding. Per the session instruction, feedback is triaged by Wendy, not obeyed by
+Claude. The R/07 + R/06 commit is pushed as-is; each item awaits Wendy's
+accept / reject / defer before code changes.** (The one pre-review change already in
+the commit -- em dashes removed from R/07's header -- was Claude's own spec-review
+catch before this gate ran, not a response to these findings.)
+
+- **BLOCKER 1 (R/06 does not declare its new R/07 dependency; 05 -> 06 -> 07 numeric
+  order hard-errors) -- PROPOSED ACCEPT.** Real reproducibility trap: R/06 main() reads
+  `team_game_shot_making.rds` but the Inputs header lists only team_game_features.rds,
+  and no run-order doc states 07 must run before 06. Proposed fix (not applied): add the
+  input to R/06's header and state the correct order 05 -> 07 -> 06 in PLAN.md/README.
+- **WARNING 1 (R/07:162 comment says "shot-quality baseline") -- PROPOSED ACCEPT.**
+  Direct vocabulary-discipline violation; the layer is never "shot-quality." Proposed
+  fix (not applied): change to "expected-points baseline."
+- **WARNING 2 (per-team trajectory table omits fallback_used) -- PROPOSED ACCEPT, or
+  defer to R/08.** All 5 metrics fell back to the residual-slope approximation, but
+  team_trajectories.csv carries no fallback_used column, so a reader of per-team slopes
+  cannot tell they are not random-slope BLUPs. Proposed fix (not applied): add
+  fallback_used to the per-team output, or guarantee R/08 joins it when built -- Wendy's
+  call which.
+- **WARNING 3 (no AMENDMENT_01 §2c sensitivity / split-half pass for the trajectory
+  shortlist) -- PROPOSED DEFER (already scheduled).** The garbage-time-exclusion re-run
+  and split-half stability check are listed as pending for the Jul 25-26 findings-draft
+  block; no trajectory sentence is published yet, so the check is not needed until prose
+  is written. Gate any trajectory claim on it then; do not publish a trajectory finding
+  without it.
+- **WARNING 4 (em dashes in R/06 comments, lines 17/20/31/32/75/175/267) -- PROPOSED
+  DEFER as a repo-wide hygiene pass.** All flagged lines are pre-existing from prior
+  committed sessions, not introduced by this change (the lines Claude added use `--`);
+  R/02-R/05 carry the same pre-existing em dashes, so a proper fix is one repo-wide
+  language-hygiene sweep, not an R/06-only edit inside this diff.
+- **NOTE 1 (shot_class precedence undocumented) -- PROPOSED ACCEPT (trivial).** Add one
+  comment justifying putback > cutting > driving > pullup > other. Safe to defer.
+- **NOTE 2 (H3 heads-up: GSV makes shots at/above expectation, refuting H3's registered
+  "below expectation" premise) -- PROPOSED ACCEPT, act at findings stage.** No code change
+  now (the code asserts nothing). Flagged loudly for the findings draft: report H3 as a
+  refutation/null per hypotheses discipline, not a quiet reframe. This is the most
+  decision-relevant finding for the eventual write-up.
+- **NOTE 3 (in-sample baseline: each team-game's expected value includes ~1/15 its own
+  shots) -- PROPOSED DEFER.** Inherent to a league-average baseline; one methodology
+  sentence at the writing stage. Safe to defer.
+- **NOTE 4 (MIN_CELL_N SE rationale optimistic: ~0.10 not 0.07) -- PROPOSED ACCEPT
+  (comment-only accuracy fix) or DEFER.** Does not affect any output value. Safe to defer.
+- **NOTE 5 ("flat" label unreachable since slope is never exactly 0; honesty rests on
+  interval_spans_zero) -- PROPOSED DEFER to R/08.** A requirement on R/08's presentation
+  (surface the interval_spans_zero footnote so improving/declining are not read as fact);
+  R/08 is intentionally not built yet. Safe to defer.
 
 ## Data download (session 2, 2026-07-18)
 
