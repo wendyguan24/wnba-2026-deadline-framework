@@ -86,12 +86,14 @@ written until this gate clears.
       confirmed every style metric is cdn-derived (area/areaDetail/descriptor), never
       shotdetail-derived; Toronto's 24 team-games have zero NAs on any such column
 - [x] Game-level variance per metric (previews which ICCs will be meaningful) —
-      approximate one-way ICC ranges from ~0 (assisted_rate) to ~0.35 (fg3a_rate);
+      approximate one-way ICC ranges from ~0 (assisted_rate) to ~0.53 (mid_share, the
+      actual highest, not fg3a_rate at ~0.35 which is second);
       most rate stats are low-ICC, meaning R/06's BLUP shrinkage will matter a lot
 - [x] Outlier games identified and dispositioned (keep / exclude / flag — blowouts,
       OT games) — 60/364 team-games are blowouts (final margin >= 20), kept, no
       aggregate distortion found; 16/364 are OT team-games, kept and flagged (`is_ot`)
-      since raw `pace_poss` is mechanically inflated by extra game time
+      since raw `pace_poss` is mechanically inflated by extra game time (later resolved
+      by adding `pace_per40`, see the W3 fix below)
 - [x] Raw trajectory eyeball plots for the Part 1 metric shortlist (below), before any
       trajectory model runs — pooled naive OLS shows no distinguishable trend for any
       of the 4 shortlist metrics through ~game 24 (all p > 0.4, preliminary null at
@@ -171,9 +173,16 @@ metrics use equal weighting.
       is_ot count, garbage-time share) — all match exactly. No missing values anywhere.
 - [x] Implement `R/06_models.R` — identity models (`metric ~ is_home + (1|team) +
       (1|opponent)`) fit for all 20 HANDOFF §5b style metrics (`pace_formula` excluded,
-      secondary-only). `output/icc_table.csv` written. Several models hit
+      secondary-only; pace modeled as `pace_per40`, not raw `pace_poss` — see the W3
+      fix below). `output/icc_table.csv` written. Several models hit
       "boundary (singular) fit" (opponent-variance component near zero) — expected and
       harmless for ICC/BLUP extraction, not a fallback trigger (that's trajectory-only).
+      **Identity-anchor rule (from the analytics-reviewer's decisions-only EDA review,
+      BLOCKER 1): a metric may anchor an identity claim in the deadline-read table only
+      if its `output/icc_table.csv` ICC is >= 0.15. Eligible: mid_share, fg3a_rate,
+      atb3_share, pullup_share, ra_share, paint_fgm_share, driving_share,
+      transition_share. Everything else (including assisted_rate) is trajectory-only
+      or descriptive — apply this when R/08_deadline_read.R is written.**
 - [x] Implement `R/06_models.R` trajectory extension (§5c-bis) on the metric shortlist:
       1. Transition share (H1)
       2. Transition points per transition possession (H1, efficiency side)
@@ -292,7 +301,70 @@ descriptions of them.
 Feedback is triaged, not obeyed: accept, reject with a one-line reason, or defer to
 post-deadline. Log each triage decision here as it happens:
 
-- (none yet — agents have not been run; no script 06 results exist)
+**analytics-reviewer, narrow decisions-only pre-gate run (2026-07-19).** Scoped to
+the four EDA decisions, the low-ICC implication, H1/H2 null discipline, and spec
+contradictions — NOT the formal post-06 gate, which still fires separately on the
+full script-06 result set. Verdicts: all four EDA decisions defensible as made
+(pace_poss primary, is_ot flag, garbage-time flag-not-exclude, Toronto
+cdn-derivation); H1/H2 pooled-null discipline correct; no structural spec
+contradictions. Triage of its findings, all applied 2026-07-19:
+
+- **BLOCKER 1 — ACCEPT, FIXED.** eda_notes.md §3's own table contradicts its prose
+  ("zone-profile shares" as a class includes corner3_share at 0.075 and
+  paint_share at 0.082, both below tov_rate) and the class-level "lead with
+  zone-profile shares" rule would let near-zero-ICC metrics anchor identity.
+  Fix: name the specific high-ICC shares (mid_share, atb3_share, ra_share)
+  instead of the class, and adopt the reviewer's formal anchor rule — identity
+  anchors in the deadline-read table require mixed-model ICC >= 0.15 (from
+  output/icc_table.csv, not the EDA one-way approximations), a stated judgment
+  call placed at the observed break in the ICC distribution (transition_share
+  0.181 is the last metric before the collapse to <= 0.113). Eligible anchors
+  under the rule: mid_share, fg3a_rate, atb3_share, pullup_share, ra_share,
+  driving_share, paint_fgm_share, transition_share.
+- **WARNING 1 — ACCEPT, FIXED.** eda_notes.md self-contradiction: §2 says
+  shotdetail is "reconciliation-only" while §1 builds is_home from its HTM/VTM.
+  Reworded to "reconciliation and game-level metadata (HTM/VTM) only; no
+  shot-level features."
+- **WARNING 2 — ACCEPT, FIXED.** Pace gap reported unsigned only. Added the
+  signed mean difference (pace_poss runs +4.6 possessions/team-game higher, not
+  just "different") and attributed the main source (pace_formula's fixed 0.44 FT
+  weight is an NBA convention the handoff itself flags as unvalidated for the
+  WNBA).
+- **WARNING 3 — ACCEPT, FIXED.** The is_ot spec change deferred the actual OT
+  treatment without choosing. Added `game_minutes` (40 + 5 per OT period) and
+  `pace_per40` (pace_poss normalized to a 40-minute game) to
+  `R/05_features.R`; `R/06_models.R`'s `IDENTITY_METRICS` now models
+  `pace_per40`, not raw `pace_poss` (which remains the rate-stat denominator).
+  Confirmed the fix works: OT vs. regulation team-game means went from
+  95.7 vs. 81.0 (raw pace_poss, the original artifact) to 81.8 vs. 81.0
+  (pace_per40) — the mechanical gap is gone. Re-ran both scripts;
+  `pace_per40`'s own mixed-model ICC is 0.146 (just under the 0.15 anchor
+  floor from BLOCKER 1 — expected, pace was never a top-ICC identity metric).
+- **WARNING 4 — ACCEPT, FIXED (disclosure only).** NA-margin possessions are
+  silently not-flagged in the garbage-time rule. Confirmed count is 0; added a
+  one-sentence disclosure of the rule and count to eda_notes.md §6, no
+  recomputation needed.
+- **NOTE 1 — ACCEPT, FIXED (half-sentence only, rest deferred).** Added to §5
+  that pooled OLS p-values ignore within-team correlation (descriptive only)
+  and that the pooled null bears on the league-wide clause of H1/H2, not H2's
+  team-specific TOR/PDX prediction.
+- **NOTE 2 — ACCEPT, FIXED.** eda_icc_table.csv now has an `icc_floored` column
+  (`pmax(icc_approx, 0)`) alongside the raw `icc_approx`, with a footnote in
+  eda_notes.md §3 explaining the one-way ANOVA estimator can go slightly
+  negative.
+- **NOTE 3 — DEFER post-deadline.** Blowout no-distortion check covered pace and
+  transition_share only before generalizing; script 06's §2c sensitivity pass
+  covers the shortlist, which is where it matters. Add the precision phrase only
+  if a findings-draft reviewer asks.
+- **NOTE 4 — ACCEPT, FIXED.** Aligned the stale "to ~0.35 (fg3a_rate)" line in the earlier
+  EDA checkbox with the corrected mid_share finding to avoid quoting it by
+  accident.
+- **Process observation — ACCEPT as standing practice.** Keep eda_notes.md frozen
+  as the pre-model record; post-model updates (like the assisted_rate
+  opponent-effect retirement) live in PLAN.md, not retro-edited into the EDA
+  notes. Exception: the accepted fixes above correct errors that existed at
+  generation time (self-contradictions, missing disclosures), which is
+  legitimate correction, not post-hoc rewriting.
 
 ## Data download (session 2, 2026-07-18)
 

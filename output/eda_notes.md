@@ -8,7 +8,7 @@ descriptive team-game-level checks, not modeling results.
 ## 1. Style metric distributions
 
 364 team-games (182 games x 2 teams), no missing values in any of the 21 planned style metrics.
-Pace: `pace_poss` (possession-table count) and `pace_formula` (FGA + 0.44*FTA - OREB + TOV) correlate at 0.899, mean absolute gap 4.6 possessions per team-game.
+Pace: `pace_poss` (possession-table count) and `pace_formula` (FGA + 0.44*FTA - OREB + TOV) correlate at 0.899. pace_poss runs 4.6 possessions/team-game higher on average (signed), mean absolute gap 4.6 -- pace_formula's fixed 0.44 FT weight is an NBA-derived convention (HANDOFF Section 5b flags it as unvalidated for the WNBA) approximating continuation possessions that pace_poss reads directly off the possession column.
 Spec decision: `pace_poss` is the primary pace figure for R/05_features.R (possession-table-derived, already verified against final box scores); `pace_formula` is kept only as a secondary cross-check column.
 Zone-profile shares (RA/paint/mid/corner3/ATB3) sum to 1 in every team-game, confirmed directly.
 Home/away, added per review feedback: joined from shotdetail's HTM/VTM (covers all 182 games including Toronto's), no missing values. Spec addition: R/05_features.R carries an is_home column; R/06_models.R's identity models include it as a fixed effect rather than an unmodeled confounder.
@@ -17,13 +17,13 @@ Home/away, added per review feedback: joined from shotdetail's HTM/VTM (covers a
 
 shotdetail covers 14 of 15 teams (Toronto Tempo has zero rows, confirmed again). cdn covers all 15.
 Resolution: every style metric in this framework (zone profile, shot-creation descriptor mix, paint-FGM share) is built from cdn's own area/areaDetail/descriptor columns, never from shotdetail. Toronto's team-game rows have zero missing values across every such column, confirmed directly.
-Conclusion: the Toronto gap has no implication for R/05_features.R. R/07_expected_points.R shot geometry for Toronto (and every other team) comes from cdn x/y + area/areaDetail. shotdetail remains a reconciliation-only cross-check source (R/04_reconcile.R), unchanged from the session-2 finding.
+Conclusion: the Toronto gap has no implication for R/05_features.R. R/07_expected_points.R shot geometry for Toronto (and every other team) comes from cdn x/y + area/areaDetail. shotdetail is used only for reconciliation (R/04_reconcile.R) and game-level metadata (HTM/VTM for the is_home flag) -- never as an input to any shot-level feature.
 
 ## 3. Game-level variance
 
-Approximate one-way ICC (between-team / total variance) computed for the full 21-metric style list, saved to output/eda_icc_table.csv. Ranges from -0.00 (assisted_rate) to 0.53 (mid_share).
-Reading across the full table: shot selection and shot location separate WNBA teams (fg3a_rate and the zone-profile shares all land well above the rate/context metrics); ball movement does not (assisted_rate sits at essentially zero ICC). Two plausible readings: WNBA offenses may be more homogeneous on ball movement than a 300+-program college sample would be (talent compression across 15 teams from one elite pool), or the one-way ICC understates team signal by ignoring opponent effects that R/06_models.R's (1|team) + (1|opponent) structure will partially recover. Both plausible; the BLUPs are the actual test.
-Practical implication: BLUPs on near-zero-ICC metrics (assisted_rate, off_tov_share, secondchance_share) will shrink almost entirely to the league mean and should not anchor identity claims in the deadline-read table -- lead identity summaries with the high-ICC metrics (fg3a_rate, zone-profile shares) and treat assisted_rate as trajectory-only (H2), not identity.
+Approximate one-way ICC (between-team / total variance; the estimator can go slightly negative, floored at 0 for display in output/eda_icc_table.csv's icc_floored column, raw value kept alongside) computed for the full 21-metric style list, saved to output/eda_icc_table.csv. Ranges from -0.00 (assisted_rate) to 0.53 (mid_share).
+Reading across the full table: shot selection and shot location separate WNBA teams, but not every zone-profile/descriptor share qualifies -- mid_share, fg3a_rate, atb3_share, pullup_share, and ra_share are the specific highest-ICC metrics, while corner3_share and paint_share sit below several rate/context metrics despite also being zone-profile shares. Ball movement does not separate teams (assisted_rate sits at essentially zero ICC). Two plausible readings: WNBA offenses may be more homogeneous on ball movement than a 300+-program college sample would be (talent compression across 15 teams from one elite pool), or the one-way ICC understates team signal by ignoring opponent effects that R/06_models.R's (1|team) + (1|opponent) structure will partially recover. Both plausible; the BLUPs are the actual test.
+Anchor rule for the deadline-read table (explicit judgment call, not left implicit): a metric may anchor an identity claim only if its ICC (on R/06_models.R's mixed-model estimates, not this one-way approximation) is at least 0.15, set at the observed break in this table's distribution. Eligible anchors from this table: mid_share, fg3a_rate, atb3_share, pullup_share, ra_share, paint_fgm_share, driving_share, transition_share. Below the floor (including assisted_rate): trajectory-only or descriptive, never an identity anchor -- BLUPs on these will shrink almost entirely to the league mean.
 Weighting decision, documented rather than left to lme4's default: R/06_models.R will weight team-game observations by transition_poss when fitting transition_pts_per_poss specifically (its denominator ranges from single digits to 20+ per team-game, unlike FGA which stays in a tight, larger band). All other shortlist/identity metrics use equal weighting, since their denominators are large and stable enough not to need it.
 
 ## 4. Outlier games
@@ -36,13 +36,13 @@ A handful of team-games exceed |z| > 3 on rate metrics (concentrated in transiti
 ## 5. Raw trajectory eyeball plots
 
 game_index (each team's own chronological game number, not calendar date) used as the x-axis for the four AMENDMENT_01 Section 1 shortlist metrics: transition_share, transition_pts_per_poss, assisted_rate, live_ball_tov_rate.
-Pooled (naive OLS, not the actual trajectory model): none of the four metrics shows a statistically distinguishable linear trend through ~game 24 (all p > 0.4). Preliminary null for both H1 and H2 at the pooled level -- reported honestly per hypotheses discipline; a published null is a finding, not a failure.
+Pooled (naive OLS, not the actual trajectory model, and these p-values are descriptive at best since pooling ignores within-team correlation across a team's own games): none of the four metrics shows a statistically distinguishable linear trend through ~game 24 (all p > 0.4). Preliminary null for the league-wide clause of both H1 and H2 at the pooled level specifically -- it does not bear on H2's team-specific TOR/PDX prediction -- reported honestly per hypotheses discipline; a published null is a finding, not a failure.
 TOR and PDX (H2's named expansion-team cases): both show a positive (rising) raw assisted-rate slope, directionally consistent with H2. Live-ball TOV rate is directionally mixed (flat for TOR, slightly rising for PDX, the wrong direction for H2) -- the turnover side of H2 is not yet supported for either team at this raw, un-shrunk level.
 This is a visual/pooled gut check only. The actual test is R/06_models.R's per-team random-slope trajectory model, which a pooled fit can average away.
 
 ## 6. Garbage-time decision
 
-Rule: a possession is flagged garbage_time when period >= 4 and |score margin| >= 20 at the possession's start. 1162 of 29853 possessions (3.9%) flagged.
+Rule: a possession is flagged garbage_time when period >= 4 and |score margin| >= 20 at the possession's start. 1162 of 29853 possessions (3.9%) flagged. 0 possessions have a start event with no matching score row and are silently treated as not garbage time rather than dropped or imputed; that count is 0 here, so this does not change any result, but the rule is stated for the record.
 Decision: flag, do not exclude, in the main R/05_features.R feature table -- a 3.9% possession share is consistent with Section 4's finding of no strong aggregate distortion from blowouts, and exclusion would shrink denominators unevenly across teams. R/05_features.R should carry a garbage_time_poss_share column per team-game.
 R/06_models.R's AMENDMENT_01 Section 2c sensitivity check should re-run shortlist trajectory metrics excluding garbage_time possessions and confirm no finding flips direction; if one does, report it as a caveat rather than silently picking a threshold.
 
@@ -57,6 +57,7 @@ Rest days between consecutive games, per team, checked for imbalance that could 
 3. R/05_features.R: add a garbage_time_poss_share column per team-game (flag, not exclude, per the Section 6 decision).
 4. R/05_features.R: add an is_home column (joined from shotdetail HTM/VTM); R/06_models.R's identity models include it as a fixed effect.
 5. R/06_models.R: weight team-game observations by transition_poss specifically when fitting transition_pts_per_poss; equal weighting elsewhere (documented, not a default left unstated).
+6. R/08_deadline_read.R (identity summaries): only anchor an identity claim with a metric whose R/06_models.R mixed-model ICC is at least 0.15. Eligible from this table: mid_share, fg3a_rate, atb3_share, pullup_share, ra_share, paint_fgm_share, driving_share, transition_share.
 
 ## Hypotheses registry
 

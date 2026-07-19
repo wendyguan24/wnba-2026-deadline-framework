@@ -28,9 +28,16 @@ library(lme4)
 
 # Full identity-layer metric list (HANDOFF §5b, matches the EDA gate's
 # 21-metric ICC preview minus pace_formula, which is a secondary cross-check
-# column only, never modeled — see the EDA gate's pace spec decision).
+# column only, never modeled — see the EDA gate's pace spec decision). Models
+# pace_per40 (possessions normalized to a 40-minute game), not raw pace_poss —
+# the analytics-reviewer's decisions-only pass on the EDA gate (PLAN.md,
+# 2026-07-19, WARNING 3) flagged that the original is_ot flag deferred the
+# actual OT treatment; pace_per40 (added in R/05_features.R) removes the
+# mechanical inflation in OT team-games (95.7 raw vs 81.0 regulation,
+# collapsing to 81.8 vs 81.0 once normalized) rather than leaving it to be
+# absorbed silently into the team/opponent random effects.
 IDENTITY_METRICS <- c(
-  "pace_poss", "fg3a_rate", "assisted_rate", "transition_share",
+  "pace_per40", "fg3a_rate", "assisted_rate", "transition_share",
   "transition_pts_per_poss", "off_tov_share", "secondchance_share",
   "paint_fgm_share", "ra_share", "paint_share", "mid_share", "corner3_share",
   "atb3_share", "driving_share", "pullup_share", "cutting_share",

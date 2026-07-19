@@ -17,6 +17,15 @@
 #     5. (R/06_models.R only, not this script) weight transition_pts_per_poss
 #        fits by transition_poss.
 #
+#   Also applies the OT-treatment follow-up from the analytics-reviewer's
+#   decisions-only pass on the EDA gate (PLAN.md, 2026-07-19, WARNING 3): the
+#   original is_ot flag deferred the actual OT treatment rather than choosing
+#   one. game_minutes (40 + 5 per OT period played) and pace_per40 (pace_poss
+#   normalized to a 40-minute game) are added so R/06_models.R can model pace
+#   without OT team-games reading as a raw-count artifact; pace_poss remains
+#   the primary rate-stat denominator (tov_rate, live_ball_tov_rate,
+#   transition_share), unchanged.
+#
 # Inputs:  data/processed/pbp_events.rds, data/processed/possessions.rds,
 #          data/raw/wnba_shotdetail_2026.csv (HTM/VTM home/away join only)
 # Outputs: data/processed/team_game_features.rds — one row per team-game
@@ -187,15 +196,21 @@ compute_rate_stats <- function(pbp, pace_tbl) {
     select(gameId, team, ft_rate, tov_rate, live_ball_tov_rate)
 }
 
-#' Home/away and opponent, plus the OT flag (spec changes 2 and 4 from the
-#' EDA gate). Home/away is joined from shotdetail's HTM/VTM columns, which
-#' cover all 182 games including Toronto's (via the opponent's row) even
-#' though shotdetail itself has zero Toronto shot rows.
+#' Home/away, opponent, the OT flag, and game_minutes (spec changes 2 and 4
+#' from the EDA gate, plus the OT-treatment follow-up from the analytics-
+#' reviewer's decisions-only pass on the EDA gate, PLAN.md 2026-07-19: raw
+#' pace_poss is a possession count, so OT team-games read as mechanically
+#' higher-pace unless normalized — game_minutes (40 + 5 per OT period played)
+#' is carried so compute_pace() can derive pace_per40 as the modeled pace
+#' figure, while pace_poss remains available as the denominator for rate
+#' stats). Home/away is joined from shotdetail's HTM/VTM columns, which cover
+#' all 182 games including Toronto's (via the opponent's row) even though
+#' shotdetail itself has zero Toronto shot rows.
 #'
 #' @param possessions tibble
 #' @param pbp tibble
 #' @param shotdetail_raw tibble, raw wnba_shotdetail_2026.csv
-#' @return tibble: gameId, team, opponent, is_home, is_ot
+#' @return tibble: gameId, team, opponent, is_home, is_ot, game_minutes
 compute_game_context_flags <- function(possessions, pbp, shotdetail_raw) {
   team_opponent <- possessions %>% distinct(gameId, team, opponent)
 
@@ -205,12 +220,18 @@ compute_game_context_flags <- function(possessions, pbp, shotdetail_raw) {
 
   ot_games <- pbp %>% filter(periodType == "OVERTIME") %>% distinct(gameId) %>% mutate(is_ot = TRUE)
 
+  game_minutes_tbl <- pbp %>%
+    group_by(gameId) %>%
+    summarise(n_ot_periods = max(0, max(period) - 4), .groups = "drop") %>%
+    mutate(game_minutes = 40 + 5 * n_ot_periods)
+
   team_opponent %>%
     left_join(home_away, by = c("gameId" = "GAME_ID")) %>%
     mutate(is_home = team == HTM) %>%
     left_join(ot_games, by = "gameId") %>%
     mutate(is_ot = replace_na(is_ot, FALSE)) %>%
-    select(gameId, team, opponent, is_home, is_ot)
+    left_join(game_minutes_tbl, by = "gameId") %>%
+    select(gameId, team, opponent, is_home, is_ot, game_minutes)
 }
 
 #' Join all feature groups into the final team-game feature table.
@@ -219,7 +240,8 @@ compute_game_context_flags <- function(possessions, pbp, shotdetail_raw) {
 #' @param pbp tibble
 #' @param shotdetail_raw tibble, raw wnba_shotdetail_2026.csv (home/away join only)
 #' @return tibble, one row per team-game, all HANDOFF §5b features plus the
-#'   EDA-gate spec additions (is_ot, is_home, garbage_time_poss_share)
+#'   EDA-gate spec additions (is_ot, is_home, garbage_time_poss_share,
+#'   game_minutes, pace_per40)
 build_team_game_features <- function(possessions, pbp, shotdetail_raw) {
   game_index_tbl <- compute_game_index(pbp, possessions)
   pace_tbl <- compute_pace(possessions, pbp)
@@ -234,7 +256,8 @@ build_team_game_features <- function(possessions, pbp, shotdetail_raw) {
                by = c("gameId", "team")) %>%
     left_join(shot_profile_tbl, by = c("gameId", "team")) %>%
     left_join(context_tbl, by = c("gameId", "team")) %>%
-    left_join(rate_tbl, by = c("gameId", "team"))
+    left_join(rate_tbl, by = c("gameId", "team")) %>%
+    mutate(pace_per40 = pace_poss / game_minutes * 40)
 }
 
 main <- function() {
