@@ -139,7 +139,11 @@ metrics use equal weighting.
   league (vs. 300+ heterogeneous college programs) or as the one-way ICC ignoring
   opponent effects that the mixed model will partially recover. Practical rule:
   identity summaries in the deadline-read table should lead with high-ICC metrics,
-  not `assisted_rate`.
+  not `assisted_rate`. **Update after R/06_models.R ran (below): the opponent-effect
+  explanation does not hold up — the mixed model's ICC for assisted_rate (0.0004,
+  controlling for opponent and home) is essentially unchanged from the one-way
+  estimate (-0.0026). Ball movement genuinely does not separate WNBA teams; it is
+  not an artifact of the simpler EDA-stage ICC calculation.**
 - Home/away added (see spec change 4 above).
 - Schedule density (rest days between games) checked per team — no meaningful
   imbalance found, one sentence in methodology notes, not a model term this cycle.
@@ -159,19 +163,40 @@ metrics use equal weighting.
 
 ## Jul 21-22 — Style features, mixed-effects + trajectory models, BLUPs/ICC
 
-- [ ] Implement `R/05_features.R`
-- [ ] Implement `R/06_models.R` — identity models (metric ~ (1|team) + (1|opponent))
-- [ ] Implement `R/06_models.R` trajectory extension (§5c-bis) on the metric shortlist:
+- [x] Implement `R/05_features.R` — 364-row team-game feature table (`data/processed/
+      team_game_features.rds`), formalizing the EDA gate's verified logic plus all 4
+      forced spec-change columns (`pace_poss` primary, `is_ot`, `garbage_time_poss_share`,
+      `is_home`). Output cross-checked line-for-line against the EDA notebook's
+      independently computed numbers (pace correlation, assisted rate, zone-share sums,
+      is_ot count, garbage-time share) — all match exactly. No missing values anywhere.
+- [x] Implement `R/06_models.R` — identity models (`metric ~ is_home + (1|team) +
+      (1|opponent)`) fit for all 20 HANDOFF §5b style metrics (`pace_formula` excluded,
+      secondary-only). `output/icc_table.csv` written. Several models hit
+      "boundary (singular) fit" (opponent-variance component near zero) — expected and
+      harmless for ICC/BLUP extraction, not a fallback trigger (that's trajectory-only).
+- [x] Implement `R/06_models.R` trajectory extension (§5c-bis) on the metric shortlist:
       1. Transition share (H1)
       2. Transition points per transition possession (H1, efficiency side)
       3. Assisted rate of FGM (H2)
       4. Live-ball TOV rate (H2)
       5. Optional: shot-making residual from script 07 (H3, GSV-relevant) — cut first
-         if the block is threatened
+         if the block is threatened (not built this pass, script 07 doesn't exist yet)
       **Superseded by the project-wide cut order below (AMENDMENT_02 §4)** — the
       `trajectory` column itself is still never cut; the optional 5th metric is now
       the first thing to go project-wide, not just within this block.
-- [ ] Present BLUP/ICC results and raw-vs-adjusted rank deltas
+      All 4 shortlist metrics hit a genuine singular fit on the full random-slope
+      model (confirmed directly: team intercept/slope correlation locks at 1.000,
+      the classic small-sample boundary case at 23-26 games/team) and used the
+      documented fallback (random-intercept model + per-team residual-vs-game_index
+      OLS slope). League-wide trend: all 4 metrics p > 0.2, consistent with the EDA
+      gate's pooled-OLS preliminary null for H1/H2. TOR and PDX's raw assisted-rate
+      slopes still point positive in the fallback model too (consistent with the EDA
+      eyeball pass), both with intervals spanning zero — directionally
+      H2-consistent, not yet statistically distinguishable from flat.
+- [x] Present BLUP/ICC results and raw-vs-adjusted rank deltas — `output/icc_table.csv`,
+      `output/team_rank_deltas.csv`, `output/team_trajectories.csv`,
+      `output/trajectory_league_trends.csv` (all human-readable, alongside the `.rds`
+      versions in `data/processed/`)
 - [ ] **Run `analytics-reviewer` agent on script 06 results (BLUPs, ICCs, trajectory
       slopes) — triage feedback (accept / reject with one-line reason / defer
       post-deadline), log the triage below**

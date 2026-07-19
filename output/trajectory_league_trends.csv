@@ -1,0 +1,5 @@
+metric,league_trend,league_trend_p,fallback_used
+transition_share,-8.229620481684165e-5,0.7285269898704543,TRUE
+transition_pts_per_poss,0.0038137072635813984,0.21383575795575402,TRUE
+assisted_rate,-2.114400006382604e-4,0.7723009564208767,TRUE
+live_ball_tov_rate,2.1757100099545592e-4,0.3643952240416345,TRUE
