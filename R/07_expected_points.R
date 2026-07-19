@@ -30,9 +30,9 @@ library(tidyverse)
 
 # IDENTITY-style constants -----------------------------------------------
 # Minimum shots required for a (zone, shot_class, context) cell to stand on
-# its own. With ~24,794 league FGA a full cell at N=100 has mean-PPS
-# standard error around 0.07, tight enough for a lookup baseline; 100 is a
-# round floor thin cells fall through.
+# its own. With ~24,794 league FGA a full cell at N=100 has a mean-PPS
+# standard error near 0.10 (per-shot points SD is close to 1.0), tight
+# enough for a lookup baseline; 100 is a round floor thin cells fall through.
 MIN_CELL_N <- 100L
 
 #' Build the league-average points-per-shot baseline stratified by
@@ -159,7 +159,7 @@ main <- function() {
   possessions <- readRDS("data/processed/possessions.rds")
 
   # FG-only: free throws are excluded because they are foul-triggered, not
-  # a shot chosen from a diet, so they do not belong in a shot-quality
+  # a shot chosen from a diet, so they do not belong in an expected-points
   # baseline.
   shots <- pbp %>%
     filter(actionType %in% c("2pt", "3pt")) %>%
@@ -172,6 +172,10 @@ main <- function() {
         area %in% c("Left Corner 3", "Right Corner 3") ~ "Corner 3",
         TRUE ~ area
       ),
+      # shot_class precedence putback > cutting > driving > pullup > other:
+      # first match wins so a descriptor that names several resolves to the
+      # most rim-proximal / most specific label; shots naming none (incl. NA
+      # descriptor) fall to "other", a real stratum, never dropped.
       shot_class = case_when(
         str_detect(coalesce(descriptor, ""), "putback") ~ "putback",
         str_detect(coalesce(descriptor, ""), "cutting") ~ "cutting",

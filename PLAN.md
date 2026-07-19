@@ -236,7 +236,12 @@ metrics use equal weighting.
       "acquire" read under a capped context becomes `acquire (constrained: requires
       salary out)` or downgrades — never silently recommend a move the cap forbids),
       and a `team_trajectories` input from script 06 plus a `cap_context` input from
-      `data/reference/cap_context_2026.csv`; implement against that skeleton
+      `data/reference/cap_context_2026.csv`; implement against that skeleton.
+      **Two requirements carried from the 2026-07-19 analytics-reviewer triage:**
+      (WARNING 2) join `fallback_used` from `output/trajectory_league_trends.csv` and
+      surface it, so a residual-slope-approximation trajectory is never presented as a
+      random-slope BLUP; (NOTE 5) always surface the `interval_spans_zero` footnote so an
+      "improving"/"declining" label is never read as a fact when its interval spans zero.
 - [ ] **Gather `data/reference/cap_context_2026.csv` (AMENDMENT_02 §3a/§4) — all 15
       teams, hand-curated by Wendy from Spotrac WNBA team pages and Her Hoop Stats
       contract data, NOT scripted scraping. ~1 hour, same day as script 08. Every row
@@ -437,6 +442,43 @@ catch before this gate ran, not a response to these findings.)
   interval_spans_zero) -- PROPOSED DEFER to R/08.** A requirement on R/08's presentation
   (surface the interval_spans_zero footnote so improving/declining are not read as fact);
   R/08 is intentionally not built yet. Safe to defer.
+
+**Triage resolved (Wendy's decisions, 2026-07-19).** The proposals above were triaged.
+Dispositions and what was done:
+
+- **BLOCKER 1, WARNING 1, NOTE 1, NOTE 4 -- ACCEPTED, FIXED.** Applied together:
+  R/06's Inputs header now declares `team_game_shot_making.rds` plus the three §2c
+  inputs and states "run 07 before 06" (correct order 05 -> 07 -> 06); R/07:162 now reads
+  "expected-points baseline"; the shot_class precedence is documented with a comment; the
+  MIN_CELL_N comment now states the SE near 0.10 (per-shot points SD close to 1.0).
+- **WARNING 2 (fallback_used on the per-team trajectory table) -- ACCEPTED, deferred to
+  R/08.** Decision: R/06's per-team output is left as-is; R/08 must join the
+  `fallback_used` flag (from `trajectory_league_trends.csv`) when it is built, so the
+  deadline-read never presents a residual-slope approximation as a random-slope BLUP.
+  Recorded as an R/08 requirement below.
+- **WARNING 3 (§2c sensitivity pass) -- ACCEPTED, RUN NOW (not deferred).** Implemented
+  the pre-registered garbage-time-exclusion re-run in R/06 (see eda_notes.md §6):
+  `recompute_trajectory_metrics_excluding_garbage()` re-derives all five shortlist
+  metrics per team-game on non-garbage possessions/shots (period >= 4 and |margin| >= 20,
+  3.9% of possessions), holds the expected-points baseline fixed, and re-fits with the
+  same trajectory machinery. Result in `output/trajectory_sensitivity.md`: all five
+  league trends keep their sign and their non-significance (no sign flip, no p < 0.05
+  crossing) -- the league-level nulls are not garbage-time artifacts. Per-team
+  improving/flat/declining labels move for 11 team-metric cells (most for
+  live_ball_tov_rate, 5 of 15), which is expected for interval-caveated directional reads
+  and reinforces basing strong claims on the league fixed effect, not per-team labels.
+- **WARNING 4 (em dashes in R/06 comments) -- ACCEPTED, deferred as a repo-wide sweep.**
+  Not fixed in this diff. R/02-R/06 all carry pre-existing em dashes in comments; the fix
+  is one language-hygiene pass across the repo, tracked as post-deadline cleanup below.
+- **NOTE 2 (GSV refutes H3's below-expectation premise) -- ACCEPTED, act at findings
+  stage.** No code change. Carried forward as a flag for the findings draft: report H3 as
+  a refutation/null, not a quiet reframe.
+- **NOTE 3 (in-sample baseline) -- DEFERRED.** One methodology sentence at the writing
+  stage.
+
+New post-deadline cleanup tracked from this triage:
+- Repo-wide language-hygiene sweep (em dashes -> `--` in R/02-R/06 comments and PLAN.md
+  prose). Deferred per WARNING 4.
 
 ## Data download (session 2, 2026-07-18)
 
