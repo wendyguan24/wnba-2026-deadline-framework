@@ -242,7 +242,9 @@ metrics use equal weighting.
       surface it, so a residual-slope-approximation trajectory is never presented as a
       random-slope BLUP; (NOTE 5) always surface the `interval_spans_zero` footnote so an
       "improving"/"declining" label is never read as a fact when its interval spans zero.
-- [ ] **Gather `data/reference/cap_context_2026.csv` (AMENDMENT_02 §3a/§4) — all 15
+- [x] **Gather `data/reference/cap_context_2026.csv` (AMENDMENT_02 §3a/§4) -- DONE (populated
+      on main, commit 8f6956b: 15 teams, flexibility_tier + source Spotrac + as_of_date
+      2026-07-19; expiring_count/max_supermax_count left NA by design) -- all 15
       teams, hand-curated by Wendy from Spotrac WNBA team pages and Her Hoop Stats
       contract data, NOT scripted scraping. ~1 hour, same day as script 08. Every row
       needs a `source` and `as_of_date`. Tiers, not to-the-dollar figures.**
@@ -310,6 +312,26 @@ metrics use equal weighting.
 
 - [ ] Boki Wang (GSV), Eli Horowitz / Lauren Manis / Mark Schindler (Toronto),
       Portland HC contact (Portland). Optional: Todd Whitehead (Synergy courtesy).
+
+## Post-deadline / future modeling (captured 2026-07-20, NOT prioritized -- build only if time)
+
+Wendy's ideas, captured so they are not lost. Both are out of scope for the Aug 2 build
+(cut list, tiers-not-dollars, no player-value layer, reproducibility boundary) and must not
+pull scope into the deadline deliverable. Build only after ship, and only if time allows.
+
+- **Fit-vs-cost target scoring (value per cap dollar).** Rank candidate targets by
+  `(fit_delta x player_value_over_replacement) / cost`, where cost = cap hit + outgoing asset
+  value. Requires: a player-value metric (win shares / RAPM, not currently built), to-the-
+  dollar cap data (breaks tiers-not-dollars; year-one-CBA trackers lag), and asset valuation
+  for the outgoing package (a trade machine, explicitly on the cut list). Recommended interim
+  step that stays in scope: a "cost-adjusted feasibility" read -- keep fit categorical but
+  rank profiles by fit WITHIN a team's feasible asset class, so the output is "best fit you
+  can afford," never "best fit, cap be damned." Needs no new data.
+- **Trade-outcome / win-share-boost model.** Predict a team's win delta from a fit-adjusted
+  roster add. Requires: a player-value baseline, a counterfactual lineup / minutes model, a
+  style-fit interaction term, and transaction history as training labels -- none identifiable
+  from one half-season of open play-by-play, and it produces the fake-trade content the
+  gm-agent persona rejects. Different product, not a tweak to this one.
 
 ---
 
