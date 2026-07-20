@@ -36,10 +36,10 @@ of variance that is stable team identity versus matchup noise).
   `ra_share` 0.26. Lowest: `assisted_rate` 0.0004, `transition_pts_per_poss`
   0.006, `off_tov_share` 0.017. A team's shot-location profile is a real,
   stable identity; its assisted-rate is close to noise once schedule is removed.
-- Schedule adjustment moves ranks very little: mean absolute rank change 0.31,
-  maximum 5 (MIN on transition efficiency, raw rank 9 to adjusted 14). The one
-  decision-relevant mover is PDX on assisted rate, raw rank 5 to adjusted rank 1:
-  its schedule was suppressing an already high assisted-ball-movement identity.
+- Schedule adjustment moves ranks very little (mean absolute rank change 0.31,
+  maximum 5), and the few larger moves land on low-ICC metrics (transition
+  efficiency, assisted rate) whose rankings are close to noise, so they are not
+  read as identity shifts.
 - Face validity (evaluation criterion, Section 6): the adjusted BLUPs match known
   identities. GSV sits first in adjusted `fg3a_rate` and `atb3_share`, the
   league's most extreme perimeter profile, consistent with its reputation as the
@@ -90,6 +90,10 @@ distinguishable from zero:
 | live_ball_tov_rate | 0.0002 | 0.36 |
 | shot_making_residual | 0.115 | 0.20 |
 
+These league-trend p-values are approximate: all five metrics used the documented
+random-intercept-plus-residual-slope fallback after the full random-slope fit was
+singular.
+
 See `output/trajectory_small_multiples.png`, which shows the per-team slopes with
 95% intervals: most intervals span zero, so per-team labels are directional, not
 standalone claims.
@@ -107,13 +111,13 @@ Written against the pre-registered H1 / H2 / H3 / H-null registry in
   falls, strongest for expansion teams TOR and PDX): NOT SUPPORTED at the league
   level. Assisted rate trends the wrong way (-0.0002, p 0.77) and live-ball
   turnover rate trends the wrong way (0.0002, p 0.36), both not significant. At the
-  team level PDX and TOR do lean positive on assisted rate, and PDX's
-  schedule-adjusted assisted rate is first in the league, but every per-team
+  team level PDX and TOR do lean positive on assisted rate, but every per-team
   interval spans zero, so this is a direction, not a result.
 - H3 (GSV's low field-goal percentage is shot making below expectation on an
   acceptable shot diet; trajectory: is GSV trending toward expectation or flat):
   the premise is REFUTED. GSV makes shots at or slightly above expectation (shot
-  making 50th percentile, roughly +0.6 points per 100). GSV's low field-goal
+  making 50th percentile; shot_making_per100 is +0.6 in
+  output/team_generation_making.csv). GSV's low field-goal
   percentage is not a making deficit against its own shot diet; it is an identity
   of high-variance perimeter shot selection (first in 3-point-attempt rate and
   above-the-break-3 rate). GSV's making trajectory is directionally improving but
@@ -155,19 +159,22 @@ axes, an argument for scheme-level gains over a splashy move.
 Limitations a front office would raise (from the gm-agent review, carried honestly
 rather than papered over):
 
-- The lever encodes no buyer-or-seller posture. WAS is worst on both axes and
-  likely rebuilding, yet the rule maps bottom-generation to acquire mechanically; a
-  cellar team acquiring at the deadline is a different act than a contender adding.
+- The lever encodes no buyer-or-seller posture. WAS is worst on generation and
+  near-worst on making and likely rebuilding, yet the rule maps bottom-generation to
+  acquire mechanically; a cellar team acquiring at the deadline is a different act
+  than a contender adding.
 - The salary floor is not yet in the cap tier. The team-salary floor is 85% of the
   cap (`cba_rules_2026.md` Section 1), and the two room-tier teams (WAS, PDX) sit
-  below it, so they are pushed to add salary rather than free to stand pat. A
-  proposed below-floor flag is pending triage.
+  below it, so they are pushed to add salary rather than free to stand pat. The
+  deadline-read table now flags this: WAS and PDX display "room (below floor)", and
+  a below-floor team is pushed to add salary.
 - Roster spots and market supply are unmodeled: acquire and minimum-or-depth reads
   both presume an open spot and an available profile, and four tight-or-capped
   teams chasing the same depth tier is a thin market.
 - Forward strength-of-schedule is not modeled (the open play-by-play has no forward
   schedule). The one calendar fact carried is the World Cup Hiatus (August 31 to
-  September 16), which makes a hold a mid-schedule reset window.
+  September 16, dates per AMENDMENT_02), which makes a hold a mid-schedule reset
+  window.
 
 ## 6. Framework evaluation (AMENDMENT_01 Section 2c)
 
@@ -179,8 +186,9 @@ rather than papered over):
   rate metrics are noisy (`assisted_rate` -0.33, `secondchance_share` 0.06). Shot
   generation (0.63) and shot making (0.56) are moderately stable, so single-season
   team making and generation reads are directional and should be read with that
-  caution. This split-half ordering tracks the ICC ordering closely, an
-  independent confirmation of which identities carry real signal.
+  caution. This split-half ordering tracks the ICC ordering closely (both measure
+  within-season stability on the same data, so they are consistent rather than
+  independent confirmation).
 - Sensitivity to stratification (`output/framework_evaluation.md`): recomputing the
   expected-points baseline with a coarser zone-only stratification preserves the
   team ordering almost exactly (Spearman rank correlation 0.98 for generation, 1.00

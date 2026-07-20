@@ -260,8 +260,21 @@ build_deadline_read <- function(team_blups, team_generation_making, team_traject
 
   identity_summary <- build_identity_summary(team_blups)
 
+  # Team-salary floor is 85% of the $7.0M cap = $5,950,000 (cba_rules_2026.md
+  # Section 1). A team below the floor is pushed to add salary (or pay the
+  # shortfall out), which strengthens an acquire and weakens a hold. The flag is
+  # a tier-compatible boolean; committed_salary_est is used only to derive it and
+  # is never published (tiers-not-dollars, AMENDMENT_02 Section 3a). The clean
+  # flexibility_tier (not the floor-annotated display string) drives the lever.
+  team_salary_floor <- 5950000
   cap <- cap_context %>%
-    select(team, cap_context = flexibility_tier)
+    mutate(
+      below_floor = committed_salary_est < team_salary_floor,
+      cap_context = if_else(below_floor,
+                            paste0(flexibility_tier, " (below floor)"),
+                            flexibility_tier)
+    ) %>%
+    select(team, flexibility_tier, cap_context, below_floor)
 
   deadline_read <- base %>%
     left_join(traj, by = "team") %>%
@@ -270,13 +283,13 @@ build_deadline_read <- function(team_blups, team_generation_making, team_traject
     rowwise() %>%
     mutate(
       lever_raw = classify_lever(generation_tier, making_tier, identity_summary),
-      lever = condition_lever_on_cap(lever_raw, cap_context)
+      lever = condition_lever_on_cap(lever_raw, flexibility_tier)
     ) %>%
     ungroup() %>%
     select(
       team, identity_summary, generation_pctile, making_pctile,
       generation_tier, making_tier, trajectory, interval_spans_zero,
-      trajectory_display, cap_context, lever_raw, lever
+      trajectory_display, cap_context, below_floor, lever_raw, lever
     )
 
   lever_order <- c("acquire", "adjust", "hold")
@@ -334,17 +347,20 @@ render_deadline_read_md <- function(deadline_read) {
     "",
     paste(
       "Schedule note: the August 2 deadline sits just before the World Cup",
-      "Hiatus (August 31 to September 16, cba_rules_2026.md Section 5). The",
-      "break is a hold incentive; a hold this deadline buys a mid-schedule",
-      "reset. Forward strength-of-schedule is not modeled (no forward",
-      "schedule in the open play-by-play)."
+      "Hiatus (August 31 to September 16, dates per AMENDMENT_02; the Hiatus",
+      "and prioritization rule is cba_rules_2026.md Section 5). The break is a",
+      "hold incentive; a hold this deadline buys a mid-schedule reset. Forward",
+      "strength-of-schedule is not modeled (no forward schedule in the open",
+      "play-by-play)."
     ),
     "",
     paste(
       "Cap context is a flexibility tier (room / tight / capped), not a",
       "dollar figure; source data/reference/cap_context_2026.csv (Spotrac,",
-      "2026-07-19), grounded in cba_rules_2026.md Section 2. Re-verify",
-      "before publish (AMENDMENT_02 Section 4)."
+      "2026-07-19), grounded in cba_rules_2026.md Section 2. A \"(below floor)\"",
+      "tag marks a team below the 85%-of-cap team-salary floor ($5.95M,",
+      "cba_rules_2026.md Section 1), which is pushed to add salary rather than",
+      "free to stand pat. Re-verify before publish (AMENDMENT_02 Section 4)."
     )
   )
 
