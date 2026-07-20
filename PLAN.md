@@ -218,9 +218,12 @@ metrics use equal weighting.
 
 ## Jul 23 — Data refresh check; expected-points baseline; deadline-read table; cap-context CSV
 
-- [ ] Check `shufinskiy/nba_data` for a commit newer than `773ce29`; re-pin and re-run
+- [x] Check `shufinskiy/nba_data` for a commit newer than `773ce29`; re-pin and re-run
       01-04 if found, confirm tests still pass; update baseline expectations
-      deliberately if counts shift
+      deliberately if counts shift -- CHECKED 2026-07-20: repo HEAD advanced to
+      `e829d46`, but the WNBA 2026 cdn dataset is byte-identical (same 2,333,836-byte
+      archive, same 182 games / 89,735 rows). The newer commit touched other datasets,
+      not ours. No re-pin, no baseline shift, tests unaffected; pin stays at `773ce29`.
 - [x] Implement `R/07_expected_points.R` (stratified expected-points baseline / qSQ-lite,
       NOT a trained model) -- 49 strata over zone x shot_class x context, cdn-only, 2026
       in-season, MIN_CELL_N=100 collapse cascade (full cell -> zone x context -> zone ->
