@@ -8,10 +8,8 @@ reproduce it. Any figure or rule that reaches `output/` must be re-verified
 against the cited Article/Section at publish time (AMENDMENT_02 pre-publish
 checklist items 2 and 3).
 
-Sources: (1) WNBA Collective Bargaining Agreement (2026-2033), full text, for all
-CBA rules and dollar figures; (2) Her Hoop Stats WNBA CBA FAQ (herhoopstats.com),
-for plain-language explanation of supermax eligibility. Where the two conflict on
-figures, the CBA governs (see Sec. 6).
+Source: WNBA Collective Bargaining Agreement (2026-2033), full text. All rules and
+figures are cited to the CBA by Article/Section.
 As of: 2026-07-20. CBA line numbers refer to the local txt conversion used to build
 this note, for quick re-lookup; cite the Article/Section (not the line) in any
 published output.
@@ -89,45 +87,52 @@ published output.
   the break over integrating a new piece days before players scatter to national
   teams.
 
-## 6. Maximum base salary and the supermax (Article V)
+## 6. Maximum base salary and the supermax (Article V, Section 8)
 
-Correction to an earlier draft of this note, which wrongly claimed the WNBA has no
-supermax. It does. There are two maximum base-salary tiers, both defined as a
-percentage of the Salary Cap (CBA Art. V, lines 2044-2051):
+The WNBA has two maximum base-salary tiers, each defined as a percentage of the
+Salary Cap (CBA Art. V Sec. 8):
 
-- Standard Maximum Salary: 17% of the cap. For 2026 ($7M cap), $1,190,000.
-- Supermax Salary: 20% of the cap. For 2026 ($7M cap), $1,400,000.
+- Standard Maximum Salary: 17% of the cap (Sec. 8(b), line 2049). For 2026 ($7M
+  cap), $1,190,000.
+- Supermax Salary: 20% of the cap (Sec. 8(a), line 2044). For 2026 ($7M cap),
+  $1,400,000.
 
-Supermax eligibility (Her Hoop Stats WNBA CBA FAQ, herhoopstats.com). A player can
-reach the supermax by any of four routes:
+By default every Standard Player Contract is capped at the Standard Maximum (17%).
+A contract may reach the Supermax (20%) only under one of the categories in Sec.
+8(c) (lines 2057-2077):
 
-- Rookie-scale extension: a player on a rookie-scale contract can extend effective
-  for her fifth year (up to three years, through year seven), immediately at the
-  supermax.
-- Free-agent re-signing: a free agent with five or more years of service who
-  re-signs with her prior team.
-- Core designation: a free agent designated as a Core Player, regardless of years
-  of service.
-- Qualifying veteran extension: five or more years of service, under contract for
-  part of each of the two prior seasons, subject to team-change or FA-signing
-  conditions, and capped at a 20% year-one increase over the final year of the
-  original contract.
+- A Qualifying Veteran Free Agent with five or more years of service re-signing
+  with her prior team (lines 2063-2064).
+- A Veteran Free Agent designated as a Core Player, re-signing with her prior team
+  (lines 2065-2066).
+- The extended term of a Rookie Scale Contract extension (lines 2067-2068).
+- A qualifying veteran extension: five or more years of service, under contract in
+  each of the two preceding seasons, and either stayed with the prior team across
+  those seasons or changed teams only by assignment (trade) or by re-signing with
+  the prior team in the first of them. The Supermax applies to the extended term
+  only (lines 2069-2075).
+- The fourth season of a Rookie Scale Contract extended under Art. VII Sec.
+  5(c)(i)(1) (lines 2076-2077).
 
-Figure caveat (source conflict, resolved in favor of the CBA). The Her Hoop Stats
-FAQ table (2026 supermax $256,721, standard max $220,900, at 16.5% / 14.2% of cap)
-reflects the pre-2026 CBA extrapolated by 3% per year, and is superseded. The 2026
-CBA raised the cap to $7M and set the tiers at 20% / 17% of the cap (CBA Art. V), so
-the 2026 figures are $1.40M / $1.19M. Use the CBA figures; treat HHS as the plain-
-language explainer of eligibility mechanics, not the source of current dollar
-amounts. This is exactly the pre-publish checklist item 1 case: confirm cap/CBA
-dollars from the primary source before publishing.
+Other Section 8 mechanics that touch trades and extensions:
 
-The "immobility" framing (corrects an earlier draft). AMENDMENT_02's "supermax
-immobility, do not propose as a target" guidance is sound as an asset-class
-judgment: a supermax player earns 20% of the cap ($1.4M of $7M, one fifth of the
-roster budget) and is a franchise cornerstone, so she is not a realistic deadline
-acquisition target. Keep that guidance. The basis is cost and asset class, not a
-literal CBA trade ban: supermax and Core players can be traded (sign-and-trades
-occur), and a Core-designated player may hold trade-approval rights (per the Her
-Hoop Stats FAQ). The framework still publishes tiers, not dollars, so these max
-figures mainly matter as context, not as published numbers.
+- In-season signings prorate the maximum by days remaining in the season (Sec.
+  8(d), lines 2080-2085).
+- A trade bonus is automatically reduced if it would push a player above her
+  applicable maximum in any cap year (Sec. 8(e), lines 2091-2099).
+- On February 1, a contract above the maximum is deemed amended down to the
+  maximum for that cap year (Sec. 8(f), lines 2102-2107).
+
+Immobility framing. AMENDMENT_02's "supermax immobility, do not propose as a
+target" guidance is sound as an asset-class judgment: a Supermax player earns 20%
+of the cap ($1.4M of $7M, a fifth of the roster budget) and is a franchise
+cornerstone, so she is not a realistic deadline acquisition target. The basis is
+cost and asset class, not a literal CBA trade ban; Supermax and Core players can be
+traded (the Core Designation terminates on assignment of the contract to another
+team, Sec. 3 above). The framework publishes tiers, not dollars, so these max
+figures are context, not published numbers.
+
+For the record: publicly circulated max-salary figures that predate the 2026 CBA
+(for example a roughly $250K supermax) reflect the old cap structure and are
+superseded by the 20% / 17%-of-$7M figures above. Confirm any published dollar
+against the CBA (pre-publish checklist item 1).
