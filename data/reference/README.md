@@ -9,10 +9,35 @@ script. See `AMENDMENT_02_contracts_cba_cap.md` §3a.
 ## `cap_context_2026.csv`
 
 One row per WNBA team (15 rows), estimated 2026 salary-cap context. Gathered by hand
-by Wendy from Spotrac WNBA team pages and Her Hoop Stats contract data — **not**
-scripted scraping (AMENDMENT_02 §4: "an hour of Spotrac/Her Hoop Stats work for 15
-team rows, done by Wendy"). Currently a header-only template; rows land in the July 23
-work block per `PLAN.md`.
+by Wendy from Spotrac and Her Hoop Stats contract data — **not** scripted scraping
+(AMENDMENT_02 §4: "an hour of Spotrac/Her Hoop Stats work for 15 team rows, done by
+Wendy").
+
+Populated 2026-07-19: `committed_salary_est`, `cap_room_est`, and `flexibility_tier`
+come from the Spotrac WNBA cap tracker (spotrac.com/wnba/cap), captured 2026-07-19.
+`expiring_count` and `max_supermax_count` are `NA` for now; they are hand-curated at
+the fit-read stage (AMENDMENT_02 §3c), since they need player-level contract detail
+this team-level tracker does not carry, and they are not used by R/08's lever
+conditioning (which reads `flexibility_tier` only).
+
+### Tier derivation
+
+`flexibility_tier` is a documented, tunable summary of `cap_room_est`, not a hand
+verdict. The dollar figures are the source of truth; the tier is derived from them by
+this rule:
+
+- `capped`: `cap_room_est` at or below $0 (over the hard cap, must shed salary to
+  acquire) — CHI, GSV, LVA.
+- `room`: `cap_room_est` at or above $1,000,000 (meaningful space to absorb a
+  contract) — PDX, WAS.
+- `tight`: everything in between (limited space, roughly salary-matching only) — the
+  other ten teams.
+
+The $1M room cutoff sits in the natural gap in the data (WAS at $1.84M, then PHX at
+$873K), so no team is near the boundary. The cutoff is the one tunable knob: change it
+and re-derive if the room/tight line should move. The $0 capped line is fixed by the
+CBA hard-cap rule (a team over the cap cannot add salary without shedding it first;
+see `cba_rules_2026.md` §2).
 
 ### Columns
 
