@@ -229,7 +229,7 @@ metrics use equal weighting.
       `team_game_shot_making.rds` (the `shot_making_residual` column feeding R/06's
       trajectory layer). Season identity generation + making = actual holds < 1e-8 for all
       15 teams; all xpts in [0.66, 1.54]. Run 2026-07-19 on the clean VM.
-- [ ] Implement `R/08_deadline_read.R` — skeleton now includes the `trajectory`
+- [x] Implement `R/08_deadline_read.R` (DONE 2026-07-20, clean VM) -- skeleton now includes the `trajectory`
       column (improving / flat / declining, footnoted when the interval spans zero,
       via `format_trajectory_column()`), the `cap_context` column (room / tight /
       capped, AMENDMENT_02 §3b), the feasibility-conditioned `lever` rule (an
@@ -246,10 +246,12 @@ metrics use equal weighting.
       teams, hand-curated by Wendy from Spotrac WNBA team pages and Her Hoop Stats
       contract data, NOT scripted scraping. ~1 hour, same day as script 08. Every row
       needs a `source` and `as_of_date`. Tiers, not to-the-dollar figures.**
-- [ ] Present the deadline-read table (the core deliverable)
-- [ ] **Run `gm-agent` on the deadline-read table before any prose is written around
+- [x] Present the deadline-read table (the core deliverable) -- `output/deadline_read.csv`
+      + `.md`; lever distribution 5 acquire / 4 adjust / 6 hold, every acquire cap-conditioned
+- [x] **Run `gm-agent` on the deadline-read table before any prose is written around
       it — triage feedback, log below. Includes the cap-conditioning check added by
-      AMENDMENT_02 §4.**
+      AMENDMENT_02 §4.** RUN 2026-07-20; findings + PROPOSED triage logged below under
+      "gm-agent, deadline-read table run." Triage is PROPOSED, awaiting Wendy's decision.
 
 ## Jul 24-25 — Synergy case-study enrichment + fit reads (time-boxed)
 
@@ -266,12 +268,17 @@ metrics use equal weighting.
 
 ## Jul 25-26 — Writing, graphics, methodology notes
 
-- [ ] Implement `R/09_graphics.R` (includes one trajectory graphic maximum — small
+- [x] Implement `R/09_graphics.R` (includes one trajectory graphic maximum -- small
       multiples, adjusted trends, expansion teams highlighted; no rolling-window
-      machinery, no month-by-month split tables)
-- [ ] Draft `output/findings.md`, including framework evaluation criteria
+      machinery, no month-by-month split tables) -- DONE 2026-07-20: `output/identity_map.png`,
+      `output/generation_vs_making.png`, `output/trajectory_small_multiples.png`
+- [x] Draft `output/findings.md`, including framework evaluation criteria
       (AMENDMENT_01 §2c: face validity, split-half stability, sensitivity check,
-      garbage-time disposition)
+      garbage-time disposition) -- DRAFT DONE 2026-07-20. The split-half and
+      alt-stratification §2c checks are scripted in a new `R/10_framework_evaluation.R`
+      (-> `output/framework_evaluation.md`); garbage-time §2c is in R/06
+      (`output/trajectory_sensitivity.md`); face validity is qualitative in the draft.
+      Synergy case studies and the §3d structural paragraph are left as marked stubs.
 - [ ] **Structural paragraph (AMENDMENT_02 §3d, league-wide, findings draft):** what
       the first post-CBA deadline means structurally — contract-length distribution
       after the 2026 free agency rush, what that implies about market liquidity
@@ -289,9 +296,11 @@ metrics use equal weighting.
          since deadline-week moves will stale it within days.
 - [ ] **Run `coach-agent` on case-study sections (GSV, TOR, PDX) once fit reads are
       drafted — triage feedback, log below**
-- [ ] **Run `analytics-reviewer` on the full findings draft — triage feedback, log
+- [x] **Run `analytics-reviewer` on the full findings draft -- triage feedback, log
       below. Includes the cap-figure traceability and tiers-only checks added by
-      AMENDMENT_02 §4.**
+      AMENDMENT_02 §4.** RUN 2026-07-20; findings + PROPOSED triage logged below under
+      "analytics-reviewer, findings-draft run." Triage is PROPOSED, awaiting Wendy's
+      decision -- no fix applied to `findings.md`.
 
 ## Jul 26-27 — Publish (repo + writeup + WHoopsLab version)
 
@@ -479,6 +488,66 @@ Dispositions and what was done:
 New post-deadline cleanup tracked from this triage:
 - Repo-wide language-hygiene sweep (em dashes -> `--` in R/02-R/06 comments and PLAN.md
   prose). Deferred per WARNING 4.
+
+**gm-agent, deadline-read table run (2026-07-20).** Ran on `output/deadline_read.md` +
+`.csv` the moment R/08 produced them, before any prose. The agent affirmed the floor:
+the lever rule is applied correctly across all 15 rows, every acquire is cap-conditioned
+and attributed, no CBA mechanic is unattributed, no old-CBA intuition leaked. It named
+the LVA <-> ATL mirror as the forwardable idea and ATL as the sharpest disagreement with
+consensus. **Triage below is PROPOSED, NOT applied; the deadline-read table is unchanged
+pending Wendy's decision.**
+
+- **NOT YET 1 (ATL hold vs its own declining making trajectory) -- PROPOSED ACCEPT, in
+  findings prose.** Addressed in `findings.md` Section 5: ATL argued explicitly, the
+  declining-making contra-signal named as the open risk. Table unchanged.
+- **NOT YET 2 (acquire rows have no need-profile) -- PROPOSED DEFER (scope).** Fit/need
+  profiles are case-study-only attended work (HANDOFF §5f, AMENDMENT_02 §3c). Real gap
+  flagged: the planned case studies (GSV/TOR/PDX) cover zero acquire teams.
+- **NOT YET 3 ("tight -> minimum/depth only" over-compresses PHX vs NYL) -- PROPOSED
+  REJECT the dollar-band fix** (violates tiers-not-dollars, AMENDMENT_02 §3a); alternative
+  (soften the string, or split the tight tier) is Wendy's cap-curation call.
+- **NOT YET 4 (salary floor flips WAS/PDX) -- PROPOSED ACCEPT (strongest fix).** Floor is
+  85% of cap = $5.95M (cba_rules §1); WAS and PDX (both room tier) sit below it, so pushed
+  to add. Add a below-floor boolean flag (tiers-compatible), publish "room (below floor)".
+  Not applied; awaiting greenlight.
+- **NOT YET 5 (adjust needs a driver) -- PROPOSED ACCEPT, in findings prose.** Addressed
+  in `findings.md` Section 5 (e.g. IND overperforming its process -> consolidate). Table
+  unchanged.
+- **THE ROOM'S QUESTIONS (buyer/seller posture, roster spots, market supply, expansion
+  overlay, break-both-ways) -- PROPOSED DEFER** to the structural paragraph (§3d) and case
+  studies. The buyer/seller limitation is stated as a caveat in `findings.md` Section 5.
+
+**analytics-reviewer, findings-draft run (2026-07-20).** The full-findings-draft gate on
+`output/findings.md`. The reviewer confirmed the core numbers all trace to source files
+(ICCs, the five league trends and p-values, generation/making percentiles, split-half and
+Spearman values, garbage-time 3.9%, reconciliation deltas), that H1/H2 nulls and the H3
+refutation are written against the registry, and that vocabulary, hygiene, tiers-not-dollars,
+and Synergy quarantine all pass. **Triage below is PROPOSED, NOT applied; `findings.md` is
+unchanged pending Wendy's decision.**
+
+- **BLOCKER 1 (assisted-rate identity claim on a shrunk BLUP; self-contradiction) --
+  PROPOSED ACCEPT.** assisted_rate ICC 0.0004 shrinks all BLUPs to ~0.649, so the PDX
+  "decision-relevant mover" sentence (Section 1) and "PDX's schedule-adjusted assisted rate
+  is first in the league" clause (Section 4) are claims on noise and contradict Section 1's
+  own "close to noise" line. Fix: delete both, keep only the interval-caveated trajectory
+  direction note. Recommend accept (correctness fix).
+- **WARNING 2 (GSV "+0.6 per 100" not in a readable output) -- PROPOSED ACCEPT.** The value
+  lives only in binary `team_generation_making.rds`; the H3 refutation rests on its sign.
+  Fix: have R/07 also write a readable `output/team_generation_making.csv` and cite it (the
+  50th percentile alone does not establish "above own expectation").
+- **WARNING 3 ("WAS worst on both axes" inaccurate) -- PROPOSED ACCEPT.** WAS is 0th on
+  generation but 7th on making; ATL is 0th on making. Fix: "worst on generation and
+  near-worst on making."
+- **WARNING 4 (World Cup dates cited to cba_rules §5, which does not contain them) --
+  PROPOSED ACCEPT.** The Aug 31-Sep 16 bracket traces to AMENDMENT_02 line 34, not
+  cba_rules §5. Fix the citation in `findings.md`, `deadline_read.md`, and R/08.
+- **NOTE 5 (test summary not captured to a file) -- PROPOSED DEFER.** Optionally write the
+  testthat summary to output for a stranger's reproducibility.
+- **NOTE 6 ("independent confirmation" overstates split-half vs ICC) -- PROPOSED ACCEPT
+  (soften).** Both measure within-season stability on the same data; change to "consistent
+  with the ICC ordering."
+- **NOTE 7 (trajectory p-values are from the documented fallback) -- PROPOSED ACCEPT.** Add
+  a one-line caveat that the p-values are approximate under the random-intercept fallback.
 
 ## Data download (session 2, 2026-07-18)
 
