@@ -10,6 +10,11 @@ data/processed/
 analysis/*.csv
 analysis/*.xlsx
 
+# Raw third-party source documents (CBA text, FAQ exports) kept locally for
+# reference extraction, not committed. The paraphrased, cited summary lives in
+# data/reference/cba_rules_2026.md.
+WNBA CBA Her Hoop Stats Faq.txt
+
 # R artifacts
 .Rhistory
 .RData
