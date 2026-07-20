@@ -489,6 +489,15 @@ New post-deadline cleanup tracked from this triage:
 - Repo-wide language-hygiene sweep (em dashes -> `--` in R/02-R/06 comments and PLAN.md
   prose). Deferred per WARNING 4.
 
+**Triage for the two 2026-07-20 gates (gm-agent + analytics-reviewer) below: ACCEPTED by
+Wendy and APPLIED in commit `ea2ee92`.** Applied: gm NOT YET 4 (R/08 below-floor flag;
+WAS/PDX show "room (below floor)"), analytics BLOCKER 1 (removed the PDX assisted-rate
+identity claims), WARNING 2 (R/07 writes `output/team_generation_making.csv`), WARNING 3
+(WAS wording), WARNING 4 (World Cup dates cited to AMENDMENT_02), NOTES 6-7 (wording +
+fallback-p caveat). Held as decided: gm NOT YET 2 (deferred, case-study scope), NOT YET 3
+(rejected the dollar-band fix, tiers-not-dollars), NOTE 5 (deferred); gm NOT YET 1/5 and
+the room questions were already handled in the findings prose.
+
 **gm-agent, deadline-read table run (2026-07-20).** Ran on `output/deadline_read.md` +
 `.csv` the moment R/08 produced them, before any prose. The agent affirmed the floor:
 the lever rule is applied correctly across all 15 rows, every acquire is cap-conditioned
