@@ -1,6 +1,6 @@
 # Reconciliation Report
 
-Generated: 2026-07-18 22:10:54 UTC
+Generated: 2026-07-19 19:48:27 UTC
 
 ## 1. HANDOFF §4 baseline sanity table
 
