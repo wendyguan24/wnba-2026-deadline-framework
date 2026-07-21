@@ -1,8 +1,8 @@
 # WNBA 2026 Offensive Generation Gap by Zone
 
-Generated: 2026-07-21 14:36:32 UTC
+Generated: 2026-07-21 14:43:49 UTC
 
-Each team's shot-diet generation gap versus the league is decomposed by zone using a centered-pps contribution: (team share minus league share) times (league pps minus overall mean pps), so per-zone signs are interpretable and the per-team sum equals that team's diet generation versus a league-average-diet team.
+Each team's shot-SELECTION quality is decomposed by zone using a per-shot centered-pps contribution: (team share minus league share) times (league pps minus overall mean pps). A negative zone is where a team's shot mix costs it points relative to the league -- the gap. This is the shot-MIX component of generation only. It is a per-shot quantity and deliberately not the same object as shot_generation_per100, which is a per-100-possessions level that also reflects shot volume (FGA per possession); the two are not expected to match. The gap names WHAT a better shot profile would fix; the generation percentile (shown per team, from 07_expected_points.R) sizes the overall need.
 
 ## ATL
 

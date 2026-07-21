@@ -222,6 +222,15 @@ build_generation_gap <- function(pbp_events, team_generation_making, team_blups,
   gap_table <- decompose_generation_gap(shot_rows) %>%
     flag_identity_driven(team_blups, icc_table)
 
+  # The zone contribution is a PER-SHOT shot-selection quality: (team share minus
+  # league share) times (centered league pps). It measures the shot-MIX component
+  # of generation only, and is deliberately NOT the same object as the framework's
+  # shot_generation_per100 (a per-100-possessions LEVEL that also reflects shot
+  # volume, FGA per possession). The two answer different questions -- which zones
+  # a better shot profile would improve (this) vs how much a team generates overall
+  # (that) -- and are not expected to correlate strongly. generation_pctile below
+  # is the official per-100 generation standing, carried for the fit-mode call and
+  # for context; the per-shot gap names WHAT to fill, the percentile SIZES the need.
   generation_pctile_table <- team_generation_making %>%
     mutate(generation_pctile = round(percent_rank(shot_generation_per100) * 100)) %>%
     select(team, generation_pctile)
@@ -253,11 +262,16 @@ render_generation_gap_md <- function(gap_table, fit_modes) {
     paste0("Generated: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")),
     "",
     paste(
-      "Each team's shot-diet generation gap versus the league is decomposed",
-      "by zone using a centered-pps contribution: (team share minus league",
-      "share) times (league pps minus overall mean pps), so per-zone signs",
-      "are interpretable and the per-team sum equals that team's diet",
-      "generation versus a league-average-diet team."
+      "Each team's shot-SELECTION quality is decomposed by zone using a",
+      "per-shot centered-pps contribution: (team share minus league share)",
+      "times (league pps minus overall mean pps). A negative zone is where a",
+      "team's shot mix costs it points relative to the league -- the gap.",
+      "This is the shot-MIX component of generation only. It is a per-shot",
+      "quantity and deliberately not the same object as shot_generation_per100,",
+      "which is a per-100-possessions level that also reflects shot volume",
+      "(FGA per possession); the two are not expected to match. The gap names",
+      "WHAT a better shot profile would fix; the generation percentile (shown",
+      "per team, from 07_expected_points.R) sizes the overall need."
     ),
     ""
   )
