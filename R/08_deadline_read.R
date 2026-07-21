@@ -29,12 +29,21 @@
 #   Window column and recommendation (standing/window layer, R/12_standing.R):
 #   `window` (buyer/bubble/seller) is joined in from output/standing.csv, a
 #   data-driven proxy for a team's competitive window built from game results
-#   (win-loss record and point differential), never from anything modeled
-#   above. Standing conditions the RECOMMENDATION column only -- the `lever`
-#   column above stays the record-independent diagnosis, unchanged. See
-#   reconcile_recommendation() below: a seller's "acquire" reads sell-side,
-#   not buy; a buyer's recommendation is the lever as-is; a bubble team gets
-#   a judgment call that names the contested window rather than a flat verdict.
+#   -- win-loss record AND scoring margin per game, equally weighted (one
+#   more pass, accepted gm fix) -- never from anything modeled above.
+#   Standing conditions the RECOMMENDATION column only -- the `lever` column
+#   above stays the record-independent diagnosis, unchanged. See
+#   reconcile_recommendation() below: this is the SAME shared recommendation
+#   logic used in R/11_generation_gap.R's fit_read, keyed on window,
+#   generation_tier, making_tier, and making_trajectory (the shot_making_
+#   residual trajectory), so the two documents agree verb-for-verb: a seller
+#   reads "sell / accumulate" regardless of diagnosis; a buyer with bottom-
+#   tertile generation propped up by top-tertile but declining making reads
+#   "reassess" (the paper-tiger case); a buyer with bottom-tertile generation
+#   otherwise reads "gap-fill" (naming the acquire lever and its cap
+#   constraint); a buyer with top-tertile generation reads "amplify"; a buyer
+#   with mid-tertile generation reads "adjust"; a bubble team gets a
+#   trajectory-resolved "judgment" call that names the World Cup break.
 #
 #   Run the `gm-agent` review (see .claude/agents/gm-agent.md) on this table
 #   the moment it exists, before any prose is written around it -- it checks
@@ -177,37 +186,74 @@ load_standing <- function(path = "output/standing.csv") {
 }
 
 #' Reconcile the diagnostic lever with the standing-derived window into the
-#' table's bottom-line recommendation (standing/window layer, PART 2).
+#' table's bottom-line recommendation (standing/window layer, PART 2; one
+#' more pass, accepted gm fix: shared recommendation vocabulary with
+#' R/11_generation_gap.R's fit_read -- see that script's buyer_branch_text()/
+#' assign_fit_read(), which implements the identical logic keyed on window,
+#' generation tier, making tier, and making trajectory).
 #'
-#' The `lever` argument is the cap-conditioned diagnosis from
-#' condition_lever_on_cap() (e.g. "acquire", "acquire (constrained: requires
-#' salary out)", "adjust", "hold") -- record-independent, computed above and
-#' left untouched by this function. `window` is the record-derived proxy for
-#' a team's competitive standing (R/12_standing.R). This function is the only
-#' place standing enters the table: it conditions the RECOMMENDATION, never
-#' the diagnosis.
+#' `lever` is the cap-conditioned diagnosis from condition_lever_on_cap()
+#' (e.g. "acquire", "acquire (constrained: requires salary out)", "adjust",
+#' "hold") -- record-independent, computed above and left untouched by this
+#' function; only its text is carried into the buyer/gap-fill branch below so
+#' the cap constraint stays attached to any acquire recommendation.
+#' `generation_tier`/`making_tier` are the record-independent ntile(x, 3)
+#' tiers (1 = low, 2 = mid, 3 = high) computed above; `making_trajectory` is
+#' the raw shot_making_residual trajectory label (improving/flat/declining/
+#' NA), read from `trajectory` before the "*" display formatting. `window` is
+#' the record-derived proxy for a team's competitive standing
+#' (R/12_standing.R). This function is the only place standing enters the
+#' table: it conditions the RECOMMENDATION, never the diagnosis.
 #'
 #' @param lever character, the cap-conditioned lever string
+#' @param generation_tier integer, ntile(shot_generation_per100, 3), 1=low..3=high
+#' @param making_tier integer, ntile(shot_making_per100, 3), 1=low..3=high
+#' @param making_trajectory character or NA, shot_making_residual trajectory label
 #' @param window character, one of "buyer"/"bubble"/"seller"
 #' @return character, the reconciled recommendation
-reconcile_recommendation <- function(lever, window) {
+reconcile_recommendation <- function(lever, generation_tier, making_tier, making_trajectory, window) {
   if (window == "seller") {
-    if (startsWith(lever, "acquire")) {
+    return(paste(
+      "sell / accumulate: out of the race -- deal expirings and prioritize",
+      "asset value over a deadline buy"
+    ))
+  }
+
+  if (window == "buyer") {
+    if (generation_tier == 1) {
+      # bottom-tertile generation
+      if (making_tier == 3 && identical(making_trajectory, "declining")) {
+        return(paste(
+          "reassess: bottom-tier shot generation propped up by top-tier",
+          "but declining making -- address the shot diet / identity before",
+          "spending an asset on a new piece"
+        ))
+      }
+      return(paste0("gap-fill: ", lever))
+    }
+    if (generation_tier == 3) {
+      # top-tertile generation
       return(paste(
-        "sell-side: diagnosis needs the acquire, but team is out of the",
-        "race -- accumulate/deal expirings, do not buy"
+        "amplify: extend the edge -- add on-style depth, protect the shot",
+        "hierarchy"
       ))
     }
-    return("hold/sell: out of the race, prioritize development and asset value")
+    # generation_tier == 2, mid-tertile generation
+    return(paste(
+      "adjust: offense is roughly league-average -- tune, not a splash;",
+      "offense is not the primary lever"
+    ))
   }
-  if (window == "buyer") {
-    return(lever)
-  }
+
   # window == "bubble"
+  verb <- case_when(
+    identical(making_trajectory, "improving") ~ "lean buy",
+    identical(making_trajectory, "declining") ~ "lean hold or sell",
+    TRUE ~ "hold"
+  )
   paste0(
-    "judgment: ", lever,
-    " -- window is contested; weigh trajectory (see deadline read / ",
-    "trajectory outputs) before buying or selling"
+    "judgment (", verb, "): the late-August World Cup break favors",
+    " hold-and-reassess unless the trajectory is clearly improving"
   )
 }
 
@@ -370,7 +416,7 @@ build_deadline_read <- function(team_blups, team_generation_making, team_traject
     mutate(
       lever_raw = classify_lever(generation_tier, making_tier, identity_summary),
       lever = condition_lever_on_cap(lever_raw, flexibility_tier),
-      recommendation = reconcile_recommendation(lever, window)
+      recommendation = reconcile_recommendation(lever, generation_tier, making_tier, trajectory, window)
     ) %>%
     ungroup() %>%
     select(
@@ -463,11 +509,20 @@ render_deadline_read_md <- function(deadline_read) {
     "",
     paste(
       "Window (buyer/bubble/seller) is from standing (output/standing.csv), a",
-      "data-driven proxy for a team's competitive window; it conditions the",
-      "recommendation, not the diagnosis. Diagnosis (identity/generation/",
-      "making/trajectory) is record-independent by design. A front office",
-      "overrides window with private information (ownership mandate,",
-      "injuries, the World Cup break)."
+      "data-driven proxy for a team's competitive window that blends win-loss",
+      "record and scoring margin per game (equally weighted z-scores, see",
+      "R/12_standing.R), not win_pct alone; it conditions the recommendation,",
+      "not the diagnosis. Diagnosis (identity/generation/making/trajectory)",
+      "is record-independent by design. A front office overrides window with",
+      "private information (ownership mandate, injuries, the World Cup",
+      "break)."
+    ),
+    "",
+    paste(
+      "Recommendation vocabulary (amplify / adjust / gap-fill / reassess /",
+      "sell / judgment) is shared with output/generation_gap.md's fit_read,",
+      "derived from the same signals (window, generation tier, making tier,",
+      "making trajectory), so the two documents agree verb-for-verb."
     )
   )
 

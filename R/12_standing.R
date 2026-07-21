@@ -1,30 +1,42 @@
 # 12_standing.R
 #
 # Purpose: Standing/window layer -- a data-driven proxy for each team's
-#   competitive window (buyer / bubble / seller), computed from game results
-#   (win-loss record and point differential). This is the standing/window
-#   layer added to the framework: it exists to CONDITION THE RECOMMENDATION
-#   downstream (R/08_deadline_read.R, R/11_generation_gap.R), never the
-#   diagnosis. Identity, generation, making, and trajectory (R/05-R/07, R/11's
-#   gap decomposition) stay record-independent by design -- that is what lets
-#   the framework claim it reads beyond the record. Standing/window enters
-#   only at the recommendation step, downstream of this script.
+#   competitive window (buyer / bubble / seller), computed from game results.
+#   This is the standing/window layer added to the framework: it exists to
+#   CONDITION THE RECOMMENDATION downstream (R/08_deadline_read.R,
+#   R/11_generation_gap.R), never the diagnosis. Identity, generation,
+#   making, and trajectory (R/05-R/07, R/11's gap decomposition) stay
+#   record-independent by design -- that is what lets the framework claim it
+#   reads beyond the record. Standing/window enters only at the
+#   recommendation step, downstream of this script.
 #
-#   Playoff-line assumption (stated explicitly, not derived): the WNBA takes
-#   8 of 15 teams to the playoffs, so the 8th-ranked team by win_pct (ties
-#   broken by season point differential) is used as the playoff cut line for
-#   games_back_from_8th and for the window tiers below.
+#   The window blends win-loss record AND scoring margin per game, equally
+#   weighted (one more pass, accepted gm fix): win_pct alone can miscast a
+#   team riding a lucky record (close wins, blown out in losses) or undersell
+#   one that is winning big but has a middling record. point_diff_per_game
+#   (point_diff / games) is z-scored across the 15 teams, win_pct is
+#   z-scored the same way, and standing_score is their average -- see
+#   build_standing() below. Window tier is assigned from the standing_score
+#   rank, not win_pct rank alone. It remains a PROXY for front-office window,
+#   not a front-office decision: a real front office overrides it with
+#   private information this framework cannot see (ownership mandate, injury
+#   outlook, timeline preference, a rebuild already underway despite a
+#   mediocre record). Treat window as a data-driven default, not a verdict.
 #
-#   Window tier is a PROXY for front-office window, not a front-office
-#   decision. It is a data-only read of the record; a real front office
-#   overrides it with private information this framework cannot see
-#   (ownership mandate, injury outlook, timeline preference, a rebuild
-#   already underway despite a mediocre record). Treat window as a
-#   data-driven default, not a verdict.
+#     standing_score rank 1-5   -> "buyer"   comfortably in playoff position
+#     standing_score rank 6-9   -> "bubble"  straddling the 8-seed line
+#     standing_score rank 10-15 -> "seller"  out of the race
 #
-#     rank 1-5   -> "buyer"   comfortably in playoff position
-#     rank 6-9   -> "bubble"  straddling the 8-seed line
-#     rank 10-15 -> "seller"  out of the race
+#   Playoff-line assumption (stated explicitly, not derived, and kept
+#   separate from the window blend above): the WNBA takes 8 of 15 teams to
+#   the playoffs, so the 8th-ranked team by win_pct (ties broken by season
+#   point differential) is used as the playoff cut line for
+#   games_back_from_8th, a standard games-back statistic that is always a
+#   function of win-loss record, not scoring margin. The `rank` column below
+#   is this win_pct rank, unchanged from before; it is what games_back_from_8th
+#   is computed against. The window tier uses a separate standing_score rank
+#   computed internally (see build_standing()) and is not the same ranking as
+#   the `rank` column.
 #
 # Inputs:  data/processed/possessions.rds (possession_id, gameId, team,
 #            opponent, points, ... -- see R/03_possessions.R). Summing
@@ -35,7 +47,8 @@
 #            teams (checked below); the team with more points in a game wins
 #            -- there are no ties in basketball.
 # Outputs: output/standing.csv (team, wins, losses, win_pct, point_diff,
-#            rank, games_back_from_8th, window); also printed to console.
+#            point_diff_per_game, standing_score, rank, games_back_from_8th,
+#            window); also printed to console.
 
 library(tidyverse)
 
@@ -70,18 +83,27 @@ build_game_scores <- function(possessions) {
     ungroup()
 }
 
-#' Build the per-team standing table: record, point differential, rank
-#' (win_pct descending, ties broken by point_diff descending),
-#' games_back_from_8th, and window tier.
+#' Build the per-team standing table: record, point differential,
+#' standing_score, rank, games_back_from_8th, and window tier.
 #'
 #' games_back_from_8th = ((W_8th - L_8th) - (W_team - L_team)) / 2, where the
-#' 8th-ranked team (by the same rank order) is the playoff cut line (see file
-#' header: WNBA takes 8 of 15 teams). Negative values mean a team sits ahead
-#' of the cut line, by the standard "games back" convention.
+#' 8th-ranked team by `rank` (win_pct descending, ties broken by point_diff
+#' descending -- see file header) is the playoff cut line. Negative values
+#' mean a team sits ahead of the cut line, by the standard "games back"
+#' convention. This is unchanged by the window blend below: games back is a
+#' win-loss statistic, not a scoring-margin one.
+#'
+#' standing_score blends win_pct and point_diff_per_game (point_diff / games)
+#' as equally-weighted z-scores across the 15 teams: standing_score =
+#' (scale(win_pct) + scale(point_diff_per_game)) / 2. Window tier is assigned
+#' from the standing_score rank (descending, ties broken by win_pct), not
+#' from `rank` (see file header) -- so a team whose record overstates it
+#' (a lucky win_pct riding a poor point differential) is not miscast as a
+#' buyer or bubble team it is not.
 #'
 #' @param game_scores tibble, from build_game_scores()
-#' @return tibble, team, wins, losses, win_pct, point_diff, rank,
-#'   games_back_from_8th, window
+#' @return tibble, team, wins, losses, win_pct, point_diff,
+#'   point_diff_per_game, standing_score, rank, games_back_from_8th, window
 build_standing <- function(game_scores) {
   standing <- game_scores %>%
     group_by(team) %>%
@@ -92,7 +114,10 @@ build_standing <- function(game_scores) {
       point_diff = sum(team_pts - opp_pts),
       .groups = "drop"
     ) %>%
-    mutate(win_pct = wins / games) %>%
+    mutate(
+      win_pct = wins / games,
+      point_diff_per_game = point_diff / games
+    ) %>%
     arrange(desc(win_pct), desc(point_diff)) %>%
     mutate(rank = row_number())
 
@@ -103,16 +128,28 @@ build_standing <- function(game_scores) {
   w8 <- eighth$wins
   l8 <- eighth$losses
 
-  standing %>%
+  standing <- standing %>%
     mutate(
       games_back_from_8th = ((w8 - l8) - (wins - losses)) / 2,
+      standing_score = (as.numeric(scale(win_pct)) + as.numeric(scale(point_diff_per_game))) / 2
+    )
+
+  window_tbl <- standing %>%
+    arrange(desc(standing_score), desc(win_pct)) %>%
+    mutate(
+      window_rank = row_number(),
       window = case_when(
-        rank <= 5 ~ "buyer",    # comfortably in playoff position
-        rank <= 9 ~ "bubble",   # straddling the 8-seed line
-        TRUE      ~ "seller"    # out of the race
+        window_rank <= 5 ~ "buyer",    # comfortably in playoff position
+        window_rank <= 9 ~ "bubble",   # straddling the 8-seed line
+        TRUE              ~ "seller"   # out of the race
       )
     ) %>%
-    select(team, wins, losses, win_pct, point_diff, rank, games_back_from_8th, window)
+    select(team, window)
+
+  standing %>%
+    left_join(window_tbl, by = "team") %>%
+    select(team, wins, losses, win_pct, point_diff, point_diff_per_game,
+           standing_score, rank, games_back_from_8th, window)
 }
 
 main <- function() {
@@ -123,7 +160,7 @@ main <- function() {
 
   write_csv(standing, "output/standing.csv")
 
-  message("Standing / window table (rank 1-5 buyer, 6-9 bubble, 10-15 seller):")
+  message("Standing / window table (window from standing_score rank 1-5 buyer, 6-9 bubble, 10-15 seller; standing_score blends win_pct and point_diff_per_game, equally weighted):")
   print(standing, n = Inf)
   message("Window distribution:")
   print(table(standing$window))

@@ -21,6 +21,20 @@
 #   standing conditions the RECOMMENDATION only, never the diagnosis, same
 #   design as R/08_deadline_read.R.
 #
+#   One more pass (accepted gm fix): fit_read is now built from the SAME
+#   shared recommendation logic as R/08_deadline_read.R's `recommendation`
+#   column, keyed on window, generation tertile (generation_pctile <= 33 low,
+#   >= 67 high, else mid -- matching R/08's ntile tiers), making tertile
+#   (making_pctile, same thresholds), and making_trajectory (the raw
+#   shot_making_residual trajectory label, read from
+#   data/processed/team_trajectories.rds, same source R/08 uses). This is
+#   what makes the deadline-read recommendation and this script's fit_read
+#   agree verb-for-verb instead of contradicting each other: LVA reads
+#   "reassess" in both (a buyer winning on unsustainable, declining making),
+#   DAL/GSV/MIN read "amplify" in both, and bubble teams resolve on
+#   trajectory plus the World Cup break in both. See buyer_branch_text() and
+#   assign_fit_read() below.
+#
 #   OUT OF SCOPE (post-deadline, see PLAN.md cut list): wins-over-replacement,
 #   win-shares/RAPM, any player-value or dollar computation, candidate
 #   matching. This script never touches those.
@@ -61,14 +75,17 @@
 #   abs(mix_gap_total) exceed 0.75 per 100 possessions (accepted gm fix: a
 #   team whose volume AND mix gaps are each individually large should not be
 #   filed under a single driver label). fit_read (replacing the former
-#   fit_mode) is window-conditioned -- see assign_fit_read() /
-#   buyer_branch_text() below: seller -> sell/accumulate regardless of
-#   generation tier; buyer with bottom-tertile generation -> gap-fill (named
+#   fit_mode) is window-conditioned and shares wording with R/08's
+#   `recommendation` column (one more pass, accepted gm fix) -- see
+#   assign_fit_read() / buyer_branch_text() below: seller -> sell/accumulate
+#   regardless of generation tier; buyer with bottom-tertile generation and
+#   top-tertile-but-declining making -> reassess (the paper-tiger case);
+#   buyer with bottom-tertile generation otherwise -> gap-fill (named
 #   non-identity zone, or "possession creation" if primary_driver is
-#   literally "volume") unless the most-negative mix zone is identity-driven,
-#   in which case -> reassess; buyer with top-tertile generation -> amplify;
-#   buyer middle-tertile -> "offense not the lever"; bubble -> the buyer-branch
-#   text wrapped in a judgment call naming the contested window.
+#   "volume" or "both"); buyer with top-tertile generation -> amplify; buyer
+#   mid-tertile -> adjust; bubble -> a trajectory-resolved judgment call
+#   naming the contested window and the World Cup break (not the buyer-branch
+#   text -- bubble no longer names a zone, see assign_fit_read()).
 #
 # Inputs:  data/processed/pbp_events.rds (shot events: actionType, shotResult,
 #            area, teamTricode, gameId),
@@ -81,7 +98,10 @@
 #          output/icc_table.csv (metric, icc -- the ICC >= 0.15
 #            identity-eligibility floor),
 #          output/standing.csv (team, window -- from R/12_standing.R, run 12
-#            before 11; window conditions fit_read only, never the diagnosis)
+#            before 11; window conditions fit_read only, never the diagnosis),
+#          data/processed/team_trajectories.rds (metric, team, trajectory --
+#            filtered to metric == "shot_making_residual" for
+#            making_trajectory, same source and same metric R/08 uses)
 # Outputs: output/generation_gap.csv, output/generation_gap.md
 
 library(tidyverse)
@@ -349,19 +369,36 @@ load_standing <- function(path = "output/standing.csv") {
   standing
 }
 
-#' Find, per team, the most-negative mix-contribution zone (used for the
-#' identity-flag check that routes bottom-tertile buyer/bubble teams to
-#' "reassess" instead of "gap-fill" in buyer_branch_text() below). Unchanged
-#' from the prior mix-only-section logic, just extracted as its own helper.
+#' Load each team's shot_making_residual trajectory label (one more pass,
+#' accepted gm fix: same source and same metric R/08_deadline_read.R uses
+#' for its `trajectory` column, so both scripts key the paper-tiger/bubble
+#' logic off the identical signal).
 #'
-#' @param full_table tibble, team-zone rows with mix_contribution, identity_driven
-#' @return tibble, team, most_negative_zone, most_negative_identity_driven
-most_negative_mix_zone <- function(full_table) {
-  full_table %>%
-    group_by(team) %>%
-    slice_min(mix_contribution, n = 1, with_ties = FALSE) %>%
-    ungroup() %>%
-    select(team, most_negative_zone = zone, most_negative_identity_driven = identity_driven)
+#' Defensive fallback (mirrors R/08_deadline_read.R): if team_trajectories
+#' has zero shot_making_residual rows, making_trajectory is NA for every
+#' team (a warning is emitted), rather than the script failing -- fit_read's
+#' case_when()/identical() checks treat NA as "not improving, not declining"
+#' and fall through to the neutral branch (adjust's mid case is unaffected;
+#' bubble falls to "hold"; the paper-tiger reassess check requires
+#' identical(making_trajectory, "declining") and so is simply never
+#' triggered).
+#'
+#' @param team_trajectories tibble, data/processed/team_trajectories.rds
+#' @return tibble, team, making_trajectory
+load_making_trajectory <- function(team_trajectories) {
+  making_residual_traj <- team_trajectories %>%
+    filter(metric == "shot_making_residual") %>%
+    select(team, making_trajectory = trajectory)
+
+  if (nrow(making_residual_traj) == 0) {
+    warning(
+      "load_making_trajectory(): no shot_making_residual rows in ",
+      "team_trajectories -- making_trajectory set to NA for all teams."
+    )
+    return(tibble(team = unique(team_trajectories$team), making_trajectory = NA_character_))
+  }
+
+  making_residual_traj
 }
 
 #' Find, per team, the most-negative NON-identity-driven mix-contribution
@@ -394,84 +431,119 @@ top_non_identity_negative_mix_zone <- function(full_table) {
 }
 
 #' Buyer-branch fit-read text: what a team with a real playoff window would
-#' be told about its offense, from generation tertile, primary_driver, and
-#' whether the most-negative mix zone is identity-driven. Used directly for
-#' window == "buyer", and wrapped in a judgment prefix/suffix for
-#' window == "bubble" (see assign_fit_read() below).
+#' be told about its offense, from generation tertile, making tertile,
+#' making trajectory, and primary_driver. Used only for window == "buyer"
+#' (one more pass, accepted gm fix: window == "bubble" no longer wraps this
+#' text -- see assign_fit_read() below, which uses a trajectory-resolved
+#' judgment call instead, matching R/08_deadline_read.R's shared logic).
 #'
 #' generation_pctile <= 33 (bottom tertile):
-#'   most_negative_identity_driven -> "reassess: ..." (the gap sits on a
-#'     stable identity trait, not an obvious hole -- see making/trajectory)
-#'   else, primary_driver == "volume" -> "gap-fill (acquire): possession creation"
+#'   making_pctile >= 67 (top tertile) AND making_trajectory == "declining"
+#'     -> "reassess: ..." (the paper-tiger case: bottom-tier generation
+#'     propped up by top-tier but declining making)
+#'   else, primary_driver %in% c("volume", "both") -> "gap-fill (acquire): possession creation"
 #'   else -> "gap-fill (acquire): " + the named top non-identity mix zone
-#' generation_pctile >= 67 (top tertile) -> "amplify (extend the edge)"
-#' else (middle tertile) -> "offense not the lever ..."
+#' generation_pctile >= 67 (top tertile) -> "amplify: extend the edge --
+#'   add on-style depth, protect the shot hierarchy"
+#' else (middle tertile) -> "adjust: offense is roughly league-average --
+#'   tune, not a splash; offense is not the primary lever"
 #'
 #' @param generation_pctile numeric, 0-100
+#' @param making_pctile numeric, 0-100
+#' @param making_trajectory character or NA, shot_making_residual trajectory label
 #' @param primary_driver character, "volume"/"mix"/"both"
-#' @param most_negative_identity_driven logical
 #' @param secondary_tune_zone character or NA, the named non-identity zone
 #' @return character, the buyer-branch fit-read text
-buyer_branch_text <- function(generation_pctile, primary_driver,
-                               most_negative_identity_driven, secondary_tune_zone) {
+buyer_branch_text <- function(generation_pctile, making_pctile, making_trajectory,
+                               primary_driver, secondary_tune_zone) {
   if (generation_pctile <= 33) {
-    if (isTRUE(most_negative_identity_driven)) {
+    if (making_pctile >= 67 && identical(making_trajectory, "declining")) {
       return(paste(
-        "reassess: bottom-tier offense but the gap is identity-flagged --",
-        "see making/trajectory (the identity may be the problem, not a",
-        "strength to protect)"
+        "reassess: bottom-tier shot generation propped up by top-tier but",
+        "declining making -- address the shot diet / identity before",
+        "spending an asset on a new piece"
       ))
     }
-    if (identical(primary_driver, "volume")) {
+    if (identical(primary_driver, "volume") || identical(primary_driver, "both")) {
       return("gap-fill (acquire): possession creation")
     }
     zone_name <- if (is.na(secondary_tune_zone)) "shot selection" else secondary_tune_zone
     return(paste0("gap-fill (acquire): ", zone_name))
   }
   if (generation_pctile >= 67) {
-    return("amplify (extend the edge)")
+    return(paste(
+      "amplify: extend the edge -- add on-style depth, protect the shot",
+      "hierarchy"
+    ))
   }
-  "offense not the lever (look to defense/other; offense is roughly league-average)"
+  paste(
+    "adjust: offense is roughly league-average -- tune, not a splash;",
+    "offense is not the primary lever"
+  )
+}
+
+#' Bubble-window fit-read text: a trajectory-resolved judgment call naming
+#' the World Cup break (one more pass, accepted gm fix -- shared with
+#' R/08_deadline_read.R's bubble branch; no longer wraps buyer_branch_text()
+#' / names a zone).
+#'
+#' @param making_trajectory character or NA, shot_making_residual trajectory label
+#' @return character, the bubble fit-read text
+bubble_branch_text <- function(making_trajectory) {
+  verb <- case_when(
+    identical(making_trajectory, "improving") ~ "lean buy",
+    identical(making_trajectory, "declining") ~ "lean hold or sell",
+    TRUE ~ "hold"
+  )
+  paste0(
+    "judgment (", verb, "): the late-August World Cup break favors",
+    " hold-and-reassess unless the trajectory is clearly improving"
+  )
 }
 
 #' Assign each team a window-conditioned fit_read (standing/window layer,
-#' replaces the record-independent fit_mode). Window (buyer/bubble/seller,
-#' R/12_standing.R) conditions this RECOMMENDATION only; the diagnostic
-#' decomposition (volume_gap, mix_gap_total, primary_driver, identity_driven)
-#' feeding buyer_branch_text() is untouched and stays record-independent.
+#' replaces the record-independent fit_mode; one more pass, accepted gm fix:
+#' shares wording with R/08_deadline_read.R's `recommendation` column).
+#' Window (buyer/bubble/seller, R/12_standing.R) conditions this
+#' RECOMMENDATION only; the diagnostic decomposition (volume_gap,
+#' mix_gap_total, primary_driver, identity_driven) feeding buyer_branch_text()
+#' is untouched and stays record-independent.
 #'
-#'   window == "seller"  -> "sell / accumulate (offense diagnosis below is
-#'     context, not a buy)", regardless of generation tier
+#'   window == "seller"  -> the same "sell / accumulate: ..." text as
+#'     R/08_deadline_read.R, regardless of generation tier (offense
+#'     diagnosis is context, not a buy)
 #'   window == "buyer"   -> buyer_branch_text(...)
-#'   window == "bubble"  -> "judgment: " + buyer_branch_text(...) +
-#'     " -- contested window, weigh trajectory"
+#'   window == "bubble"  -> bubble_branch_text(...) (trajectory-resolved,
+#'     names the World Cup break -- no longer wraps buyer_branch_text() /
+#'     names a zone, matching R/08_deadline_read.R's shared bubble logic)
 #'
-#' @param full_table tibble, team-zone rows (generation_pctile, primary_driver,
-#'   mix_contribution, identity_driven, zone, type)
+#' @param full_table tibble, team-zone rows (generation_pctile, making_pctile,
+#'   primary_driver, mix_contribution, identity_driven, zone, type)
 #' @param standing tibble, from load_standing() (team, window)
+#' @param trajectories tibble, team, making_trajectory (shot_making_residual
+#'   trajectory label, from data/processed/team_trajectories.rds)
 #' @return tibble, team, window, fit_read
-assign_fit_read <- function(full_table, standing) {
+assign_fit_read <- function(full_table, standing, trajectories) {
   team_level <- full_table %>%
-    distinct(team, generation_pctile, primary_driver)
+    distinct(team, generation_pctile, making_pctile, primary_driver)
 
-  most_neg <- most_negative_mix_zone(full_table)
   secondary <- top_non_identity_negative_mix_zone(full_table)
 
   team_level %>%
-    left_join(most_neg, by = "team") %>%
     left_join(secondary, by = "team") %>%
     left_join(standing %>% select(team, window), by = "team") %>%
+    left_join(trajectories, by = "team") %>%
     rowwise() %>%
     mutate(
-      buyer_text = buyer_branch_text(
-        generation_pctile, primary_driver, most_negative_identity_driven, secondary_tune_zone
-      ),
       fit_read = case_when(
-        window == "seller" ~ "sell / accumulate (offense diagnosis below is context, not a buy)",
-        window == "buyer"  ~ buyer_text,
-        window == "bubble" ~ paste0(
-          "judgment: ", buyer_text, " -- contested window, weigh trajectory"
+        window == "seller" ~ paste(
+          "sell / accumulate: out of the race -- deal expirings and",
+          "prioritize asset value over a deadline buy"
         ),
+        window == "buyer"  ~ buyer_branch_text(
+          generation_pctile, making_pctile, making_trajectory, primary_driver, secondary_tune_zone
+        ),
+        window == "bubble" ~ bubble_branch_text(making_trajectory),
         TRUE ~ NA_character_
       )
     ) %>%
@@ -487,10 +559,14 @@ assign_fit_read <- function(full_table, standing) {
 #' @param icc_table tibble, output/icc_table.csv
 #' @param standing tibble, from load_standing() (team, window --
 #'   R/12_standing.R). Conditions fit_read only, never the diagnosis.
+#' @param team_trajectories tibble, data/processed/team_trajectories.rds.
+#'   Filtered to metric == "shot_making_residual" for making_trajectory
+#'   (one more pass, accepted gm fix), which feeds fit_read's paper-tiger
+#'   and bubble branches. Conditions fit_read only, never the diagnosis.
 #' @return list(gap_table = tibble with window/fit_read joined in,
 #'   fit_reads = tibble team/window/fit_read, secondary_tune = tibble of the
 #'   per-team "secondary tune" non-identity negative mix zone)
-build_generation_gap <- function(pbp_events, team_generation_making, team_blups, icc_table, standing) {
+build_generation_gap <- function(pbp_events, team_generation_making, team_blups, icc_table, standing, team_trajectories) {
   shot_rows <- build_shot_rows(pbp_events)
 
   team_level <- decompose_team_generation_gap(shot_rows, team_generation_making)
@@ -504,9 +580,11 @@ build_generation_gap <- function(pbp_events, team_generation_making, team_blups,
   # possessions generation standing, carried for the fit_read call;
   # total_gap (volume_gap + mix_gap_total) is this script's zone-approximated
   # version of the same quantity and is asserted to reconcile with it (see
-  # decompose_team_generation_gap()). making_pctile is descriptive context
-  # shown beside generation_pctile in the md (accepted gm fix), not used in
-  # the offense-only decomposition above.
+  # decompose_team_generation_gap()). making_pctile is shown beside
+  # generation_pctile in the md, and (one more pass, accepted gm fix) is now
+  # also used directly in fit_read's paper-tiger check (making_pctile >= 67),
+  # not only as descriptive context; the offense-only decomposition above it
+  # is unaffected.
   pctile_table <- team_generation_making %>%
     mutate(
       generation_pctile = round(percent_rank(shot_generation_per100) * 100),
@@ -519,7 +597,8 @@ build_generation_gap <- function(pbp_events, team_generation_making, team_blups,
                by = "team") %>%
     left_join(pctile_table, by = "team")
 
-  fit_reads <- assign_fit_read(full_table, standing)
+  making_trajectory <- load_making_trajectory(team_trajectories)
+  fit_reads <- assign_fit_read(full_table, standing, making_trajectory)
   secondary_tune <- top_non_identity_negative_mix_zone(full_table)
 
   gap_table_out <- full_table %>%
@@ -565,9 +644,18 @@ render_generation_gap_md <- function(gap_table, fit_reads) {
     paste(
       "fit_read is window-conditioned (standing/window layer,",
       "R/12_standing.R): window (buyer/bubble/seller, from each team's",
-      "game-result record) sets the RECOMMENDATION here; the diagnostic",
-      "decomposition above it (volume_gap, mix_gap_total, primary_driver,",
-      "identity_driven) stays record-independent and unchanged by window."
+      "win-loss record AND scoring margin per game, equally weighted) sets",
+      "the RECOMMENDATION here; the diagnostic decomposition above it",
+      "(volume_gap, mix_gap_total, primary_driver, identity_driven) stays",
+      "record-independent and unchanged by window."
+    ),
+    "",
+    paste(
+      "fit_read shares its recommendation vocabulary (amplify / adjust /",
+      "gap-fill / reassess / sell / judgment) with output/deadline_read.md's",
+      "`recommendation` column -- both are derived from the same signals",
+      "(window, generation tier, making tier, making trajectory), so the two",
+      "documents agree verb-for-verb rather than contradicting each other."
     ),
     ""
   )
@@ -668,10 +756,12 @@ render_generation_gap_md <- function(gap_table, fit_reads) {
     paste(
       "fit_read is window-conditioned: a seller's offense diagnosis is",
       "context for a rebuild, not a buy signal (\"sell / accumulate\"); a",
-      "buyer's diagnosis drives an actual gap-fill, amplify, reassess, or",
-      "\"offense not the lever\" call; a bubble team gets a judgment call",
-      "that names the contested window rather than a flat verdict. Window",
-      "comes from each team's win-loss record and point differential",
+      "buyer's diagnosis drives an actual gap-fill, amplify, adjust, or",
+      "reassess call (reassess is the paper-tiger read: bottom-tier shot",
+      "generation propped up by top-tier but declining making); a bubble",
+      "team gets a trajectory-resolved judgment call that names the World",
+      "Cup break rather than a flat verdict. Window comes from each team's",
+      "win-loss record AND scoring margin per game, equally weighted",
       "(R/12_standing.R), never from anything in the offense decomposition",
       "above -- it conditions the recommendation, not the diagnosis."
     ),
@@ -711,8 +801,9 @@ render_generation_gap_md <- function(gap_table, fit_reads) {
     "",
     paste(
       "Window (buyer/bubble/seller) is a data-driven proxy for a team's",
-      "competitive standing from game results, not a front-office decision;",
-      "a real front office overrides it with private information. See",
+      "competitive standing that blends win-loss record and scoring margin",
+      "per game (equally weighted z-scores), not a front-office decision; a",
+      "real front office overrides it with private information. See",
       "output/standing.csv and R/12_standing.R."
     )
   )
@@ -726,8 +817,9 @@ main <- function() {
   team_blups <- readRDS("data/processed/team_blups.rds")
   icc_table <- readr::read_csv("output/icc_table.csv", show_col_types = FALSE)
   standing <- load_standing()
+  team_trajectories <- readRDS("data/processed/team_trajectories.rds")
 
-  result <- build_generation_gap(pbp_events, team_generation_making, team_blups, icc_table, standing)
+  result <- build_generation_gap(pbp_events, team_generation_making, team_blups, icc_table, standing, team_trajectories)
   gap_table <- result$gap_table
   fit_reads <- result$fit_reads
 
