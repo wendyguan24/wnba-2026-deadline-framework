@@ -170,26 +170,56 @@ explicit.
 ## 6. In-scope extension: generation-gap attribution (R/11)
 
 The one piece of the fit question the open data can answer now, without a player-value
-model, is naming the gap. R/11 decomposes each team's shot-diet generation shortfall by
-zone: for each zone, (team shot share minus league shot share) times league points per shot.
-Zones where a team is most below league are where its shot selection costs it expected
-points relative to the field. Each is labeled:
+model, is naming the gap, and doing so requires separating two different causes of a
+generation shortfall: a team can generate poorly because it gets fewer shots per
+possession (volume) or because the shots it gets are worth less (mix), and the fix for
+each is different (possession creation and ball security versus a zone-level shot-selection
+read). R/11 makes this a price-volume variance split. Generation is defined as volume times
+mix quality: VOLUME = FGA per 100 possessions, MIX_QUALITY = expected points per shot given
+a team's shot diet (league points-per-shot by zone, held fixed so only the diet varies).
+For each team, the generation gap versus the league splits exactly into:
 
-- Missing efficient looks: the team under-weights a high-value zone. A candidate gap-fill.
-- Over-reliant on low-value looks: the team over-weights a low-value zone. A shot-selection
-  leak.
-- Identity-driven (protect): the under- or over-weighting sits on a metric where the team
-  has a strong, stable identity (high absolute z on an ICC-eligible share). This is a
-  choice, not a gap, and filling it would be negative fit.
+```
+gen_team - gen_league = (V_team - V_league) * M_league        [volume_gap]
+                      + V_team * (M_team - M_league)           [mix_gap_total]
+```
 
-The per-team fit mode follows: bottom-tertile generation with a non-identity deficit reads
-as gap-fill; strong generation or an identity-driven low reads as style-amplify or protect.
+`volume_gap` isolates how many shots a team gets relative to the league, valued at
+league-average shot quality; `mix_gap_total` isolates the value of the shots a team
+chooses to take, at the team's own volume. The two sum exactly to the team's total
+generation gap (`volume_gap + mix_gap_total = V_team*M_team - V_league*M_league`, asserted
+in code), which is why `total_gap` reconciles with the team's `shot_generation_per100`
+standing rather than being a separate, uncorrelated read as the mix-only version was.
+`primary_driver` names whichever component (volume or mix) accounts for more of the gap.
 
-Two honesty caveats, stated in the output: this is a zone-level read (the alternative-
-stratification check found zone-only preserves team ranks, Spearman 0.98, so zone is a
-defensible grain), and it reads only the offensive shot-diet side. Open play-by-play barely
-sees defense, rebounding value, or playmaking not expressed in shots, so R/11 names
-offensive-generation gaps, not all roster gaps. See `output/generation_gap.md`.
+The mix component is then attributed by zone, using a CENTERED league points-per-shot: for
+each zone, `mix_contribution = V_team * (team shot share minus league shot share) *
+(league points per shot MINUS the overall league mean points per shot)`. Centering by the
+overall mean is what was missing from the mix-only version of this section (a prior
+BLOCKER) and is what makes each zone's sign interpretable: a team under-weighting a
+high-value zone (share below league, centered pps positive) reads as "missing efficient
+looks," and a team over-weighting a low-value zone (share above league, centered pps
+negative) reads as "over-reliant on low-value looks." Because both team and league shares
+sum to 1 across zones, centering does not change the per-team sum of zone contributions --
+it sums exactly to `mix_gap_total` (also asserted in code) -- it only makes each term's sign
+legible. Zones where the mix contribution sits on a stable, high-ICC identity metric (high
+absolute z on an ICC-eligible share) are flagged identity-driven (protect): the
+over/under-weighting is a choice, not a gap, and filling it would be negative fit.
+
+The per-team fit mode now follows `primary_driver`: bottom-tertile generation with a
+volume-driven gap reads as gap-fill (the need is possession creation or ball security, not
+a zone); bottom-tertile with a mix-driven gap reads as gap-fill unless the most-negative
+mix zone is identity-driven, in which case it reads as style-amplify or protect; everything
+else reads as style-amplify or protect.
+
+Three honesty caveats, stated in the output: generation has two drivers (volume and mix),
+and this report separates them rather than reading a low generation number as automatically
+a shot-selection problem; the mix component is a zone-level read (the alternative-
+stratification check found zone-only preserves team generation and making ranks, Spearman
+0.98 for generation and 1.00 for making, so zone is a defensible grain); and it reads only
+the offensive shot-diet side, since open play-by-play barely sees defense, rebounding value,
+or playmaking not expressed in shots, so R/11 names offensive-generation gaps, not all
+roster gaps. See `output/generation_gap.md`.
 
 ## 7. Evaluation (AMENDMENT_01 Section 2c)
 
