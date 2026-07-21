@@ -1,6 +1,6 @@
 # Reconciliation Report
 
-Generated: 2026-07-19 19:48:27 UTC
+Generated: 2026-07-21 13:35:34 UTC
 
 ## 1. HANDOFF §4 baseline sanity table
 
@@ -9,7 +9,7 @@ fastbreak share, paint share). Deltas are computed minus target.
 
 Max abs FGA delta: 0 | Max abs FG% delta: 0 | Max abs 3PA rate delta: 0 | Max abs assisted rate delta: 0 | Max abs fastbreak share delta: 0 | Max abs paint share delta: 0
 
-All deltas are 0 at 3-decimal rounding — the baseline table reproduces exactly.
+All deltas are 0 at 3-decimal rounding -- the baseline table reproduces exactly.
 Paint share definition confirmed: made shots with area in {Restricted Area,
 In The Paint (Non-RA)} / FGM (this was previously an open question, now closed).
 
@@ -24,11 +24,11 @@ Sum of |FG3A delta| across all team-games: 0
 Largest single-game FGM delta: -1 (game 1022600004, team IND)
 
 cdn totals: 24,794 FGA / 11,120 FGM (verified). v2 totals: 24,795 FGA /
-11,121 FGM — a 1-shot, 1-game discrepancy (analogous to the NCAA project's
+11,121 FGM -- a 1-shot, 1-game discrepancy (analogous to the NCAA project's
 documented 2.5-FGM gap). AST reconciles to within a handful of events
 league-wide (v2's AST is detected from free-text description, since
 PLAYER2_ID is populated on every made shot in v2 and is not a usable assist
-indicator — verified against real data, not assumed). None of these small
+indicator -- verified against real data, not assumed). None of these small
 gaps block Phase 1 feature-building; cdn remains the primary source.
 
 ## 3. shotdetail coverage

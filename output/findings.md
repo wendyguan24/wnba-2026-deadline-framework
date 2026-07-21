@@ -23,7 +23,8 @@ types. The expected-points layer is a stratified expected-points baseline
 - shotdetail covers 14 of 15 teams (Toronto absent), so every shot-level feature
   is built from the cdn feed (area / areaDetail / descriptor), never shotdetail.
 - Test suite: 38 expectations, 0 failures, 0 skipped, including the data-dependent
-  baseline-table, cdn-vs-v2, and possession-invariant checks.
+  baseline-table, cdn-vs-v2, and possession-invariant checks (see
+  `output/test_summary.txt`, reproduced via `Rscript tests/testthat.R`).
 
 ## 1. Schedule-adjusted identity (Leg 1)
 
@@ -92,7 +93,10 @@ distinguishable from zero:
 
 These league-trend p-values are approximate: all five metrics used the documented
 random-intercept-plus-residual-slope fallback after the full random-slope fit was
-singular.
+singular. AMENDMENT_01's stated fallback output is the league trend plus per-team
+observed-minus-expected late-season residuals; the per-team improving/flat/declining
+labels shown here go one step further than that, which is why they are reported only
+with their intervals.
 
 See `output/trajectory_small_multiples.png`, which shows the per-team slopes with
 95% intervals: most intervals span zero, so per-team labels are directional, not
@@ -111,8 +115,10 @@ Written against the pre-registered H1 / H2 / H3 / H-null registry in
   falls, strongest for expansion teams TOR and PDX): NOT SUPPORTED at the league
   level. Assisted rate trends the wrong way (-0.0002, p 0.77) and live-ball
   turnover rate trends the wrong way (0.0002, p 0.36), both not significant. At the
-  team level PDX and TOR do lean positive on assisted rate, but every per-team
-  interval spans zero, so this is a direction, not a result.
+  team level PDX and TOR do lean positive on assisted rate, but both PDX and TOR
+  intervals span zero, so this is a direction, not a result. The assisted-rate
+  intervals that do exclude zero (DAL, IND, NYL) point the wrong way for H2, if
+  anything strengthening the null.
 - H3 (GSV's low field-goal percentage is shot making below expectation on an
   acceptable shot diet; trajectory: is GSV trending toward expectation or flat):
   the premise is REFUTED. GSV makes shots at or slightly above expectation (shot
@@ -163,7 +169,7 @@ rather than papered over):
   near-worst on making and likely rebuilding, yet the rule maps bottom-generation to
   acquire mechanically; a cellar team acquiring at the deadline is a different act
   than a contender adding.
-- The salary floor is not yet in the cap tier. The team-salary floor is 85% of the
+- The salary floor is carried as a flag, not a dollar tier. The team-salary floor is 85% of the
   cap (`cba_rules_2026.md` Section 1), and the two room-tier teams (WAS, PDX) sit
   below it, so they are pushed to add salary rather than free to stand pat. The
   deadline-read table now flags this: WAS and PDX display "room (below floor)", and

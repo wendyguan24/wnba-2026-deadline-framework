@@ -214,7 +214,7 @@ metrics use equal weighting.
       post-deadline), log the triage below** -- RUN 2026-07-19, scoped to the trajectory
       layer (incl. the new 5th metric) and the R/07 expected-points outputs. Findings
       logged below under "analytics-reviewer, post-06/07 gate run." Triage is PROPOSED,
-      NOT yet accepted -- awaiting Wendy's decision on each item before any fix is applied.
+      NOT yet accepted -- awaiting Wendy's decision on each item before any fix is applied. (SINCE RESOLVED: accepted and applied during the PR #1 work.)
 
 ## Jul 23 — Data refresh check; expected-points baseline; deadline-read table; cap-context CSV
 
@@ -256,7 +256,7 @@ metrics use equal weighting.
 - [x] **Run `gm-agent` on the deadline-read table before any prose is written around
       it — triage feedback, log below. Includes the cap-conditioning check added by
       AMENDMENT_02 §4.** RUN 2026-07-20; findings + PROPOSED triage logged below under
-      "gm-agent, deadline-read table run." Triage is PROPOSED, awaiting Wendy's decision.
+      "gm-agent, deadline-read table run." Triage is PROPOSED, awaiting Wendy's decision. (SINCE RESOLVED: accepted and applied in ea2ee92; see the acceptance note in the triage log.)
 
 ## Jul 24-25 — Synergy case-study enrichment + fit reads (time-boxed)
 
@@ -305,7 +305,7 @@ metrics use equal weighting.
       below. Includes the cap-figure traceability and tiers-only checks added by
       AMENDMENT_02 §4.** RUN 2026-07-20; findings + PROPOSED triage logged below under
       "analytics-reviewer, findings-draft run." Triage is PROPOSED, awaiting Wendy's
-      decision -- no fix applied to `findings.md`.
+      decision -- no fix applied to `findings.md`. (SINCE RESOLVED: accepted and applied in ea2ee92.)
 
 ## Jul 26-27 — Publish (repo + writeup + WHoopsLab version)
 
@@ -529,7 +529,7 @@ the lever rule is applied correctly across all 15 rows, every acquire is cap-con
 and attributed, no CBA mechanic is unattributed, no old-CBA intuition leaked. It named
 the LVA <-> ATL mirror as the forwardable idea and ATL as the sharpest disagreement with
 consensus. **Triage below is PROPOSED, NOT applied; the deadline-read table is unchanged
-pending Wendy's decision.**
+pending Wendy's decision.** (SINCE RESOLVED: Wendy accepted this triage; fixes applied in ea2ee92.)
 
 - **NOT YET 1 (ATL hold vs its own declining making trajectory) -- PROPOSED ACCEPT, in
   findings prose.** Addressed in `findings.md` Section 5: ATL argued explicitly, the
@@ -557,7 +557,7 @@ pending Wendy's decision.**
 Spearman values, garbage-time 3.9%, reconciliation deltas), that H1/H2 nulls and the H3
 refutation are written against the registry, and that vocabulary, hygiene, tiers-not-dollars,
 and Synergy quarantine all pass. **Triage below is PROPOSED, NOT applied; `findings.md` is
-unchanged pending Wendy's decision.**
+unchanged pending Wendy's decision.** (SINCE RESOLVED: Wendy accepted this triage; fixes applied in ea2ee92.)
 
 - **BLOCKER 1 (assisted-rate identity claim on a shrunk BLUP; self-contradiction) --
   PROPOSED ACCEPT.** assisted_rate ICC 0.0004 shrinks all BLUPs to ~0.649, so the PDX
@@ -582,6 +582,21 @@ unchanged pending Wendy's decision.**
   with the ICC ordering."
 - **NOTE 7 (trajectory p-values are from the documented fallback) -- PROPOSED ACCEPT.** Add
   a one-line caveat that the p-values are approximate under the random-intercept fallback.
+
+**Fable-5 analytics-reviewer second-opinion run (2026-07-20)** on `output/findings.md` + PLAN.md.
+Confirmed every core number still traces to source and the guardrails hold. Found two real
+blockers the earlier gates missed, plus warnings; Wendy ACCEPTED all and they were APPLIED:
+- B1: `build_identity_summary()` now filters the z-score pool to metrics with mixed-model
+  ICC >= 0.15 (eda_notes.md spec change 6), so the deadline-read identity column no longer
+  anchors on noise metrics. GSV now reads as a perimeter profile, matching the findings prose.
+- B2: `deadline_read.md` discloses the random-intercept fallback behind the trajectory labels.
+- W1-W5 (findings + reconciliation_report): H2 interval claim corrected, stale salary-floor
+  sentence fixed, test summary captured to `output/test_summary.txt`, trajectory fallback-output
+  deviation disclosed, and the stale em dashes in reconciliation_report.md regenerated out.
+- W6-W7 (PLAN): the pre-Jul-23 data-refresh caveat and the stale "PROPOSED" statements annotated.
+- Deferred (notes): readable strata CSV, "0.996" rounding, one methodology line that agent
+  gates supplement rather than replace human spec-tracing.
+A gm-agent re-gate on the corrected identity_summary column is the remaining follow-up.
 
 ## Data download (session 2, 2026-07-18)
 

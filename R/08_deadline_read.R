@@ -44,6 +44,8 @@
 
 library(tidyverse)
 
+ICC_ANCHOR_FLOOR <- 0.15  # eda_notes.md spec change 6: only anchor identity on metrics with mixed-model ICC >= 0.15
+
 #' Classify a team's deadline lever from its generation/making tiers.
 #'
 #' HANDOFF §5e talent/process/luck framing: generation (shot_generation_per100,
@@ -154,9 +156,22 @@ condition_lever_on_cap <- function(lever, flexibility_tier) {
 #' names are mapped to readable labels via METRIC_LABELS, falling back to the
 #' raw metric name if a metric is not in the map.
 #'
+#' ICC anchor filter (eda_notes.md spec change 6): before z-scoring, team_blups
+#' is restricted to metrics whose output/icc_table.csv ICC is >= ICC_ANCHOR_FLOOR,
+#' so the identity claim never anchors on a noise metric (e.g. assisted_rate).
+#'
 #' @param team_blups tibble, cols metric, team, adjusted_value
+#' @param icc_path character, defaults to output/icc_table.csv (cols metric, icc)
 #' @return tibble, cols team, identity_summary
-build_identity_summary <- function(team_blups) {
+build_identity_summary <- function(team_blups, icc_path = "output/icc_table.csv") {
+  icc_table <- readr::read_csv(icc_path, show_col_types = FALSE)
+  eligible_metrics <- icc_table %>%
+    filter(icc >= ICC_ANCHOR_FLOOR) %>%
+    pull(metric)
+
+  team_blups <- team_blups %>%
+    filter(metric %in% eligible_metrics)
+
   METRIC_LABELS <- c(
     pace_per40 = "pace",
     fg3a_rate = "3PA rate",
@@ -361,6 +376,14 @@ render_deadline_read_md <- function(deadline_read) {
       "tag marks a team below the 85%-of-cap team-salary floor ($5.95M,",
       "cba_rules_2026.md Section 1), which is pushed to add salary rather than",
       "free to stand pat. Re-verify before publish (AMENDMENT_02 Section 4)."
+    ),
+    "",
+    paste(
+      "Trajectory note: all five trajectory metrics used the documented",
+      "random-intercept-plus-residual-slope fallback (the full random-slope fit",
+      "was singular); the improving/flat/declining labels are directional reads,",
+      "not random-slope BLUPs. Source: output/trajectory_league_trends.csv",
+      "(fallback_used = TRUE for all five)."
     )
   )
 

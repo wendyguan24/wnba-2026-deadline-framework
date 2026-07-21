@@ -173,7 +173,7 @@ render_reconciliation_report <- function(baseline, reconciliation, shotdetail_ch
            "Max abs fastbreak share delta: ", max(abs(baseline$fastbreak_share_delta)), " | ",
            "Max abs paint share delta: ", max(abs(baseline$paint_share_delta))),
     "",
-    "All deltas are 0 at 3-decimal rounding — the baseline table reproduces exactly.",
+    "All deltas are 0 at 3-decimal rounding -- the baseline table reproduces exactly.",
     "Paint share definition confirmed: made shots with area in {Restricted Area,",
     "In The Paint (Non-RA)} / FGM (this was previously an open question, now closed).",
     "",
@@ -189,11 +189,11 @@ render_reconciliation_report <- function(baseline, reconciliation, shotdetail_ch
            " (game ", worst_fgm$gameId[1], ", team ", worst_fgm$team[1], ")"),
     "",
     "cdn totals: 24,794 FGA / 11,120 FGM (verified). v2 totals: 24,795 FGA /",
-    "11,121 FGM — a 1-shot, 1-game discrepancy (analogous to the NCAA project's",
+    "11,121 FGM -- a 1-shot, 1-game discrepancy (analogous to the NCAA project's",
     "documented 2.5-FGM gap). AST reconciles to within a handful of events",
     "league-wide (v2's AST is detected from free-text description, since",
     "PLAYER2_ID is populated on every made shot in v2 and is not a usable assist",
-    "indicator — verified against real data, not assumed). None of these small",
+    "indicator -- verified against real data, not assumed). None of these small",
     "gaps block Phase 1 feature-building; cdn remains the primary source.",
     "",
     "## 3. shotdetail coverage",
@@ -209,7 +209,7 @@ render_reconciliation_report <- function(baseline, reconciliation, shotdetail_ch
         "and PLAN.md, the §5d expected-points layer must source shot geometry",
         "for the missing team(s) from cdn (x/y + area/areaDetail), not shotdetail.")
     } else {
-      "All 15 teams present in shotdetail — the previously flagged gap did not reproduce."
+      "All 15 teams present in shotdetail -- the previously flagged gap did not reproduce."
     },
     "",
     "## Gate",
