@@ -322,16 +322,19 @@ metrics use equal weighting.
 rationale companion to findings.md, including the "defining fit" design (gap-fill vs
 style-amplify, philosophy selects the mode, the honest value-vs-cost split).
 
-**In-scope fit first part (DONE 2026-07-21): `R/11_generation_gap.R`** ->
-`output/generation_gap.md` + `.csv`. Names each team's offensive shot-mix generation gap by
-zone (per-shot centered-pps decomposition), labels each gap (missing efficient looks vs
+**In-scope fit first part (DONE 2026-07-21, analytics-reviewer gated): `R/11_generation_gap.R`**
+-> `output/generation_gap.md` + `.csv`. Decomposes each team's generation gap versus the league
+into a VOLUME gap (FGA per 100 possessions -- turnovers, offensive rebounds, pace) and a MIX
+gap (shot selection, attributed by zone via a centered-pps split), which sum to the team's
+total gap and reconcile with shot_generation_per100 (Pearson 0.99). Reports a primary_driver
+per team (volume for 10 teams, mix for 5), labels each mix zone (missing efficient looks vs
 over-reliant on low-value), flags identity-driven zones (protect, not fill) via the ICC>=0.15
 anchor rule, and assigns a fit mode (gap-fill: NYL/PHX/SEA/WAS; style-amplify/protect: the
-other 11). This is a question-1 refinement (what do we need), offense-only, zone-level, with
-NO player-value or dollar component. One design note logged: the per-shot gap is the shot-mix
-component of generation and is deliberately not the same object as shot_generation_per100 (a
-per-100 level that also reflects shot volume), so the two do not reconcile by design. FOLLOW-UP
-before publish: run `analytics-reviewer` on R/11 + methodology.md (not yet gated).
+other 11). Question-1 refinement, offense-only, NO player-value or dollar component.
+Analytics-reviewer gate run 2026-07-20/21: no R/11 blockers; the volume+mix redesign was built
+in response to its WAS warning (a low-volume team judged only on per-shot mix is misread), and
+its methodology fixes (centered-formula description, Spearman 0.98 generation / 1.00 making)
+were applied. Reviewer NOTES deferred: minor wording only.
 
 **Still post-deadline, NOT prioritized (build only if time, out of scope for Aug 2 --
 cut list, tiers-not-dollars, no player-value layer):**
