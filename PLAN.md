@@ -316,20 +316,36 @@ metrics use equal weighting.
 - [ ] Boki Wang (GSV), Eli Horowitz / Lauren Manis / Mark Schindler (Toronto),
       Portland HC contact (Portland). Optional: Todd Whitehead (Synergy courtesy).
 
-## Post-deadline / future modeling (captured 2026-07-20, NOT prioritized -- build only if time)
+## Fit analysis and future modeling
 
-Wendy's ideas, captured so they are not lost. Both are out of scope for the Aug 2 build
-(cut list, tiers-not-dollars, no player-value layer, reproducibility boundary) and must not
-pull scope into the deadline deliverable. Build only after ship, and only if time allows.
+**Methodology doc (DONE 2026-07-21):** `output/methodology.md` -- the why-these-methods
+rationale companion to findings.md, including the "defining fit" design (gap-fill vs
+style-amplify, philosophy selects the mode, the honest value-vs-cost split).
+
+**In-scope fit first part (DONE 2026-07-21): `R/11_generation_gap.R`** ->
+`output/generation_gap.md` + `.csv`. Names each team's offensive shot-mix generation gap by
+zone (per-shot centered-pps decomposition), labels each gap (missing efficient looks vs
+over-reliant on low-value), flags identity-driven zones (protect, not fill) via the ICC>=0.15
+anchor rule, and assigns a fit mode (gap-fill: NYL/PHX/SEA/WAS; style-amplify/protect: the
+other 11). This is a question-1 refinement (what do we need), offense-only, zone-level, with
+NO player-value or dollar component. One design note logged: the per-shot gap is the shot-mix
+component of generation and is deliberately not the same object as shot_generation_per100 (a
+per-100 level that also reflects shot volume), so the two do not reconcile by design. FOLLOW-UP
+before publish: run `analytics-reviewer` on R/11 + methodology.md (not yet gated).
+
+**Still post-deadline, NOT prioritized (build only if time, out of scope for Aug 2 --
+cut list, tiers-not-dollars, no player-value layer):**
 
 - **Fit-vs-cost target scoring (value per cap dollar).** Rank candidate targets by
   `(fit_delta x player_value_over_replacement) / cost`, where cost = cap hit + outgoing asset
   value. Requires: a player-value metric (win shares / RAPM, not currently built), to-the-
   dollar cap data (breaks tiers-not-dollars; year-one-CBA trackers lag), and asset valuation
-  for the outgoing package (a trade machine, explicitly on the cut list). Recommended interim
-  step that stays in scope: a "cost-adjusted feasibility" read -- keep fit categorical but
-  rank profiles by fit WITHIN a team's feasible asset class, so the output is "best fit you
-  can afford," never "best fit, cap be damned." Needs no new data.
+  for the outgoing package (a trade machine, explicitly on the cut list). The in-scope first
+  part above (R/11, naming the gap) is now built; what remains post-deadline is the
+  player-value and cost sides. Recommended interim step that stays in scope: a
+  "cost-adjusted feasibility" read -- keep fit categorical but rank profiles by fit WITHIN a
+  team's feasible asset class, so the output is "best fit you can afford," never "best fit,
+  cap be damned." Needs no new data.
 - **Trade-outcome / win-share-boost model.** Predict a team's win delta from a fit-adjusted
   roster add. Requires: a player-value baseline, a counterfactual lineup / minutes model, a
   style-fit interaction term, and transaction history as training labels -- none identifiable
