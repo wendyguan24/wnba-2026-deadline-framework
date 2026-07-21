@@ -139,6 +139,31 @@ Philosophy selects the mode:
 This is why the deadline read outputs acquire / adjust / hold rather than a fit score: the
 lever is a coarse philosophy-and-need read, and fit refines it one level down.
 
+### 5a-bis. Standing/window: conditioning the recommendation, not the diagnosis (R/12)
+
+Philosophy above is supplied qualitatively; the framework also has one data-driven proxy
+for it: standing. R/12_standing.R computes each team's win-loss record and point
+differential from game results and ranks teams into a window tier (buyer: rank 1-5,
+comfortably in playoff position; bubble: rank 6-9, straddling the 8-seed line; seller:
+rank 10-15, out of the race, assuming the WNBA's 8-of-15 playoff format). This window is a
+proxy a front office overrides with private information it has and this framework does
+not (an ownership mandate, an injury outlook, a rebuild already underway despite a
+mediocre record) -- it is a data-driven default, not a verdict.
+
+Standing conditions the RECOMMENDATION, never the diagnosis. Identity, generation,
+making, and trajectory (Sections 3a-3d) are computed exactly as before, with no knowledge
+of any team's record -- that is what lets the framework claim it reads beyond the record
+in the first place, and folding standing into the diagnosis would quietly erase that
+claim. Instead, window is joined in only at the final step (R/08_deadline_read.R's
+`recommendation` column, R/11_generation_gap.R's `fit_read` column) to reconcile the
+record-independent read with where a team actually sits in the standings. The result: a
+seller and a contender with the same diagnosis get opposite recommendations. A team with
+a poor generation profile reads "acquire" as its diagnosis either way; paired with a
+seller's window that becomes sell-side framing ("accumulate/deal expirings, do not buy"),
+while paired with a buyer's window it proceeds as an actual acquire call, cap-gated as
+before. A bubble team gets neither a clean buy nor sell signal, but a judgment call that
+names the contested window and points back to trajectory.
+
 ### 5a. The value-versus-cost split (honest boundary)
 
 Assessable now, inside the constraints, as categorical or ordinal reads:
@@ -206,11 +231,22 @@ legible. Zones where the mix contribution sits on a stable, high-ICC identity me
 absolute z on an ICC-eligible share) are flagged identity-driven (protect): the
 over/under-weighting is a choice, not a gap, and filling it would be negative fit.
 
-The per-team fit mode now follows `primary_driver`: bottom-tertile generation with a
-volume-driven gap reads as gap-fill (the need is possession creation or ball security, not
-a zone); bottom-tertile with a mix-driven gap reads as gap-fill unless the most-negative
-mix zone is identity-driven, in which case it reads as style-amplify or protect; everything
-else reads as style-amplify or protect.
+The per-team recommendation (`fit_read`, replacing the earlier record-independent
+`fit_mode`) is now window-conditioned, per Section 5a-bis: a seller's read is "sell /
+accumulate" regardless of generation tier, since the offense diagnosis is context for a
+rebuild, not a buy signal. A buyer's read follows `primary_driver` and generation tertile:
+bottom-tertile generation with a volume-driven gap (or a mix-driven gap whose
+most-negative zone is not identity-driven) reads as gap-fill, naming either possession
+creation (volume-driven) or the specific non-identity zone; bottom-tertile where the
+most-negative mix zone IS identity-driven reads "reassess" instead of a blind protect,
+since a stable identity trait sitting at the bottom of the league is itself worth a second
+look, not an automatic pass; top-tertile generation reads amplify; middle-tertile reads
+"offense not the lever." A bubble team gets the same buyer-branch read wrapped in a
+judgment call that names the contested window. `making_pctile` is now shown beside
+`generation_pctile` in the output so a reader sees both offensive axes together, and a
+"secondary tune" line always names the team's top non-identity negative mix zone (even for
+amplify/volume-driven teams), so a real fixable deficit is not hidden just because it is
+not the primary driver.
 
 Three honesty caveats, stated in the output: generation has two drivers (volume and mix),
 and this report separates them rather than reading a low generation number as automatically

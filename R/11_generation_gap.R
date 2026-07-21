@@ -4,10 +4,22 @@
 #   offensive shot-diet generation gap versus the league into a VOLUME
 #   component and a MIX component, then attributes the mix component by ZONE,
 #   labels each mix-gap zone, flags identity-driven zones (a stable part of
-#   who the team is, not a hole to fill), and assigns a fit mode driven by
-#   which component (volume or mix) dominates the gap. This is a
-#   generation-gap attribution refinement of HANDOFF question 1 (what do we
-#   need), computed entirely from the shot-diet side.
+#   who the team is, not a hole to fill), and assigns a window-conditioned fit
+#   read (`fit_read`) driven by which component (volume or mix) dominates the
+#   gap AND by the team's standing-derived window (buyer/bubble/seller, see
+#   R/12_standing.R). This is a generation-gap attribution refinement of
+#   HANDOFF question 1 (what do we need), computed entirely from the
+#   shot-diet side.
+#
+#   Standing/window layer: `window` and `making_pctile` are added to the
+#   per-team output, and the recommendation label (`fit_read`, replacing the
+#   old `fit_mode`) is window-conditioned -- a seller's offense diagnosis is
+#   context, not a buy signal; a buyer's diagnosis drives an actual gap-fill/
+#   amplify/reassess call; a bubble team gets a judgment call. The diagnostic
+#   decomposition itself (volume_gap, mix_gap_total, total_gap, primary_driver,
+#   the per-zone mix rows, identity_driven) stays record-independent --
+#   standing conditions the RECOMMENDATION only, never the diagnosis, same
+#   design as R/08_deadline_read.R.
 #
 #   OUT OF SCOPE (post-deadline, see PLAN.md cut list): wins-over-replacement,
 #   win-shares/RAPM, any player-value or dollar computation, candidate
@@ -44,24 +56,32 @@
 #   only on team_share vs. league_share, not on volume, so it is unaffected
 #   by the volume/mix split.
 #
-#   primary_driver: "volume" if |volume_gap| >= |mix_gap_total|, else "mix".
-#   Fit mode uses primary_driver directly (see assign_fit_mode() below):
-#   bottom-tertile generation with a volume-driven gap reads as "gap-fill"
-#   (the need is possession creation / ball security, not a zone); bottom-
-#   tertile with a mix-driven gap reads as "gap-fill" unless the most-negative
-#   mix zone is identity-driven, in which case it is "style-amplify / protect";
-#   everything else is "style-amplify / protect".
+#   primary_driver: "volume" if |volume_gap| >= |mix_gap_total|, "mix" if
+#   |mix_gap_total| > |volume_gap|, OR "both" when BOTH abs(volume_gap) and
+#   abs(mix_gap_total) exceed 0.75 per 100 possessions (accepted gm fix: a
+#   team whose volume AND mix gaps are each individually large should not be
+#   filed under a single driver label). fit_read (replacing the former
+#   fit_mode) is window-conditioned -- see assign_fit_read() /
+#   buyer_branch_text() below: seller -> sell/accumulate regardless of
+#   generation tier; buyer with bottom-tertile generation -> gap-fill (named
+#   non-identity zone, or "possession creation" if primary_driver is
+#   literally "volume") unless the most-negative mix zone is identity-driven,
+#   in which case -> reassess; buyer with top-tertile generation -> amplify;
+#   buyer middle-tertile -> "offense not the lever"; bubble -> the buyer-branch
+#   text wrapped in a judgment call naming the contested window.
 #
 # Inputs:  data/processed/pbp_events.rds (shot events: actionType, shotResult,
 #            area, teamTricode, gameId),
 #          data/processed/team_generation_making.rds (team, fga, poss_count,
-#            shot_generation_per100 -- the official generation percentile
-#            source and the volume-component basis, kept consistent with the
-#            rest of the framework),
+#            shot_generation_per100, shot_making_per100 -- the official
+#            generation/making percentile source and the volume-component
+#            basis, kept consistent with the rest of the framework),
 #          data/processed/team_blups.rds (metric, team, adjusted_value --
 #            identity BLUPs for the identity-driven z-score check),
 #          output/icc_table.csv (metric, icc -- the ICC >= 0.15
-#            identity-eligibility floor)
+#            identity-eligibility floor),
+#          output/standing.csv (team, window -- from R/12_standing.R, run 12
+#            before 11; window conditions fit_read only, never the diagnosis)
 # Outputs: output/generation_gap.csv, output/generation_gap.md
 
 library(tidyverse)
@@ -206,7 +226,15 @@ decompose_team_generation_gap <- function(shot_rows, team_generation_making) {
 
   team_level %>%
     mutate(
-      primary_driver = if_else(abs(volume_gap) >= abs(mix_gap_total), "volume", "mix")
+      # Accepted gm fix: when both components individually exceed 0.75 per
+      # 100 possessions, neither is the sole story -- label "both" instead of
+      # picking the larger-magnitude one. Else fall back to the original
+      # larger-magnitude rule.
+      primary_driver = case_when(
+        abs(volume_gap) > 0.75 & abs(mix_gap_total) > 0.75 ~ "both",
+        abs(volume_gap) >= abs(mix_gap_total) ~ "volume",
+        TRUE ~ "mix"
+      )
     ) %>%
     select(team, V_team, M_team, V_league, M_league, mean_pps,
            volume_gap, mix_gap_total, total_gap, primary_driver)
@@ -239,8 +267,15 @@ decompose_mix_by_zone <- function(shot_rows, team_level) {
       type = case_when(
         mix_contribution >= 0 ~ "",
         team_share < league_share & league_pps > mean_pps ~ "missing efficient looks",
+        # Accepted gm fix (ATB3 relabel): a zone whose league_pps sits within
+        # 0.05 of the overall league mean_pps is a league-average look, not an
+        # inefficient one (this is Above the Break 3 specifically, ~0.996 vs
+        # mean ~1.02 -- see the footnote in render_generation_gap_md()).
+        # Over-weighting it is "slightly below-mean volume", not "over-reliant
+        # on low-value looks".
+        team_share > league_share & league_pps < mean_pps & abs(league_pps - mean_pps) < 0.05 ~ "slightly below-mean volume",
         team_share > league_share & league_pps < mean_pps ~ "over-reliant on low-value looks",
-        TRUE ~ "missing efficient looks"  # defensive fallback, should not trigger given the two cases above are exhaustive for mix_contribution < 0
+        TRUE ~ "missing efficient looks"  # defensive fallback, should not trigger given the cases above are exhaustive for mix_contribution < 0
       )
     ) %>%
     select(team, zone, team_share, league_share, league_pps, mix_contribution, type)
@@ -295,35 +330,153 @@ flag_identity_driven <- function(zone_table, team_blups, icc_table) {
     mutate(identity_driven = replace_na(identity_driven, FALSE))
 }
 
-#' Assign each team a fit mode from its generation percentile, primary_driver,
-#' and whether its most-negative mix zone is identity-driven (see file header).
+#' Load the standing/window table (R/12_standing.R)
 #'
-#' generation_pctile <= 33 (bottom tertile):
-#'   primary_driver == "volume" -> "gap-fill"
-#'   primary_driver == "mix": most-negative mix zone identity_driven ->
-#'     "style-amplify / protect", else -> "gap-fill"
-#' else -> "style-amplify / protect"
+#' @param path character, defaults to output/standing.csv
+#' @return tibble: team, wins, losses, win_pct, point_diff, rank,
+#'   games_back_from_8th, window (buyer/bubble/seller)
+load_standing <- function(path = "output/standing.csv") {
+  standing <- readr::read_csv(path, show_col_types = FALSE)
+
+  bad_windows <- setdiff(unique(standing$window), c("buyer", "bubble", "seller"))
+  if (length(bad_windows) > 0) {
+    stop(
+      "load_standing(): window must be one of buyer/bubble/seller, found: ",
+      paste(bad_windows, collapse = ", ")
+    )
+  }
+
+  standing
+}
+
+#' Find, per team, the most-negative mix-contribution zone (used for the
+#' identity-flag check that routes bottom-tertile buyer/bubble teams to
+#' "reassess" instead of "gap-fill" in buyer_branch_text() below). Unchanged
+#' from the prior mix-only-section logic, just extracted as its own helper.
 #'
-#' @param full_table tibble, team-zone rows with generation_pctile,
-#'   primary_driver, mix_contribution, identity_driven joined in
-#' @return tibble, team, fit_mode
-assign_fit_mode <- function(full_table) {
-  most_negative_mix <- full_table %>%
+#' @param full_table tibble, team-zone rows with mix_contribution, identity_driven
+#' @return tibble, team, most_negative_zone, most_negative_identity_driven
+most_negative_mix_zone <- function(full_table) {
+  full_table %>%
     group_by(team) %>%
     slice_min(mix_contribution, n = 1, with_ties = FALSE) %>%
     ungroup() %>%
-    select(team, generation_pctile, primary_driver, most_negative_mix_identity_driven = identity_driven)
+    select(team, most_negative_zone = zone, most_negative_identity_driven = identity_driven)
+}
 
-  most_negative_mix %>%
+#' Find, per team, the most-negative NON-identity-driven mix-contribution
+#' zone with mix_contribution < 0 -- a real, fixable shot-selection deficit,
+#' as opposed to a stable identity trait to protect. Named unconditionally in
+#' the md per-team block as a "secondary tune" line (accepted gm fix: fixable
+#' non-identity deficits should surface even for amplify/volume-driven teams,
+#' not only for primary_driver == "mix" teams as the prior version's "Top
+#' mix-gap zones" section was restricted to).
+#'
+#' @param full_table tibble, team-zone rows with mix_contribution, identity_driven, type
+#' @return tibble, one row per team in full_table: team, secondary_tune_zone,
+#'   secondary_tune_contribution, secondary_tune_type (all NA if the team has
+#'   no negative, non-identity-driven mix zone)
+top_non_identity_negative_mix_zone <- function(full_table) {
+  all_teams <- tibble(team = unique(full_table$team))
+
+  candidates <- full_table %>%
+    filter(mix_contribution < 0, !identity_driven) %>%
+    group_by(team) %>%
+    slice_min(mix_contribution, n = 1, with_ties = FALSE) %>%
+    ungroup() %>%
+    select(team,
+           secondary_tune_zone = zone,
+           secondary_tune_contribution = mix_contribution,
+           secondary_tune_type = type)
+
+  all_teams %>%
+    left_join(candidates, by = "team")
+}
+
+#' Buyer-branch fit-read text: what a team with a real playoff window would
+#' be told about its offense, from generation tertile, primary_driver, and
+#' whether the most-negative mix zone is identity-driven. Used directly for
+#' window == "buyer", and wrapped in a judgment prefix/suffix for
+#' window == "bubble" (see assign_fit_read() below).
+#'
+#' generation_pctile <= 33 (bottom tertile):
+#'   most_negative_identity_driven -> "reassess: ..." (the gap sits on a
+#'     stable identity trait, not an obvious hole -- see making/trajectory)
+#'   else, primary_driver == "volume" -> "gap-fill (acquire): possession creation"
+#'   else -> "gap-fill (acquire): " + the named top non-identity mix zone
+#' generation_pctile >= 67 (top tertile) -> "amplify (extend the edge)"
+#' else (middle tertile) -> "offense not the lever ..."
+#'
+#' @param generation_pctile numeric, 0-100
+#' @param primary_driver character, "volume"/"mix"/"both"
+#' @param most_negative_identity_driven logical
+#' @param secondary_tune_zone character or NA, the named non-identity zone
+#' @return character, the buyer-branch fit-read text
+buyer_branch_text <- function(generation_pctile, primary_driver,
+                               most_negative_identity_driven, secondary_tune_zone) {
+  if (generation_pctile <= 33) {
+    if (isTRUE(most_negative_identity_driven)) {
+      return(paste(
+        "reassess: bottom-tier offense but the gap is identity-flagged --",
+        "see making/trajectory (the identity may be the problem, not a",
+        "strength to protect)"
+      ))
+    }
+    if (identical(primary_driver, "volume")) {
+      return("gap-fill (acquire): possession creation")
+    }
+    zone_name <- if (is.na(secondary_tune_zone)) "shot selection" else secondary_tune_zone
+    return(paste0("gap-fill (acquire): ", zone_name))
+  }
+  if (generation_pctile >= 67) {
+    return("amplify (extend the edge)")
+  }
+  "offense not the lever (look to defense/other; offense is roughly league-average)"
+}
+
+#' Assign each team a window-conditioned fit_read (standing/window layer,
+#' replaces the record-independent fit_mode). Window (buyer/bubble/seller,
+#' R/12_standing.R) conditions this RECOMMENDATION only; the diagnostic
+#' decomposition (volume_gap, mix_gap_total, primary_driver, identity_driven)
+#' feeding buyer_branch_text() is untouched and stays record-independent.
+#'
+#'   window == "seller"  -> "sell / accumulate (offense diagnosis below is
+#'     context, not a buy)", regardless of generation tier
+#'   window == "buyer"   -> buyer_branch_text(...)
+#'   window == "bubble"  -> "judgment: " + buyer_branch_text(...) +
+#'     " -- contested window, weigh trajectory"
+#'
+#' @param full_table tibble, team-zone rows (generation_pctile, primary_driver,
+#'   mix_contribution, identity_driven, zone, type)
+#' @param standing tibble, from load_standing() (team, window)
+#' @return tibble, team, window, fit_read
+assign_fit_read <- function(full_table, standing) {
+  team_level <- full_table %>%
+    distinct(team, generation_pctile, primary_driver)
+
+  most_neg <- most_negative_mix_zone(full_table)
+  secondary <- top_non_identity_negative_mix_zone(full_table)
+
+  team_level %>%
+    left_join(most_neg, by = "team") %>%
+    left_join(secondary, by = "team") %>%
+    left_join(standing %>% select(team, window), by = "team") %>%
+    rowwise() %>%
     mutate(
-      fit_mode = case_when(
-        generation_pctile > 33 ~ "style-amplify / protect",
-        primary_driver == "volume" ~ "gap-fill",
-        most_negative_mix_identity_driven ~ "style-amplify / protect",
-        TRUE ~ "gap-fill"
+      buyer_text = buyer_branch_text(
+        generation_pctile, primary_driver, most_negative_identity_driven, secondary_tune_zone
+      ),
+      fit_read = case_when(
+        window == "seller" ~ "sell / accumulate (offense diagnosis below is context, not a buy)",
+        window == "buyer"  ~ buyer_text,
+        window == "bubble" ~ paste0(
+          "judgment: ", buyer_text, " -- contested window, weigh trajectory"
+        ),
+        TRUE ~ NA_character_
       )
     ) %>%
-    select(team, fit_mode)
+    ungroup() %>%
+    select(team, window, fit_read)
 }
 
 #' Build the full generation-gap table, one row per team-zone (5 zones per team)
@@ -332,8 +485,12 @@ assign_fit_mode <- function(full_table) {
 #' @param team_generation_making tibble, data/processed/team_generation_making.rds
 #' @param team_blups tibble, data/processed/team_blups.rds
 #' @param icc_table tibble, output/icc_table.csv
-#' @return list(gap_table = tibble with fit_mode joined in, fit_modes = tibble team/fit_mode)
-build_generation_gap <- function(pbp_events, team_generation_making, team_blups, icc_table) {
+#' @param standing tibble, from load_standing() (team, window --
+#'   R/12_standing.R). Conditions fit_read only, never the diagnosis.
+#' @return list(gap_table = tibble with window/fit_read joined in,
+#'   fit_reads = tibble team/window/fit_read, secondary_tune = tibble of the
+#'   per-team "secondary tune" non-identity negative mix zone)
+build_generation_gap <- function(pbp_events, team_generation_making, team_blups, icc_table, standing) {
   shot_rows <- build_shot_rows(pbp_events)
 
   team_level <- decompose_team_generation_gap(shot_rows, team_generation_making)
@@ -341,40 +498,49 @@ build_generation_gap <- function(pbp_events, team_generation_making, team_blups,
   zone_table <- decompose_mix_by_zone(shot_rows, team_level) %>%
     flag_identity_driven(team_blups, icc_table)
 
-  # generation_pctile is computed HERE, in R/11, via percent_rank of
-  # shot_generation_per100 (which itself comes from 07_expected_points.R).
-  # It is the official per-100-possessions generation standing, carried for
-  # the fit-mode call; total_gap (volume_gap + mix_gap_total) is this
-  # script's zone-approximated version of the same quantity and is asserted
-  # to reconcile with it (see decompose_team_generation_gap()).
-  generation_pctile_table <- team_generation_making %>%
-    mutate(generation_pctile = round(percent_rank(shot_generation_per100) * 100)) %>%
-    select(team, generation_pctile)
+  # generation_pctile and making_pctile are computed HERE, in R/11, via
+  # percent_rank of shot_generation_per100 / shot_making_per100 (both from
+  # 07_expected_points.R). generation_pctile is the official per-100-
+  # possessions generation standing, carried for the fit_read call;
+  # total_gap (volume_gap + mix_gap_total) is this script's zone-approximated
+  # version of the same quantity and is asserted to reconcile with it (see
+  # decompose_team_generation_gap()). making_pctile is descriptive context
+  # shown beside generation_pctile in the md (accepted gm fix), not used in
+  # the offense-only decomposition above.
+  pctile_table <- team_generation_making %>%
+    mutate(
+      generation_pctile = round(percent_rank(shot_generation_per100) * 100),
+      making_pctile = round(percent_rank(shot_making_per100) * 100)
+    ) %>%
+    select(team, generation_pctile, making_pctile)
 
   full_table <- zone_table %>%
     left_join(team_level %>% select(team, volume_gap, mix_gap_total, total_gap, primary_driver),
                by = "team") %>%
-    left_join(generation_pctile_table, by = "team")
+    left_join(pctile_table, by = "team")
 
-  fit_modes <- assign_fit_mode(full_table)
+  fit_reads <- assign_fit_read(full_table, standing)
+  secondary_tune <- top_non_identity_negative_mix_zone(full_table)
 
   gap_table_out <- full_table %>%
-    left_join(fit_modes, by = "team") %>%
+    left_join(fit_reads, by = "team") %>%
     select(
-      team, generation_pctile, volume_gap, mix_gap_total, total_gap,
-      primary_driver, fit_mode, zone, mix_contribution, type, identity_driven
+      team, generation_pctile, making_pctile, window, volume_gap, mix_gap_total,
+      total_gap, primary_driver, fit_read, zone, mix_contribution, type, identity_driven
     ) %>%
     arrange(team, zone)
 
-  list(gap_table = gap_table_out, fit_modes = fit_modes)
+  list(gap_table = gap_table_out, fit_reads = fit_reads, secondary_tune = secondary_tune)
 }
 
 #' Render the generation-gap markdown report
 #'
 #' @param gap_table tibble, from build_generation_gap()$gap_table
 #' @param fit_modes tibble, from build_generation_gap()$fit_modes
+#' @param fit_reads tibble, from build_generation_gap()$fit_reads (team,
+#'   window, fit_read)
 #' @return character vector, markdown lines
-render_generation_gap_md <- function(gap_table, fit_modes) {
+render_generation_gap_md <- function(gap_table, fit_reads) {
   header <- c(
     "# WNBA 2026 Offensive Generation Gap: Volume + Mix Decomposition",
     "",
@@ -389,36 +555,48 @@ render_generation_gap_md <- function(gap_table, fit_modes) {
       "quality), the second attributed by zone with a centered-pps",
       "contribution. The two components sum to the team's total generation",
       "gap, which reconciles with the team's shot_generation_per100",
-      "standing (generation percentile shown per team, computed in R/11 via",
-      "percent_rank of shot_generation_per100, which itself comes from",
-      "07_expected_points.R). primary_driver names which component (volume",
-      "or mix) accounts for more of the gap."
+      "standing (generation and making percentile shown per team, computed",
+      "in R/11 via percent_rank of shot_generation_per100 /",
+      "shot_making_per100, both from 07_expected_points.R). primary_driver",
+      "names which component (volume, mix, or both when each individually",
+      "exceeds 0.75 per 100 possessions) accounts for the gap."
+    ),
+    "",
+    paste(
+      "fit_read is window-conditioned (standing/window layer,",
+      "R/12_standing.R): window (buyer/bubble/seller, from each team's",
+      "game-result record) sets the RECOMMENDATION here; the diagnostic",
+      "decomposition above it (volume_gap, mix_gap_total, primary_driver,",
+      "identity_driven) stays record-independent and unchanged by window."
     ),
     ""
   )
 
-  team_order <- fit_modes %>%
+  team_order <- fit_reads %>%
     arrange(team) %>%
     pull(team)
 
   team_blocks <- map(team_order, function(tm) {
     team_rows <- gap_table %>% filter(team == tm)
     gen_pctile <- unique(team_rows$generation_pctile)
+    making_pctile <- unique(team_rows$making_pctile)
+    window <- unique(team_rows$window)
     primary_driver <- unique(team_rows$primary_driver)
     volume_gap <- unique(team_rows$volume_gap)
     mix_gap_total <- unique(team_rows$mix_gap_total)
     total_gap <- unique(team_rows$total_gap)
-    fit_mode <- fit_modes %>% filter(team == tm) %>% pull(fit_mode)
+    fit_read <- fit_reads %>% filter(team == tm) %>% pull(fit_read)
 
     gap_summary_lines <- c(
-      paste0("- Generation percentile: ", gen_pctile),
+      paste0("- Generation percentile: ", gen_pctile, " (making percentile: ", making_pctile, ")"),
+      paste0("- Window: ", window),
       paste0("- Primary driver: ", primary_driver),
       paste0("- Volume gap (per 100 poss): ", sprintf("%.2f", volume_gap)),
       paste0("- Mix gap, total (per 100 poss): ", sprintf("%.2f", mix_gap_total)),
       paste0("- Total gap (per 100 poss): ", sprintf("%.2f", total_gap))
     )
 
-    mix_zone_lines <- if (primary_driver == "mix") {
+    mix_zone_lines <- if (primary_driver %in% c("mix", "both")) {
       top2 <- team_rows %>%
         filter(mix_contribution < 0) %>%
         arrange(mix_contribution) %>%
@@ -443,12 +621,31 @@ render_generation_gap_md <- function(gap_table, fit_modes) {
       character(0)
     }
 
+    # Accepted gm fix: always name the top non-identity negative mix zone as
+    # a "secondary tune" line, even for amplify/volume-driven teams, so a
+    # fixable non-identity deficit (e.g. a team's Restricted Area gap) is not
+    # silently dropped just because it isn't the primary driver.
+    secondary_row <- team_rows %>%
+      filter(mix_contribution < 0, !identity_driven) %>%
+      arrange(mix_contribution) %>%
+      slice_head(n = 1)
+
+    secondary_tune_line <- if (nrow(secondary_row) == 0) {
+      "- Secondary tune (non-identity): none (no negative, non-identity-driven mix zone)"
+    } else {
+      paste0(
+        "- Secondary tune (non-identity): ", secondary_row$zone, ": ", secondary_row$type,
+        " (mix contribution: ", sprintf("%.3f", secondary_row$mix_contribution), ")"
+      )
+    }
+
     c(
       paste0("## ", tm),
       "",
       gap_summary_lines,
       mix_zone_lines,
-      paste0("- Fit mode: ", fit_mode),
+      secondary_tune_line,
+      paste0("- Fit read: ", fit_read),
       ""
     )
   }) %>%
@@ -466,6 +663,17 @@ render_generation_gap_md <- function(gap_table, fit_modes) {
       "standing -- this is by construction, not a coincidence, since total_gap",
       "is the zone-approximated version of the same generation-versus-league",
       "quantity."
+    ),
+    "",
+    paste(
+      "fit_read is window-conditioned: a seller's offense diagnosis is",
+      "context for a rebuild, not a buy signal (\"sell / accumulate\"); a",
+      "buyer's diagnosis drives an actual gap-fill, amplify, reassess, or",
+      "\"offense not the lever\" call; a bubble team gets a judgment call",
+      "that names the contested window rather than a flat verdict. Window",
+      "comes from each team's win-loss record and point differential",
+      "(R/12_standing.R), never from anything in the offense decomposition",
+      "above -- it conditions the recommendation, not the diagnosis."
     ),
     ""
   )
@@ -496,8 +704,16 @@ render_generation_gap_md <- function(gap_table, fit_modes) {
     paste(
       "Footnote: Above the Break 3 (about 0.996 points per shot) sits just",
       "below the rim-inflated overall mean (about 1.02), so it is tagged",
-      "low-value only relative to that mean; it is a league-average look,",
-      "not an inefficient one."
+      "low-value only relative to that mean (\"slightly below-mean volume\"",
+      "when a team over-weights it); it is a league-average look, not an",
+      "inefficient one."
+    ),
+    "",
+    paste(
+      "Window (buyer/bubble/seller) is a data-driven proxy for a team's",
+      "competitive standing from game results, not a front-office decision;",
+      "a real front office overrides it with private information. See",
+      "output/standing.csv and R/12_standing.R."
     )
   )
 
@@ -509,17 +725,19 @@ main <- function() {
   team_generation_making <- readRDS("data/processed/team_generation_making.rds")
   team_blups <- readRDS("data/processed/team_blups.rds")
   icc_table <- readr::read_csv("output/icc_table.csv", show_col_types = FALSE)
+  standing <- load_standing()
 
-  result <- build_generation_gap(pbp_events, team_generation_making, team_blups, icc_table)
+  result <- build_generation_gap(pbp_events, team_generation_making, team_blups, icc_table, standing)
   gap_table <- result$gap_table
-  fit_modes <- result$fit_modes
+  fit_reads <- result$fit_reads
 
   write_csv(gap_table, "output/generation_gap.csv")
-  writeLines(render_generation_gap_md(gap_table, fit_modes), "output/generation_gap.md")
+  writeLines(render_generation_gap_md(gap_table, fit_reads), "output/generation_gap.md")
 
-  message("Fit mode + primary driver by team:")
+  message("Fit read + window + primary driver by team:")
   team_summary <- gap_table %>%
-    distinct(team, generation_pctile, volume_gap, mix_gap_total, total_gap, primary_driver, fit_mode) %>%
+    distinct(team, generation_pctile, making_pctile, window, volume_gap,
+             mix_gap_total, total_gap, primary_driver, fit_read) %>%
     arrange(team)
   print(team_summary, n = Inf)
 

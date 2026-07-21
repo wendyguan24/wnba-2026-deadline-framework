@@ -1,76 +1,76 @@
-team,generation_pctile,volume_gap,mix_gap_total,total_gap,primary_driver,fit_mode,zone,mix_contribution,type,identity_driven
-ATL,100,3.4629720813333282,4.516271758611999,7.979243839945327,mix,style-amplify / protect,Above the Break 3,-0.023254784074627353,over-reliant on low-value looks,FALSE
-ATL,100,3.4629720813333282,4.516271758611999,7.979243839945327,mix,style-amplify / protect,Corner 3,-0.015426448602902558,missing efficient looks,FALSE
-ATL,100,3.4629720813333282,4.516271758611999,7.979243839945327,mix,style-amplify / protect,In The Paint (Non-RA),0.6593104028627532,,FALSE
-ATL,100,3.4629720813333282,4.516271758611999,7.979243839945327,mix,style-amplify / protect,Mid-Range,1.758984774799075,,TRUE
-ATL,100,3.4629720813333282,4.516271758611999,7.979243839945327,mix,style-amplify / protect,Restricted Area,2.136657813627694,,TRUE
-CHI,79,-0.7178265247671431,2.1614867043893637,1.4436601796222206,mix,style-amplify / protect,Above the Break 3,0.08352795149321282,,FALSE
-CHI,79,-0.7178265247671431,2.1614867043893637,1.4436601796222206,mix,style-amplify / protect,Corner 3,0.046933276566093286,,FALSE
-CHI,79,-0.7178265247671431,2.1614867043893637,1.4436601796222206,mix,style-amplify / protect,In The Paint (Non-RA),0.23097765983393231,,FALSE
-CHI,79,-0.7178265247671431,2.1614867043893637,1.4436601796222206,mix,style-amplify / protect,Mid-Range,0.4678894522153517,,FALSE
-CHI,79,-0.7178265247671431,2.1614867043893637,1.4436601796222206,mix,style-amplify / protect,Restricted Area,1.3321583642807804,,TRUE
-CON,57,0.6355374821544926,0.027930462768637466,0.66346794492313,volume,style-amplify / protect,Above the Break 3,0.17106237948705796,,TRUE
-CON,57,0.6355374821544926,0.027930462768637466,0.66346794492313,volume,style-amplify / protect,Corner 3,-0.1384604591431384,missing efficient looks,FALSE
-CON,57,0.6355374821544926,0.027930462768637466,0.66346794492313,volume,style-amplify / protect,In The Paint (Non-RA),0.22329089890752457,,FALSE
-CON,57,0.6355374821544926,0.027930462768637466,0.66346794492313,volume,style-amplify / protect,Mid-Range,-1.341003202821591,over-reliant on low-value looks,TRUE
-CON,57,0.6355374821544926,0.027930462768637466,0.66346794492313,volume,style-amplify / protect,Restricted Area,1.1130408463387793,,TRUE
-DAL,93,6.312165979991127,-2.7941870124365513,3.5179789675545754,volume,style-amplify / protect,Above the Break 3,0.03154736665764758,,FALSE
-DAL,93,6.312165979991127,-2.7941870124365513,3.5179789675545754,volume,style-amplify / protect,Corner 3,-0.11770459457844373,missing efficient looks,FALSE
-DAL,93,6.312165979991127,-2.7941870124365513,3.5179789675545754,volume,style-amplify / protect,In The Paint (Non-RA),-0.2710850974025033,over-reliant on low-value looks,FALSE
-DAL,93,6.312165979991127,-2.7941870124365513,3.5179789675545754,volume,style-amplify / protect,Mid-Range,-1.4727903698342928,over-reliant on low-value looks,TRUE
-DAL,93,6.312165979991127,-2.7941870124365513,3.5179789675545754,volume,style-amplify / protect,Restricted Area,-0.9641543172789642,missing efficient looks,FALSE
-GSV,71,4.219881104920171,-2.187469933116982,2.032411171803189,volume,style-amplify / protect,Above the Break 3,-0.16220826200276348,over-reliant on low-value looks,TRUE
-GSV,71,4.219881104920171,-2.187469933116982,2.032411171803189,volume,style-amplify / protect,Corner 3,0.02777499987322695,,FALSE
-GSV,71,4.219881104920171,-2.187469933116982,2.032411171803189,volume,style-amplify / protect,In The Paint (Non-RA),-0.1471061229806572,over-reliant on low-value looks,FALSE
-GSV,71,4.219881104920171,-2.187469933116982,2.032411171803189,volume,style-amplify / protect,Mid-Range,-0.0665142433328922,over-reliant on low-value looks,FALSE
-GSV,71,4.219881104920171,-2.187469933116982,2.032411171803189,volume,style-amplify / protect,Restricted Area,-1.839416304673896,missing efficient looks,TRUE
-IND,36,-1.641702507188034,0.6660122788543181,-0.9756902283337159,volume,style-amplify / protect,Above the Break 3,-0.05550784037608236,over-reliant on low-value looks,FALSE
-IND,36,-1.641702507188034,0.6660122788543181,-0.9756902283337159,volume,style-amplify / protect,Corner 3,-0.0038654699193637924,missing efficient looks,FALSE
-IND,36,-1.641702507188034,0.6660122788543181,-0.9756902283337159,volume,style-amplify / protect,In The Paint (Non-RA),0.45158194892535936,,FALSE
-IND,36,-1.641702507188034,0.6660122788543181,-0.9756902283337159,volume,style-amplify / protect,Mid-Range,0.13149122139337757,,FALSE
-IND,36,-1.641702507188034,0.6660122788543181,-0.9756902283337159,volume,style-amplify / protect,Restricted Area,0.1423124188310298,,FALSE
-LAS,43,-1.516675086459216,0.6798770097546862,-0.8367980767045298,volume,style-amplify / protect,Above the Break 3,-0.048500194957291604,over-reliant on low-value looks,FALSE
-LAS,43,-1.516675086459216,0.6798770097546862,-0.8367980767045298,volume,style-amplify / protect,Corner 3,-0.05208474421796811,missing efficient looks,FALSE
-LAS,43,-1.516675086459216,0.6798770097546862,-0.8367980767045298,volume,style-amplify / protect,In The Paint (Non-RA),-0.0258886321605029,over-reliant on low-value looks,FALSE
-LAS,43,-1.516675086459216,0.6798770097546862,-0.8367980767045298,volume,style-amplify / protect,Mid-Range,0.6130026921820891,,FALSE
-LAS,43,-1.516675086459216,0.6798770097546862,-0.8367980767045298,volume,style-amplify / protect,Restricted Area,0.1933478889083603,,FALSE
-LVA,7,0.30214192221311315,-3.925363299958089,-3.6232213777449758,mix,style-amplify / protect,Above the Break 3,0.06675173231583933,,FALSE
-LVA,7,0.30214192221311315,-3.925363299958089,-3.6232213777449758,mix,style-amplify / protect,Corner 3,0.003358545615918768,,FALSE
-LVA,7,0.30214192221311315,-3.925363299958089,-3.6232213777449758,mix,style-amplify / protect,In The Paint (Non-RA),-1.100900994412275,over-reliant on low-value looks,FALSE
-LVA,7,0.30214192221311315,-3.925363299958089,-3.6232213777449758,mix,style-amplify / protect,Mid-Range,-1.1776544504190005,over-reliant on low-value looks,TRUE
-LVA,7,0.30214192221311315,-3.925363299958089,-3.6232213777449758,mix,style-amplify / protect,Restricted Area,-1.716918133058565,missing efficient looks,TRUE
-MIN,86,2.4378546425467627,-0.5413768760391802,1.8964777665075825,volume,style-amplify / protect,Above the Break 3,0.09882664903918738,,TRUE
-MIN,86,2.4378546425467627,-0.5413768760391802,1.8964777665075825,volume,style-amplify / protect,Corner 3,-0.022792576115305344,missing efficient looks,FALSE
-MIN,86,2.4378546425467627,-0.5413768760391802,1.8964777665075825,volume,style-amplify / protect,In The Paint (Non-RA),0.5635787243166647,,FALSE
-MIN,86,2.4378546425467627,-0.5413768760391802,1.8964777665075825,volume,style-amplify / protect,Mid-Range,-1.5271963781719682,over-reliant on low-value looks,TRUE
-MIN,86,2.4378546425467627,-0.5413768760391802,1.8964777665075825,volume,style-amplify / protect,Restricted Area,0.3462067048922377,,FALSE
-NYL,14,-3.470877946308432,0.8243057607901609,-2.646572185518271,volume,gap-fill,Above the Break 3,-0.12077787185457332,over-reliant on low-value looks,TRUE
-NYL,14,-3.470877946308432,0.8243057607901609,-2.646572185518271,volume,gap-fill,Corner 3,0.06417484663688681,,FALSE
-NYL,14,-3.470877946308432,0.8243057607901609,-2.646572185518271,volume,gap-fill,In The Paint (Non-RA),0.14455980405070798,,FALSE
-NYL,14,-3.470877946308432,0.8243057607901609,-2.646572185518271,volume,gap-fill,Mid-Range,1.0099025502909584,,TRUE
-NYL,14,-3.470877946308432,0.8243057607901609,-2.646572185518271,volume,gap-fill,Restricted Area,-0.273553568333826,missing efficient looks,FALSE
-PDX,64,-0.40163005578281985,1.045537014305686,0.6439069585228661,mix,style-amplify / protect,Above the Break 3,-0.08494383169516452,over-reliant on low-value looks,TRUE
-PDX,64,-0.40163005578281985,1.045537014305686,0.6439069585228661,mix,style-amplify / protect,Corner 3,0.039272107565840694,,FALSE
-PDX,64,-0.40163005578281985,1.045537014305686,0.6439069585228661,mix,style-amplify / protect,In The Paint (Non-RA),-0.28563631027020026,over-reliant on low-value looks,FALSE
-PDX,64,-0.40163005578281985,1.045537014305686,0.6439069585228661,mix,style-amplify / protect,Mid-Range,1.4095677194251461,,TRUE
-PDX,64,-0.40163005578281985,1.045537014305686,0.6439069585228661,mix,style-amplify / protect,Restricted Area,-0.032722670719935766,missing efficient looks,FALSE
-PHX,21,-2.1946268115367014,-1.244976838883737,-3.4396036504204384,volume,gap-fill,Above the Break 3,7.872022769000597e-4,,FALSE
-PHX,21,-2.1946268115367014,-1.244976838883737,-3.4396036504204384,volume,gap-fill,Corner 3,0.07058593728709588,,FALSE
-PHX,21,-2.1946268115367014,-1.244976838883737,-3.4396036504204384,volume,gap-fill,In The Paint (Non-RA),-0.18429939313325244,over-reliant on low-value looks,FALSE
-PHX,21,-2.1946268115367014,-1.244976838883737,-3.4396036504204384,volume,gap-fill,Mid-Range,-0.38387082720086096,over-reliant on low-value looks,FALSE
-PHX,21,-2.1946268115367014,-1.244976838883737,-3.4396036504204384,volume,gap-fill,Restricted Area,-0.7481797581136289,missing efficient looks,FALSE
-SEA,29,-0.9527054694108394,-1.530618603517684,-2.4833240729285233,mix,gap-fill,Above the Break 3,-0.02783322766674528,over-reliant on low-value looks,FALSE
-SEA,29,-0.9527054694108394,-1.530618603517684,-2.4833240729285233,mix,gap-fill,Corner 3,-0.020496524029108915,missing efficient looks,FALSE
-SEA,29,-0.9527054694108394,-1.530618603517684,-2.4833240729285233,mix,gap-fill,In The Paint (Non-RA),-0.5327763483331611,over-reliant on low-value looks,FALSE
-SEA,29,-0.9527054694108394,-1.530618603517684,-2.4833240729285233,mix,gap-fill,Mid-Range,-0.058924954209232154,over-reliant on low-value looks,FALSE
-SEA,29,-0.9527054694108394,-1.530618603517684,-2.4833240729285233,mix,gap-fill,Restricted Area,-0.8905875492794281,missing efficient looks,FALSE
-TOR,50,-1.1731587893194781,0.697032423402623,-0.4761263659168552,volume,style-amplify / protect,Above the Break 3,-0.04199344331402806,over-reliant on low-value looks,FALSE
-TOR,50,-1.1731587893194781,0.697032423402623,-0.4761263659168552,volume,style-amplify / protect,Corner 3,0.13401811159511268,,FALSE
-TOR,50,-1.1731587893194781,0.697032423402623,-0.4761263659168552,volume,style-amplify / protect,In The Paint (Non-RA),0.6727531918441656,,FALSE
-TOR,50,-1.1731587893194781,0.697032423402623,-0.4761263659168552,volume,style-amplify / protect,Mid-Range,-0.04887591622963992,over-reliant on low-value looks,FALSE
-TOR,50,-1.1731587893194781,0.697032423402623,-0.4761263659168552,volume,style-amplify / protect,Restricted Area,-0.01886952049298213,missing efficient looks,FALSE
-WAS,0,-5.251975638945167,1.655080194802516,-3.5968954441426506,volume,gap-fill,Above the Break 3,0.11490799860904391,,TRUE
-WAS,0,-5.251975638945167,1.655080194802516,-3.5968954441426506,volume,gap-fill,Corner 3,-0.021036446743979087,missing efficient looks,FALSE
-WAS,0,-5.251975638945167,1.655080194802516,-3.5968954441426506,volume,gap-fill,In The Paint (Non-RA),-0.4127858055064575,over-reliant on low-value looks,FALSE
-WAS,0,-5.251975638945167,1.655080194802516,-3.5968954441426506,volume,gap-fill,Mid-Range,0.7103907758967324,,FALSE
-WAS,0,-5.251975638945167,1.655080194802516,-3.5968954441426506,volume,gap-fill,Restricted Area,1.2636036725471775,,TRUE
+team,generation_pctile,making_pctile,window,volume_gap,mix_gap_total,total_gap,primary_driver,fit_read,zone,mix_contribution,type,identity_driven
+ATL,100,0,bubble,3.4629720813333282,4.516271758611999,7.979243839945327,both,"judgment: amplify (extend the edge) -- contested window, weigh trajectory",Above the Break 3,-0.023254784074627353,slightly below-mean volume,FALSE
+ATL,100,0,bubble,3.4629720813333282,4.516271758611999,7.979243839945327,both,"judgment: amplify (extend the edge) -- contested window, weigh trajectory",Corner 3,-0.015426448602902558,missing efficient looks,FALSE
+ATL,100,0,bubble,3.4629720813333282,4.516271758611999,7.979243839945327,both,"judgment: amplify (extend the edge) -- contested window, weigh trajectory",In The Paint (Non-RA),0.6593104028627532,,FALSE
+ATL,100,0,bubble,3.4629720813333282,4.516271758611999,7.979243839945327,both,"judgment: amplify (extend the edge) -- contested window, weigh trajectory",Mid-Range,1.758984774799075,,TRUE
+ATL,100,0,bubble,3.4629720813333282,4.516271758611999,7.979243839945327,both,"judgment: amplify (extend the edge) -- contested window, weigh trajectory",Restricted Area,2.136657813627694,,TRUE
+CHI,79,21,seller,-0.7178265247671431,2.1614867043893637,1.4436601796222206,mix,"sell / accumulate (offense diagnosis below is context, not a buy)",Above the Break 3,0.08352795149321282,,FALSE
+CHI,79,21,seller,-0.7178265247671431,2.1614867043893637,1.4436601796222206,mix,"sell / accumulate (offense diagnosis below is context, not a buy)",Corner 3,0.046933276566093286,,FALSE
+CHI,79,21,seller,-0.7178265247671431,2.1614867043893637,1.4436601796222206,mix,"sell / accumulate (offense diagnosis below is context, not a buy)",In The Paint (Non-RA),0.23097765983393231,,FALSE
+CHI,79,21,seller,-0.7178265247671431,2.1614867043893637,1.4436601796222206,mix,"sell / accumulate (offense diagnosis below is context, not a buy)",Mid-Range,0.4678894522153517,,FALSE
+CHI,79,21,seller,-0.7178265247671431,2.1614867043893637,1.4436601796222206,mix,"sell / accumulate (offense diagnosis below is context, not a buy)",Restricted Area,1.3321583642807804,,TRUE
+CON,57,14,seller,0.6355374821544926,0.027930462768637466,0.66346794492313,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Above the Break 3,0.17106237948705796,,TRUE
+CON,57,14,seller,0.6355374821544926,0.027930462768637466,0.66346794492313,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Corner 3,-0.1384604591431384,missing efficient looks,FALSE
+CON,57,14,seller,0.6355374821544926,0.027930462768637466,0.66346794492313,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",In The Paint (Non-RA),0.22329089890752457,,FALSE
+CON,57,14,seller,0.6355374821544926,0.027930462768637466,0.66346794492313,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Mid-Range,-1.341003202821591,over-reliant on low-value looks,TRUE
+CON,57,14,seller,0.6355374821544926,0.027930462768637466,0.66346794492313,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Restricted Area,1.1130408463387793,,TRUE
+DAL,93,71,buyer,6.312165979991127,-2.7941870124365513,3.5179789675545754,both,amplify (extend the edge),Above the Break 3,0.03154736665764758,,FALSE
+DAL,93,71,buyer,6.312165979991127,-2.7941870124365513,3.5179789675545754,both,amplify (extend the edge),Corner 3,-0.11770459457844373,missing efficient looks,FALSE
+DAL,93,71,buyer,6.312165979991127,-2.7941870124365513,3.5179789675545754,both,amplify (extend the edge),In The Paint (Non-RA),-0.2710850974025033,over-reliant on low-value looks,FALSE
+DAL,93,71,buyer,6.312165979991127,-2.7941870124365513,3.5179789675545754,both,amplify (extend the edge),Mid-Range,-1.4727903698342928,over-reliant on low-value looks,TRUE
+DAL,93,71,buyer,6.312165979991127,-2.7941870124365513,3.5179789675545754,both,amplify (extend the edge),Restricted Area,-0.9641543172789642,missing efficient looks,FALSE
+GSV,71,50,buyer,4.219881104920171,-2.187469933116982,2.032411171803189,both,amplify (extend the edge),Above the Break 3,-0.16220826200276348,slightly below-mean volume,TRUE
+GSV,71,50,buyer,4.219881104920171,-2.187469933116982,2.032411171803189,both,amplify (extend the edge),Corner 3,0.02777499987322695,,FALSE
+GSV,71,50,buyer,4.219881104920171,-2.187469933116982,2.032411171803189,both,amplify (extend the edge),In The Paint (Non-RA),-0.1471061229806572,over-reliant on low-value looks,FALSE
+GSV,71,50,buyer,4.219881104920171,-2.187469933116982,2.032411171803189,both,amplify (extend the edge),Mid-Range,-0.0665142433328922,over-reliant on low-value looks,FALSE
+GSV,71,50,buyer,4.219881104920171,-2.187469933116982,2.032411171803189,both,amplify (extend the edge),Restricted Area,-1.839416304673896,missing efficient looks,TRUE
+IND,36,86,buyer,-1.641702507188034,0.6660122788543181,-0.9756902283337159,volume,offense not the lever (look to defense/other; offense is roughly league-average),Above the Break 3,-0.05550784037608236,slightly below-mean volume,FALSE
+IND,36,86,buyer,-1.641702507188034,0.6660122788543181,-0.9756902283337159,volume,offense not the lever (look to defense/other; offense is roughly league-average),Corner 3,-0.0038654699193637924,missing efficient looks,FALSE
+IND,36,86,buyer,-1.641702507188034,0.6660122788543181,-0.9756902283337159,volume,offense not the lever (look to defense/other; offense is roughly league-average),In The Paint (Non-RA),0.45158194892535936,,FALSE
+IND,36,86,buyer,-1.641702507188034,0.6660122788543181,-0.9756902283337159,volume,offense not the lever (look to defense/other; offense is roughly league-average),Mid-Range,0.13149122139337757,,FALSE
+IND,36,86,buyer,-1.641702507188034,0.6660122788543181,-0.9756902283337159,volume,offense not the lever (look to defense/other; offense is roughly league-average),Restricted Area,0.1423124188310298,,FALSE
+LAS,43,64,seller,-1.516675086459216,0.6798770097546862,-0.8367980767045298,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Above the Break 3,-0.048500194957291604,slightly below-mean volume,FALSE
+LAS,43,64,seller,-1.516675086459216,0.6798770097546862,-0.8367980767045298,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Corner 3,-0.05208474421796811,missing efficient looks,FALSE
+LAS,43,64,seller,-1.516675086459216,0.6798770097546862,-0.8367980767045298,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",In The Paint (Non-RA),-0.0258886321605029,over-reliant on low-value looks,FALSE
+LAS,43,64,seller,-1.516675086459216,0.6798770097546862,-0.8367980767045298,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Mid-Range,0.6130026921820891,,FALSE
+LAS,43,64,seller,-1.516675086459216,0.6798770097546862,-0.8367980767045298,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Restricted Area,0.1933478889083603,,FALSE
+LVA,7,100,buyer,0.30214192221311315,-3.925363299958089,-3.6232213777449758,mix,"reassess: bottom-tier offense but the gap is identity-flagged -- see making/trajectory (the identity may be the problem, not a strength to protect)",Above the Break 3,0.06675173231583933,,FALSE
+LVA,7,100,buyer,0.30214192221311315,-3.925363299958089,-3.6232213777449758,mix,"reassess: bottom-tier offense but the gap is identity-flagged -- see making/trajectory (the identity may be the problem, not a strength to protect)",Corner 3,0.003358545615918768,,FALSE
+LVA,7,100,buyer,0.30214192221311315,-3.925363299958089,-3.6232213777449758,mix,"reassess: bottom-tier offense but the gap is identity-flagged -- see making/trajectory (the identity may be the problem, not a strength to protect)",In The Paint (Non-RA),-1.100900994412275,over-reliant on low-value looks,FALSE
+LVA,7,100,buyer,0.30214192221311315,-3.925363299958089,-3.6232213777449758,mix,"reassess: bottom-tier offense but the gap is identity-flagged -- see making/trajectory (the identity may be the problem, not a strength to protect)",Mid-Range,-1.1776544504190005,over-reliant on low-value looks,TRUE
+LVA,7,100,buyer,0.30214192221311315,-3.925363299958089,-3.6232213777449758,mix,"reassess: bottom-tier offense but the gap is identity-flagged -- see making/trajectory (the identity may be the problem, not a strength to protect)",Restricted Area,-1.716918133058565,missing efficient looks,TRUE
+MIN,86,93,buyer,2.4378546425467627,-0.5413768760391802,1.8964777665075825,volume,amplify (extend the edge),Above the Break 3,0.09882664903918738,,TRUE
+MIN,86,93,buyer,2.4378546425467627,-0.5413768760391802,1.8964777665075825,volume,amplify (extend the edge),Corner 3,-0.022792576115305344,missing efficient looks,FALSE
+MIN,86,93,buyer,2.4378546425467627,-0.5413768760391802,1.8964777665075825,volume,amplify (extend the edge),In The Paint (Non-RA),0.5635787243166647,,FALSE
+MIN,86,93,buyer,2.4378546425467627,-0.5413768760391802,1.8964777665075825,volume,amplify (extend the edge),Mid-Range,-1.5271963781719682,over-reliant on low-value looks,TRUE
+MIN,86,93,buyer,2.4378546425467627,-0.5413768760391802,1.8964777665075825,volume,amplify (extend the edge),Restricted Area,0.3462067048922377,,FALSE
+NYL,14,79,bubble,-3.470877946308432,0.8243057607901609,-2.646572185518271,both,"judgment: gap-fill (acquire): Restricted Area -- contested window, weigh trajectory",Above the Break 3,-0.12077787185457332,slightly below-mean volume,TRUE
+NYL,14,79,bubble,-3.470877946308432,0.8243057607901609,-2.646572185518271,both,"judgment: gap-fill (acquire): Restricted Area -- contested window, weigh trajectory",Corner 3,0.06417484663688681,,FALSE
+NYL,14,79,bubble,-3.470877946308432,0.8243057607901609,-2.646572185518271,both,"judgment: gap-fill (acquire): Restricted Area -- contested window, weigh trajectory",In The Paint (Non-RA),0.14455980405070798,,FALSE
+NYL,14,79,bubble,-3.470877946308432,0.8243057607901609,-2.646572185518271,both,"judgment: gap-fill (acquire): Restricted Area -- contested window, weigh trajectory",Mid-Range,1.0099025502909584,,TRUE
+NYL,14,79,bubble,-3.470877946308432,0.8243057607901609,-2.646572185518271,both,"judgment: gap-fill (acquire): Restricted Area -- contested window, weigh trajectory",Restricted Area,-0.273553568333826,missing efficient looks,FALSE
+PDX,64,43,bubble,-0.40163005578281985,1.045537014305686,0.6439069585228661,mix,"judgment: offense not the lever (look to defense/other; offense is roughly league-average) -- contested window, weigh trajectory",Above the Break 3,-0.08494383169516452,slightly below-mean volume,TRUE
+PDX,64,43,bubble,-0.40163005578281985,1.045537014305686,0.6439069585228661,mix,"judgment: offense not the lever (look to defense/other; offense is roughly league-average) -- contested window, weigh trajectory",Corner 3,0.039272107565840694,,FALSE
+PDX,64,43,bubble,-0.40163005578281985,1.045537014305686,0.6439069585228661,mix,"judgment: offense not the lever (look to defense/other; offense is roughly league-average) -- contested window, weigh trajectory",In The Paint (Non-RA),-0.28563631027020026,over-reliant on low-value looks,FALSE
+PDX,64,43,bubble,-0.40163005578281985,1.045537014305686,0.6439069585228661,mix,"judgment: offense not the lever (look to defense/other; offense is roughly league-average) -- contested window, weigh trajectory",Mid-Range,1.4095677194251461,,TRUE
+PDX,64,43,bubble,-0.40163005578281985,1.045537014305686,0.6439069585228661,mix,"judgment: offense not the lever (look to defense/other; offense is roughly league-average) -- contested window, weigh trajectory",Restricted Area,-0.032722670719935766,missing efficient looks,FALSE
+PHX,21,36,seller,-2.1946268115367014,-1.244976838883737,-3.4396036504204384,both,"sell / accumulate (offense diagnosis below is context, not a buy)",Above the Break 3,7.872022769000597e-4,,FALSE
+PHX,21,36,seller,-2.1946268115367014,-1.244976838883737,-3.4396036504204384,both,"sell / accumulate (offense diagnosis below is context, not a buy)",Corner 3,0.07058593728709588,,FALSE
+PHX,21,36,seller,-2.1946268115367014,-1.244976838883737,-3.4396036504204384,both,"sell / accumulate (offense diagnosis below is context, not a buy)",In The Paint (Non-RA),-0.18429939313325244,over-reliant on low-value looks,FALSE
+PHX,21,36,seller,-2.1946268115367014,-1.244976838883737,-3.4396036504204384,both,"sell / accumulate (offense diagnosis below is context, not a buy)",Mid-Range,-0.38387082720086096,over-reliant on low-value looks,FALSE
+PHX,21,36,seller,-2.1946268115367014,-1.244976838883737,-3.4396036504204384,both,"sell / accumulate (offense diagnosis below is context, not a buy)",Restricted Area,-0.7481797581136289,missing efficient looks,FALSE
+SEA,29,29,seller,-0.9527054694108394,-1.530618603517684,-2.4833240729285233,both,"sell / accumulate (offense diagnosis below is context, not a buy)",Above the Break 3,-0.02783322766674528,slightly below-mean volume,FALSE
+SEA,29,29,seller,-0.9527054694108394,-1.530618603517684,-2.4833240729285233,both,"sell / accumulate (offense diagnosis below is context, not a buy)",Corner 3,-0.020496524029108915,missing efficient looks,FALSE
+SEA,29,29,seller,-0.9527054694108394,-1.530618603517684,-2.4833240729285233,both,"sell / accumulate (offense diagnosis below is context, not a buy)",In The Paint (Non-RA),-0.5327763483331611,over-reliant on low-value looks,FALSE
+SEA,29,29,seller,-0.9527054694108394,-1.530618603517684,-2.4833240729285233,both,"sell / accumulate (offense diagnosis below is context, not a buy)",Mid-Range,-0.058924954209232154,over-reliant on low-value looks,FALSE
+SEA,29,29,seller,-0.9527054694108394,-1.530618603517684,-2.4833240729285233,both,"sell / accumulate (offense diagnosis below is context, not a buy)",Restricted Area,-0.8905875492794281,missing efficient looks,FALSE
+TOR,50,57,seller,-1.1731587893194781,0.697032423402623,-0.4761263659168552,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Above the Break 3,-0.04199344331402806,slightly below-mean volume,FALSE
+TOR,50,57,seller,-1.1731587893194781,0.697032423402623,-0.4761263659168552,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Corner 3,0.13401811159511268,,FALSE
+TOR,50,57,seller,-1.1731587893194781,0.697032423402623,-0.4761263659168552,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",In The Paint (Non-RA),0.6727531918441656,,FALSE
+TOR,50,57,seller,-1.1731587893194781,0.697032423402623,-0.4761263659168552,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Mid-Range,-0.04887591622963992,over-reliant on low-value looks,FALSE
+TOR,50,57,seller,-1.1731587893194781,0.697032423402623,-0.4761263659168552,volume,"sell / accumulate (offense diagnosis below is context, not a buy)",Restricted Area,-0.01886952049298213,missing efficient looks,FALSE
+WAS,0,7,bubble,-5.251975638945167,1.655080194802516,-3.5968954441426506,both,"judgment: gap-fill (acquire): In The Paint (Non-RA) -- contested window, weigh trajectory",Above the Break 3,0.11490799860904391,,TRUE
+WAS,0,7,bubble,-5.251975638945167,1.655080194802516,-3.5968954441426506,both,"judgment: gap-fill (acquire): In The Paint (Non-RA) -- contested window, weigh trajectory",Corner 3,-0.021036446743979087,missing efficient looks,FALSE
+WAS,0,7,bubble,-5.251975638945167,1.655080194802516,-3.5968954441426506,both,"judgment: gap-fill (acquire): In The Paint (Non-RA) -- contested window, weigh trajectory",In The Paint (Non-RA),-0.4127858055064575,over-reliant on low-value looks,FALSE
+WAS,0,7,bubble,-5.251975638945167,1.655080194802516,-3.5968954441426506,both,"judgment: gap-fill (acquire): In The Paint (Non-RA) -- contested window, weigh trajectory",Mid-Range,0.7103907758967324,,FALSE
+WAS,0,7,bubble,-5.251975638945167,1.655080194802516,-3.5968954441426506,both,"judgment: gap-fill (acquire): In The Paint (Non-RA) -- contested window, weigh trajectory",Restricted Area,1.2636036725471775,,TRUE

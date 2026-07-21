@@ -26,6 +26,16 @@
 #   framework must never recommend a move the cap forbids without naming the
 #   constraint. See condition_lever_on_cap() below.
 #
+#   Window column and recommendation (standing/window layer, R/12_standing.R):
+#   `window` (buyer/bubble/seller) is joined in from output/standing.csv, a
+#   data-driven proxy for a team's competitive window built from game results
+#   (win-loss record and point differential), never from anything modeled
+#   above. Standing conditions the RECOMMENDATION column only -- the `lever`
+#   column above stays the record-independent diagnosis, unchanged. See
+#   reconcile_recommendation() below: a seller's "acquire" reads sell-side,
+#   not buy; a buyer's recommendation is the lever as-is; a bubble team gets
+#   a judgment call that names the contested window rather than a flat verdict.
+#
 #   Run the `gm-agent` review (see .claude/agents/gm-agent.md) on this table
 #   the moment it exists, before any prose is written around it -- it checks
 #   both "is trajectory doing honest work" (a hold justified by an improving
@@ -39,7 +49,8 @@
 #          data/processed/team_trajectories.rds (from 06_models.R:
 #            extract_trajectory_slopes() + classify_trajectory()),
 #          data/reference/cap_context_2026.csv (hand-curated, tracked in
-#            git, NOT gitignored -- see data/reference/README.md)
+#            git, NOT gitignored -- see data/reference/README.md),
+#          output/standing.csv (from R/12_standing.R -- run 12 before 08)
 # Outputs: output/deadline_read.csv, output/deadline_read.md
 
 library(tidyverse)
@@ -146,6 +157,60 @@ condition_lever_on_cap <- function(lever, flexibility_tier) {
   )
 }
 
+#' Load the standing/window table (R/12_standing.R)
+#'
+#' @param path character, defaults to output/standing.csv
+#' @return tibble: team, wins, losses, win_pct, point_diff, rank,
+#'   games_back_from_8th, window (buyer/bubble/seller)
+load_standing <- function(path = "output/standing.csv") {
+  standing <- readr::read_csv(path, show_col_types = FALSE)
+
+  bad_windows <- setdiff(unique(standing$window), c("buyer", "bubble", "seller"))
+  if (length(bad_windows) > 0) {
+    stop(
+      "load_standing(): window must be one of buyer/bubble/seller, found: ",
+      paste(bad_windows, collapse = ", ")
+    )
+  }
+
+  standing
+}
+
+#' Reconcile the diagnostic lever with the standing-derived window into the
+#' table's bottom-line recommendation (standing/window layer, PART 2).
+#'
+#' The `lever` argument is the cap-conditioned diagnosis from
+#' condition_lever_on_cap() (e.g. "acquire", "acquire (constrained: requires
+#' salary out)", "adjust", "hold") -- record-independent, computed above and
+#' left untouched by this function. `window` is the record-derived proxy for
+#' a team's competitive standing (R/12_standing.R). This function is the only
+#' place standing enters the table: it conditions the RECOMMENDATION, never
+#' the diagnosis.
+#'
+#' @param lever character, the cap-conditioned lever string
+#' @param window character, one of "buyer"/"bubble"/"seller"
+#' @return character, the reconciled recommendation
+reconcile_recommendation <- function(lever, window) {
+  if (window == "seller") {
+    if (startsWith(lever, "acquire")) {
+      return(paste(
+        "sell-side: diagnosis needs the acquire, but team is out of the",
+        "race -- accumulate/deal expirings, do not buy"
+      ))
+    }
+    return("hold/sell: out of the race, prioritize development and asset value")
+  }
+  if (window == "buyer") {
+    return(lever)
+  }
+  # window == "bubble"
+  paste0(
+    "judgment: ", lever,
+    " -- window is contested; weigh trajectory (see deadline read / ",
+    "trajectory outputs) before buying or selling"
+  )
+}
+
 #' Build a short readable identity-descriptor phrase per team from the
 #' schedule-adjusted BLUPs (descriptive only -- not used by classify_lever()).
 #'
@@ -238,11 +303,14 @@ build_identity_summary <- function(team_blups, icc_path = "output/icc_table.csv"
 #' @param team_trajectories tibble, from 06_models.R (team, trajectory,
 #'   interval_spans_zero, per TRAJECTORY_METRICS metric)
 #' @param cap_context tibble, from load_cap_context()
+#' @param standing tibble, from load_standing() (team, window, ...
+#'   R/12_standing.R) -- conditions recommendation only, never the diagnosis
 #' @return tibble, one row per team: team, identity_summary,
 #'   generation_pctile, making_pctile, generation_tier, making_tier,
 #'   trajectory, interval_spans_zero, trajectory_display, cap_context,
-#'   lever_raw, lever -- sorted by lever (acquire, adjust, hold) then team
-build_deadline_read <- function(team_blups, team_generation_making, team_trajectories, cap_context) {
+#'   below_floor, lever_raw, lever, window, recommendation -- sorted by lever
+#'   (acquire, adjust, hold) then team
+build_deadline_read <- function(team_blups, team_generation_making, team_trajectories, cap_context, standing) {
   base <- team_generation_making %>%
     mutate(
       generation_pctile = round(percent_rank(shot_generation_per100) * 100),
@@ -291,20 +359,25 @@ build_deadline_read <- function(team_blups, team_generation_making, team_traject
     ) %>%
     select(team, flexibility_tier, cap_context, below_floor)
 
+  window_tbl <- standing %>% select(team, window)
+
   deadline_read <- base %>%
     left_join(traj, by = "team") %>%
     left_join(identity_summary, by = "team") %>%
     left_join(cap, by = "team") %>%
+    left_join(window_tbl, by = "team") %>%
     rowwise() %>%
     mutate(
       lever_raw = classify_lever(generation_tier, making_tier, identity_summary),
-      lever = condition_lever_on_cap(lever_raw, flexibility_tier)
+      lever = condition_lever_on_cap(lever_raw, flexibility_tier),
+      recommendation = reconcile_recommendation(lever, window)
     ) %>%
     ungroup() %>%
     select(
       team, identity_summary, generation_pctile, making_pctile,
       generation_tier, making_tier, trajectory, interval_spans_zero,
-      trajectory_display, cap_context, below_floor, lever_raw, lever
+      trajectory_display, cap_context, below_floor, lever_raw, lever,
+      window, recommendation
     )
 
   lever_order <- c("acquire", "adjust", "hold")
@@ -335,8 +408,8 @@ render_deadline_read_md <- function(deadline_read) {
   )
 
   table_header <- c(
-    "| Team | Identity | Gen %ile | Making %ile | Trajectory | Cap | Lever |",
-    "|---|---|---|---|---|---|---|"
+    "| Team | Identity | Gen %ile | Making %ile | Trajectory | Cap | Lever | Window | Recommendation |",
+    "|---|---|---|---|---|---|---|---|---|"
   )
 
   table_rows <- deadline_read %>%
@@ -348,7 +421,9 @@ render_deadline_read_md <- function(deadline_read) {
         " | ", making_pctile,
         " | ", trajectory_display,
         " | ", cap_context,
-        " | ", lever, " |"
+        " | ", lever,
+        " | ", window,
+        " | ", recommendation, " |"
       )
     ) %>%
     pull(row)
@@ -384,6 +459,15 @@ render_deadline_read_md <- function(deadline_read) {
       "was singular); the improving/flat/declining labels are directional reads,",
       "not random-slope BLUPs. Source: output/trajectory_league_trends.csv",
       "(fallback_used = TRUE for all five)."
+    ),
+    "",
+    paste(
+      "Window (buyer/bubble/seller) is from standing (output/standing.csv), a",
+      "data-driven proxy for a team's competitive window; it conditions the",
+      "recommendation, not the diagnosis. Diagnosis (identity/generation/",
+      "making/trajectory) is record-independent by design. A front office",
+      "overrides window with private information (ownership mandate,",
+      "injuries, the World Cup break)."
     )
   )
 
@@ -395,16 +479,21 @@ main <- function() {
   team_generation_making <- readRDS("data/processed/team_generation_making.rds")
   team_trajectories <- readRDS("data/processed/team_trajectories.rds")
   cap_context <- load_cap_context()
+  standing <- load_standing()
 
   deadline_read <- build_deadline_read(
-    team_blups, team_generation_making, team_trajectories, cap_context
+    team_blups, team_generation_making, team_trajectories, cap_context, standing
   )
 
   write_csv(deadline_read, "output/deadline_read.csv")
   writeLines(render_deadline_read_md(deadline_read), "output/deadline_read.md")
 
-  message("Lever distribution:")
+  message("Lever distribution (diagnosis, record-independent):")
   print(table(deadline_read$lever))
+  message("Window distribution (standing-derived):")
+  print(table(deadline_read$window))
+  message("Recommendation (lever reconciled with window):")
+  print(table(deadline_read$recommendation))
 
   invisible(deadline_read)
 }
