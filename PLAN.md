@@ -336,6 +336,28 @@ in response to its WAS warning (a low-volume team judged only on per-shot mix is
 its methodology fixes (centered-formula description, Spearman 0.98 generation / 1.00 making)
 were applied. Reviewer NOTES deferred: minor wording only.
 
+**Standing / window layer (DONE 2026-07-21, gm-agent gated): `R/12_standing.R`** ->
+`output/standing.csv`. Computes each team's record from game results and a `window` tier
+(buyer / bubble / seller), blending win-loss record AND per-game scoring margin (equal-weight
+z-scores, so a lucky record is not miscast). Window conditions the RECOMMENDATION, never the
+diagnosis (identity/generation/making/trajectory stay record-independent -- the separation is
+what preserves the "reads beyond the record" claim). Distribution: 5 buyer / 4 bubble / 6
+seller. R/08 (deadline read) and R/11 (generation gap) both gained a window-conditioned
+`recommendation`/`fit_read` derived from one SHARED logic (keyed on window + generation tier +
+making + making-trajectory), so the two documents agree verb-for-verb. Design highlight the
+standing data surfaced: record and offense-diagnosis disagree sharply -- LVA is 17-7 (buyer)
+on the 7th-percentile shot generation carried by 100th-percentile but declining making, so it
+reads "reassess" (a paper tiger); WAS is a .522 bubble team despite the league's worst offense.
+gm-agent runs 2026-07-21: (1) on the pre-standing generation gap -- affirmed the volume-vs-mix
+split, flagged that the recommendation ignored standing; (2) re-run with the standing gate --
+affirmed the window layer "earns its place", named LVA the headline insight, and flagged a
+point-differential window bug (PDX) plus a recommendation verb-seam between the two docs. Both
+were fixed in a follow-up pass (point differential made a real window axis -> PDX reflows to
+seller; the two documents unified on one recommendation vocabulary). Remaining gm items are
+deferred to the case studies (the salary-out ledger, roster spots, zones-to-roles, market
+supply). FOLLOW-UP before publish: an analytics-reviewer pass on R/12 + the standing-gated
+R/08/R/11 (not yet gated).
+
 **Still post-deadline, NOT prioritized (build only if time, out of scope for Aug 2 --
 cut list, tiers-not-dollars, no player-value layer):**
 
