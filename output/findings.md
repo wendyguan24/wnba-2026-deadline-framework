@@ -20,8 +20,12 @@ types. The expected-points layer is a stratified expected-points baseline
 - cdn vs nbastats v2 reconciliation: total absolute deltas of 1 FGA and 1 FGM
   across all 364 team-games (both traced to one game, IND game 1022600004). 3PA
   reconciles exactly. Documented, not hidden.
-- shotdetail covers 14 of 15 teams (Toronto absent), so every shot-level feature
-  is built from the cdn feed (area / areaDetail / descriptor), never shotdetail.
+- The auxiliary shotdetail feed covers only 14 of 15 teams (Toronto is absent from
+  shotdetail), so to keep all 15 teams on equal footing every shot-level feature is
+  built from the cdn feed (area / areaDetail / descriptor), never shotdetail. Toronto
+  itself is fully present in the analysis via the cdn feed (25 games, 1,630 shots with
+  zone data, and rows in every framework output); the gap is limited to the unused
+  shotdetail feed and affects no published number.
 - Test suite: 38 expectations, 0 failures, 0 skipped, including the data-dependent
   baseline-table, cdn-vs-v2, and possession-invariant checks (see
   `output/test_summary.txt`, reproduced via `Rscript tests/testthat.R`).
