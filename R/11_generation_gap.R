@@ -384,18 +384,21 @@ load_standing <- function(path = "output/standing.csv") {
 #' triggered).
 #'
 #' @param team_trajectories tibble, data/processed/team_trajectories.rds
-#' @return tibble, team, making_trajectory
+#' @return tibble, team, making_trajectory, making_interval_spans_zero
 load_making_trajectory <- function(team_trajectories) {
   making_residual_traj <- team_trajectories %>%
     filter(metric == "shot_making_residual") %>%
-    select(team, making_trajectory = trajectory)
+    select(team, making_trajectory = trajectory,
+           making_interval_spans_zero = interval_spans_zero)
 
   if (nrow(making_residual_traj) == 0) {
     warning(
       "load_making_trajectory(): no shot_making_residual rows in ",
       "team_trajectories -- making_trajectory set to NA for all teams."
     )
-    return(tibble(team = unique(team_trajectories$team), making_trajectory = NA_character_))
+    return(tibble(team = unique(team_trajectories$team),
+                  making_trajectory = NA_character_,
+                  making_interval_spans_zero = NA))
   }
 
   making_residual_traj
@@ -451,18 +454,23 @@ top_non_identity_negative_mix_zone <- function(full_table) {
 #' @param generation_pctile numeric, 0-100
 #' @param making_pctile numeric, 0-100
 #' @param making_trajectory character or NA, shot_making_residual trajectory label
+#' @param making_interval_spans_zero logical, TRUE when the shot_making_residual
+#'   trajectory interval spans zero -- appends a "(trajectory directional)"
+#'   caveat to the reassess branch (the only buyer branch that leans on the
+#'   trajectory direction), matching R/08_deadline_read.R's reconcile_recommendation()
 #' @param primary_driver character, "volume"/"mix"/"both"
 #' @param secondary_tune_zone character or NA, the named non-identity zone
 #' @return character, the buyer-branch fit-read text
 buyer_branch_text <- function(generation_pctile, making_pctile, making_trajectory,
-                               primary_driver, secondary_tune_zone) {
+                               making_interval_spans_zero, primary_driver, secondary_tune_zone) {
+  traj_caveat <- if (isTRUE(making_interval_spans_zero)) " (trajectory directional)" else ""
   if (generation_pctile <= 33) {
     if (making_pctile >= 67 && identical(making_trajectory, "declining")) {
-      return(paste(
+      return(paste0(paste(
         "reassess: bottom-tier shot generation propped up by top-tier but",
         "declining making -- address the shot diet / identity before",
         "spending an asset on a new piece"
-      ))
+      ), traj_caveat))
     }
     if (identical(primary_driver, "volume") || identical(primary_driver, "both")) {
       return("gap-fill (acquire): possession creation")
@@ -488,8 +496,12 @@ buyer_branch_text <- function(generation_pctile, making_pctile, making_trajector
 #' / names a zone).
 #'
 #' @param making_trajectory character or NA, shot_making_residual trajectory label
+#' @param making_interval_spans_zero logical, TRUE when the shot_making_residual
+#'   trajectory interval spans zero -- appends a "(trajectory directional)"
+#'   caveat, matching R/08_deadline_read.R's reconcile_recommendation() bubble branch
 #' @return character, the bubble fit-read text
-bubble_branch_text <- function(making_trajectory) {
+bubble_branch_text <- function(making_trajectory, making_interval_spans_zero) {
+  traj_caveat <- if (isTRUE(making_interval_spans_zero)) " (trajectory directional)" else ""
   verb <- case_when(
     identical(making_trajectory, "improving") ~ "lean buy",
     identical(making_trajectory, "declining") ~ "lean hold or sell",
@@ -497,7 +509,8 @@ bubble_branch_text <- function(making_trajectory) {
   )
   paste0(
     "judgment (", verb, "): the late-August World Cup break favors",
-    " hold-and-reassess unless the trajectory is clearly improving"
+    " hold-and-reassess unless the trajectory is clearly improving",
+    traj_caveat
   )
 }
 
@@ -520,8 +533,9 @@ bubble_branch_text <- function(making_trajectory) {
 #' @param full_table tibble, team-zone rows (generation_pctile, making_pctile,
 #'   primary_driver, mix_contribution, identity_driven, zone, type)
 #' @param standing tibble, from load_standing() (team, window)
-#' @param trajectories tibble, team, making_trajectory (shot_making_residual
-#'   trajectory label, from data/processed/team_trajectories.rds)
+#' @param trajectories tibble, team, making_trajectory,
+#'   making_interval_spans_zero (shot_making_residual trajectory label and its
+#'   interval-spans-zero flag, from data/processed/team_trajectories.rds)
 #' @return tibble, team, window, fit_read
 assign_fit_read <- function(full_table, standing, trajectories) {
   team_level <- full_table %>%
@@ -541,9 +555,10 @@ assign_fit_read <- function(full_table, standing, trajectories) {
           "prioritize asset value over a deadline buy"
         ),
         window == "buyer"  ~ buyer_branch_text(
-          generation_pctile, making_pctile, making_trajectory, primary_driver, secondary_tune_zone
+          generation_pctile, making_pctile, making_trajectory,
+          making_interval_spans_zero, primary_driver, secondary_tune_zone
         ),
-        window == "bubble" ~ bubble_branch_text(making_trajectory),
+        window == "bubble" ~ bubble_branch_text(making_trajectory, making_interval_spans_zero),
         TRUE ~ NA_character_
       )
     ) %>%

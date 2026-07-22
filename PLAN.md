@@ -356,7 +356,31 @@ were fixed in a follow-up pass (point differential made a real window axis -> PD
 seller; the two documents unified on one recommendation vocabulary). Remaining gm items are
 deferred to the case studies (the salary-out ledger, roster spots, zones-to-roles, market
 supply). FOLLOW-UP before publish: an analytics-reviewer pass on R/12 + the standing-gated
-R/08/R/11 (not yet gated).
+R/08/R/11 -- DONE 2026-07-22, gate CLOSED (see the triage log entry
+"analytics-reviewer, standing-layer gate (2026-07-22)" below).
+
+**analytics-reviewer, standing-layer gate (2026-07-22) -- CLOSED.** Read-only pass on
+R/12_standing.R and the standing-gated R/08/R/11. Returned NO BLOCKERS, two warnings and
+two notes. Wendy accepted all four; applied 2026-07-22:
+- **W1 (ACCEPT) -- trajectory-directional caveat in the recommendation.** The reassess
+  and bubble recommendations lean on the making-trajectory direction, but all four
+  affected teams (LVA/NYL/ATL/TOR) have a shot_making_residual interval that spans zero.
+  Carried `making_interval_spans_zero` into `reconcile_recommendation()` (R/08) and
+  `buyer_branch_text()`/`bubble_branch_text()`/`load_making_trajectory()` (R/11); the
+  reassess and bubble strings now append "(trajectory directional)" when the interval
+  spans zero, so the recommendation carries the same caveat the "*" gives the trajectory
+  column. Diagnostic columns verified byte-identical before/after; cross-doc agreement holds.
+- **W2 (ACCEPT) -- "bubble" is a blended-window read, not the literal 8-seed.** The
+  standing_score blend can pull a sub-.500, several-games-back team up into the bubble band
+  on scoring margin (the TOR case: 10-14, window "bubble" on a -70 differential). Added a
+  clause to the R/12 header and output/methodology.md pointing readers to
+  games_back_from_8th for literal playoff-line distance and reframing "straddling the
+  8-seed line" as "near the standing_score playoff line".
+- **Note 3 (ACCEPT) -- reconciliation citation.** R/12 header now cites the actual test
+  (tests/testthat/test-possession-invariants.R:10) instead of "R/04_reconcile.R / the test
+  suite".
+- **Note 4 (ACCEPT) -- precise wording.** methodology.md "point differential far worse than
+  most sellers'" -> "worse than the median seller" (PDX -130 vs the -118 seller median).
 
 **Still post-deadline, NOT prioritized (build only if time, out of scope for Aug 2 --
 cut list, tiers-not-dollars, no player-value layer):**

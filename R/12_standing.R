@@ -24,8 +24,17 @@
 #   mediocre record). Treat window as a data-driven default, not a verdict.
 #
 #     standing_score rank 1-5   -> "buyer"   comfortably in playoff position
-#     standing_score rank 6-9   -> "bubble"  straddling the 8-seed line
+#     standing_score rank 6-9   -> "bubble"  near the standing_score playoff line
 #     standing_score rank 10-15 -> "seller"  out of the race
+#
+#   "Near the playoff line" is by standing_score (win_pct AND point differential),
+#   NOT by win_pct alone -- do not read "bubble" as literally straddling the
+#   8-seed. Because the blend rewards scoring margin, a sub-.500 team several
+#   games back in the win_pct standings can still rank into the bubble band on a
+#   strong point differential (the Toronto case: a bubble window on margin, not
+#   on a .500-or-better record). games_back_from_8th (a pure win-loss statistic)
+#   is the column to read for literal playoff-line distance; window is the
+#   blended competitive-window proxy.
 #
 #   Playoff-line assumption (stated explicitly, not derived, and kept
 #   separate from the window blend above): the WNBA takes 8 of 15 teams to
@@ -42,8 +51,10 @@
 #            opponent, points, ... -- see R/03_possessions.R). Summing
 #            `points` by (gameId, team) gives each team's final game score;
 #            this sums to the final box score exactly in all 364 team-games,
-#            verified independently in R/04_reconcile.R / the test suite, not
-#            re-derived tautologically here. Every gameId has exactly two
+#            verified independently in tests/testthat/test-possession-invariants.R:10
+#            ("summed possession points equal each team's final box score, for
+#            all 182 games"), not re-derived tautologically here. Every gameId
+#            has exactly two
 #            teams (checked below); the team with more points in a game wins
 #            -- there are no ties in basketball.
 # Outputs: output/standing.csv (team, wins, losses, win_pct, point_diff,

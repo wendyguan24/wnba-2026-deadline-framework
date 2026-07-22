@@ -149,11 +149,15 @@ miscast a team riding a lucky record, or undersell one winning big with a middli
 point_diff_per_game (point_diff / games) and win_pct are each z-scored across the 15 teams;
 standing_score is their average; teams are ranked on standing_score (ties broken by
 win_pct) into a window tier (buyer: rank 1-5, comfortably in playoff position; bubble:
-rank 6-9, straddling the 8-seed line; seller: rank 10-15, out of the race, assuming the
-WNBA's 8-of-15 playoff format). Point differential is a real second axis here, not a
-tiebreaker: a team like PDX (a losing record, but a point differential far worse than most
-sellers') reads seller under the blended score even though a raw win_pct ranking alone
-would have placed it on the bubble. games_back_from_8th keeps its own win-loss-only
+rank 6-9, near the standing_score playoff line; seller: rank 10-15, out of the race,
+assuming the WNBA's 8-of-15 playoff format). "Near the line" is by standing_score, not by
+win_pct alone: because the blend rewards scoring margin, it cuts both ways. A team like PDX
+(a losing record, but a point differential worse than the median seller) reads seller under
+the blended score even though a raw win_pct ranking alone would have placed it on the
+bubble; conversely a sub-.500 team several games back can be pulled up into the bubble band
+on a strong point differential (the Toronto case), so "bubble" is a blended-window read, not
+a claim the team literally straddles the 8-seed. games_back_from_8th (a pure win-loss
+statistic) is the column to read for literal playoff-line distance. games_back_from_8th keeps its own win-loss-only
 definition (a standard games-back statistic is never scoring-margin-adjusted) and is
 unaffected by this change. This window is a proxy a front office overrides with private
 information it has and this framework does not (an ownership mandate, an injury outlook, a

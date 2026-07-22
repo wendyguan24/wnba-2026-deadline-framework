@@ -209,9 +209,20 @@ load_standing <- function(path = "output/standing.csv") {
 #' @param generation_tier integer, ntile(shot_generation_per100, 3), 1=low..3=high
 #' @param making_tier integer, ntile(shot_making_per100, 3), 1=low..3=high
 #' @param making_trajectory character or NA, shot_making_residual trajectory label
+#' @param making_interval_spans_zero logical, TRUE when the shot_making_residual
+#'   trajectory interval spans zero (AMENDMENT_01 Section 1). When TRUE and the
+#'   recommendation leans on the trajectory direction (the reassess and bubble
+#'   branches), a "(trajectory directional)" caveat is appended so the
+#'   recommendation carries the same directional-not-standalone caveat the "*"
+#'   marker gives the trajectory column.
 #' @param window character, one of "buyer"/"bubble"/"seller"
 #' @return character, the reconciled recommendation
-reconcile_recommendation <- function(lever, generation_tier, making_tier, making_trajectory, window) {
+reconcile_recommendation <- function(lever, generation_tier, making_tier, making_trajectory, making_interval_spans_zero, window) {
+  # A trajectory-direction-driven recommendation carries the same caveat the
+  # "*" marker gives the trajectory column: the per-team interval spans zero,
+  # so the direction is a lean, not a standalone claim (AMENDMENT_01 Section 1).
+  traj_caveat <- if (isTRUE(making_interval_spans_zero)) " (trajectory directional)" else ""
+
   if (window == "seller") {
     return(paste(
       "sell / accumulate: out of the race -- deal expirings and prioritize",
@@ -223,11 +234,11 @@ reconcile_recommendation <- function(lever, generation_tier, making_tier, making
     if (generation_tier == 1) {
       # bottom-tertile generation
       if (making_tier == 3 && identical(making_trajectory, "declining")) {
-        return(paste(
+        return(paste0(paste(
           "reassess: bottom-tier shot generation propped up by top-tier",
           "but declining making -- address the shot diet / identity before",
           "spending an asset on a new piece"
-        ))
+        ), traj_caveat))
       }
       return(paste0("gap-fill: ", lever))
     }
@@ -253,7 +264,8 @@ reconcile_recommendation <- function(lever, generation_tier, making_tier, making
   )
   paste0(
     "judgment (", verb, "): the late-August World Cup break favors",
-    " hold-and-reassess unless the trajectory is clearly improving"
+    " hold-and-reassess unless the trajectory is clearly improving",
+    traj_caveat
   )
 }
 
@@ -416,7 +428,7 @@ build_deadline_read <- function(team_blups, team_generation_making, team_traject
     mutate(
       lever_raw = classify_lever(generation_tier, making_tier, identity_summary),
       lever = condition_lever_on_cap(lever_raw, flexibility_tier),
-      recommendation = reconcile_recommendation(lever, generation_tier, making_tier, trajectory, window)
+      recommendation = reconcile_recommendation(lever, generation_tier, making_tier, trajectory, interval_spans_zero, window)
     ) %>%
     ungroup() %>%
     select(
