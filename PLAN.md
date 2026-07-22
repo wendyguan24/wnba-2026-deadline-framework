@@ -783,6 +783,63 @@ one half-season of open play-by-play (a validated RAPM/win-shares figure is a se
 product); (b) "cost = cap hit" is dollars, which breaks the tiers-not-dollars rule
 (AMENDMENT_02 §3a); and (c) the outgoing-asset / trade-machine side is on the handoff §6
 cut list. A guardrail-compliant version has to decide the player-value SOURCE and the
-COST representation up front -- awaiting Wendy's scoping decision (see the open
-AskUserQuestion) before any script is written. Whatever is built here is additive and
+COST representation up front. Whatever is built here is additive and
 must not touch the reproducibility boundary of the published 01-12 numbers.
+
+**Scoping decisions (2026-07-22).** Value source: player-value proxy derived from open
+PBP (stays inside the reproducibility boundary). Cost: tiers + coarse contract bands
+(min/mid/max), never dollars. Primary metric: box value over replacement. Placement:
+a new published table plus prose (later narrowed by review, see below).
+
+**Design review, 2026-07-22 (analytics-reviewer + gm-agent, both on Fable 5).** Ran both
+agents on a written design doc BEFORE writing code, to catch a wrong foundation cheaply.
+They converged. Findings and PROPOSED triage (NOT yet Wendy-approved; recorded so the
+record exists while forward motion continues on the low-regret core):
+
+- Metric: **Game Score per 40 minutes** is the right engine (both). Reject Win Shares
+  ("wins" is an overclaim from a half-season; assembly cost buys false precision), PER
+  (opaque, biased), custom weights (un-citable), RAPM-family (half-season noise). Weights
+  are NBA-derived and unvalidated for the WNBA -- disclose like the 0.44-FT convention.
+  PROPOSED: ACCEPT.
+- **Per-40, not per-100.** The doc's premise that possessions.rds sidesteps minutes
+  reconstruction was wrong: a player per-100 needs stint/lineup attribution, MORE work
+  and adjacent to the on-off cut list. PROPOSED: ACCEPT, commit to per-40.
+- **Demote the value number.** A VOR leaderboard is the piece's biggest overclaim
+  (volume-rewarded, defense-blind, half-season-unstable). Build it league-wide and
+  reproducible, publish it only as production TIERS on NAMED candidates inside fit reads.
+  Reframe R/13 = the screen, R/14 = the fit-first deliverable. PROPOSED: ACCEPT.
+- **Fit-to-need is the product; value is a secondary filter.** Shop order: need ->
+  attainability -> tier -> value. Candidate pool = the sellers in standing.csv (currently
+  absent). Fit table must obey the deadline_read recommendation verbs (no buy lists for
+  LVA/reassess or sellers). PROPOSED: ACCEPT.
+- **No value/cost ratio, ever** (needs per-player dollars + package valuation, both out).
+  Rank fit-then-value WITHIN the feasible asset class. Strike "wins replaced" language.
+  PROPOSED: ACCEPT.
+- **Offensive-fits-only scope statement** (not a footnote): a defensive need cannot be
+  served by this table. PROPOSED: ACCEPT.
+- **Replacement anchor:** drop 20th-pct-of-rotation (circular); anchor to sub-rotation
+  mean, keep 20th-pct as a sensitivity. PROPOSED: ACCEPT.
+- **Eligibility floor** must include the handoff §5g player-claim threshold (>=100 FGA or
+  >=150 possessions used) AND a minutes floor (~300 min). PROPOSED: ACCEPT.
+- **Register the layer as EXPLORATORY** (dated addendum; eda_notes.md is frozen) -- no
+  hypothesis test, all statements descriptive. PROPOSED: ACCEPT.
+- **Abort criterion:** minutes-reconstruction validation gate green by end of Jul 24, else
+  the layer returns to post-deadline (does not displace the three publish blockers).
+  PROPOSED: ACCEPT.
+- Split-half reliability on GmSc/40 in R/10; garbage-time sensitivity for bench box stats;
+  coarse rim/mid/three + creation-class fit buckets (5-zone is noise at the FGA floor);
+  fallback degrades to tiers-only if it fires; disclose shot-diet context contamination.
+  PROPOSED: ACCEPT.
+- Team-pace sensitivity, empirical-Bayes shrinkage, bootstrap bands, header run-order.
+  PROPOSED: DEFER post-deadline.
+
+- **BLOCKER (analytics), flagged not resolved -- Wendy's call:** the layer conflicts with
+  handoff §5f ("No league-wide fit matrix ... no new player-level models"). Per CLAUDE.md
+  this must be FLAGGED, not silently built past. PROPOSED resolution: log an explicit §5f
+  amendment and restrict PUBLISHED fit-matching + value tiers to NAMED candidates; the
+  league-wide Game Score table stays a reproducible output/ exhibit only. AWAITING Wendy's
+  explicit decision before anything is published league-wide or R/14 is written.
+
+**Proceeding now on the low-regret core only:** build and validate the reproducible R/13
+Game Score engine (needed under every non-abort option). HOLDING the contested publication
+decisions (§5f, R/14 fit table, what enters findings.md) for Wendy's explicit sign-off.
