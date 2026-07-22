@@ -843,3 +843,27 @@ record exists while forward motion continues on the low-regret core):
 **Proceeding now on the low-regret core only:** build and validate the reproducible R/13
 Game Score engine (needed under every non-abort option). HOLDING the contested publication
 decisions (§5f, R/14 fit table, what enters findings.md) for Wendy's explicit sign-off.
+
+**BUILD STATUS (2026-07-22):**
+- §5f conflict RESOLVED: Wendy authorized adjusting the handoff to match the scope.
+  HANDOFF_wnba_deadline_framework.md §5f now carries the dated amendment (value screen +
+  fit layer in scope; league-wide value stays an exhibit; published matching/tiers on
+  named candidates only; tiers-not-dollars; seller pool; verb obedience; exploratory).
+- **R/13_player_value.R built** (commit e17b7b0). Game Score over replacement per 40 min;
+  minutes reconstructed from substitutions, 5-on-court gate 99.9% (abort criterion met);
+  eligibility = §5g floor + 200 min; replacement anchored to the below-eligibility pool;
+  split-half GmSc/40 r = 0.76; published as production tiers. Output output/player_value.csv
+  (exhibit) + tests/testthat/test-player-value.R (green). Face validity holds (Wilson,
+  Bueckers, Stewart, Mitchell, Ogwumike lead).
+- **R/14_fit_targets.R built.** Wendy authorized running it. Candidate pool = eligible
+  players on seller teams (attainability); on-style match (coarse rim/mid/three) as a fit
+  GATE, then production tier within it (value as the within-fit ranker); verb-obedient
+  (amplify DAL/GSV/MIN get on-style depth lists; buy-judgment TOR tentative; adjust IND
+  low-priority; reassess LVA + hold-judgment + sellers get a deliberate no-list with the
+  reason). Contract bands are a hand-curation template (data/reference/candidate_contracts_2026.csv,
+  15 named candidates, bands blank), never fabricated; affordability gated by the acquiring
+  team's cap tier only where a band is filled. Outputs output/fit_targets.md + .csv +
+  tests/testthat/test-fit-targets.R (green).
+- NEXT: run the gm-agent + analytics-reviewer GATE on the R/14 deliverable (Phase 2 gate),
+  then triage. Still pending for publish: hand-curate the contract bands (source + as_of_date),
+  the Synergy case studies + coach-agent gate, and the cap/CBA primary-source verification.
