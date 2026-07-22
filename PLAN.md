@@ -752,15 +752,37 @@ contract data beyond case-study rosters and named candidates; multi-year cap
 projections or 2027 free-agency analysis; any contract-protection claim without a
 source.
 
-## Next session should
+## Still REQUIRED before publish (2026-07-22, do not drop -- these are open, not done)
 
-Reconciliation gate is cleared (see "Reconciliation gate results" above; 0 test
-failures) and the EDA gate is now cleared too — `analysis/eda_midseason.Rmd` runs
-cleanly end to end (verified via `knitr::knit()`; no pandoc installed locally so
-HTML rendering wasn't checked, only that every chunk executes without error) and
-`output/eda_notes.md` is written. Next stop per the session roadmap: implement
-`R/05_features.R` against the EDA gate's 3 forced spec changes (`pace_poss` as
-primary pace, `is_ot` flag, `garbage_time_poss_share` column), then `R/06_models.R`
-including the trajectory extension, then run `analytics-reviewer` on the results.
-`data/reference/cap_context_2026.csv` still needs Wendy's manual entry (AMENDMENT_02
-§3a/§4, Jul 23 block) before script 08 can be implemented against real cap data.
+The framework pipeline (01-12), the three graphics, the framework evaluation, and the
+analytics-reviewer / gm-agent gates are built and closed. The following are still
+NECESSARY before the July 26-27 publish window and are NOT optional polish:
+
+1. **Synergy case studies + the §3d structural paragraph in `output/findings.md`.**
+   Currently TODO stubs. Synergy numbers stay quarantined in `analysis/` case-study
+   prose with the "Source: Synergy Sports | 2026 WNBA" attribution and never enter
+   data/models/output tables (reproducibility boundary).
+2. **`coach-agent` gate.** Not yet run. Required on the drafted case-study sections
+   (GSV, TOR, PDX) once they exist, per AMENDMENT_01 Part 3. This is the one mandatory
+   review gate still un-fired.
+3. **Primary-source cap/CBA verification + date-stamp (AMENDMENT_02 §4).** The four-item
+   pre-publish checklist against `data/reference/cap_context_2026.csv` and
+   `cba_rules_2026.md` still needs Wendy's manual re-verification and a fresh as-of date
+   before the numbers are defended in print. Tiers-not-dollars stands regardless.
+
+These three block publish. The player-value work below does NOT block publish and does
+not displace them.
+
+## Next: fit-vs-cost / player-value layer (2026-07-22, moved from post-deadline)
+
+Wendy has elected to attempt this layer this week (time permits: ~5 days to the publish
+window). NOTE THE STANDING CONFLICT before building: this layer as originally specced
+`(fit_delta x player_value_over_replacement) / cost` collides with two published rules --
+(a) no player-value metric exists in the framework, and none is cleanly derivable from
+one half-season of open play-by-play (a validated RAPM/win-shares figure is a separate
+product); (b) "cost = cap hit" is dollars, which breaks the tiers-not-dollars rule
+(AMENDMENT_02 §3a); and (c) the outgoing-asset / trade-machine side is on the handoff §6
+cut list. A guardrail-compliant version has to decide the player-value SOURCE and the
+COST representation up front -- awaiting Wendy's scoping decision (see the open
+AskUserQuestion) before any script is written. Whatever is built here is additive and
+must not touch the reproducibility boundary of the published 01-12 numbers.
