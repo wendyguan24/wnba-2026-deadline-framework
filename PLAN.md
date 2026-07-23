@@ -401,6 +401,33 @@ cut list, tiers-not-dollars, no player-value layer):**
   from one half-season of open play-by-play, and it produces the fake-trade content the
   gm-agent persona rejects. Different product, not a tweak to this one.
 
+**Mentor-informed v2 roadmap (defense + lineup flexibility), 2026-07-23.** From a mentor
+brain dump. Decision (Wendy, 2026-07-23): case studies + v2 roadmap; NO in-window quant
+build (deadline physics, and the three publish blockers keep priority). Defense enters v1
+QUALITATIVELY through the Synergy case studies -- the case-study template now carries a
+"Defensive fit and roster-disruption read" checklist (switchability, athleticism,
+screen-assist/off-ball context, second-unit stabilization, defensive pace/activity,
+roster-disruption cost), coach-agent gated, Synergy-attributed, quarantined. The
+reproducible quantitative versions are v2 (all buildable from open PBP; feasibility probed
+2026-07-23 -- box-defense events and 5-man lineup reconstruction both present, NO tracking /
+matchup / defender / screen columns exist):
+- **v2 FLAGSHIP -- lineup-flexibility "chess match" layer.** Reconstruct 5-man lineups from
+  substitutions (proven via R/13's 99.9% 5-on-court gate); measure a target's teammate /
+  lineup versatility and the acquiring team's thin second-unit slots (minutes drop-off from
+  starters to bench). Most novel reproducible direction; needs a real build window.
+- **Defensive-activity screen (symmetric to R/13).** DREB/40, STL/40, BLK/40, forced-TOV
+  (steals + drawn offensive fouls), foul rate, as coarse tiers. Box-only, heavily caveated
+  (no rim-protection or matchup context). Would extend R/13 / a new R/15.
+- **Usage / offense-disruption fit-cost (the "easy add").** Per-player usage tier (usage
+  already computable as poss_used); flag "improves defense without demanding the ball" =
+  high defensive-activity tier AND low usage AND adequate 3P rate. Cheapest; reuses R/13.
+- **Defensive rebounding by opponent shot-zone (the Dallas midrange example)** and
+  **pace-fit** (transition-involvement proxy). Smaller follow-ons; A4 needs event-linkage.
+- OUT OF SCOPE (no open-data support, not clean from Synergy exports either): tracking-based
+  switch rates, true rim-deterrence, matchup-level defensive load, hustle stats.
+- Dependency: apply the pending R/13/R/14 review triage before any v2 work builds on the
+  value/fit layer.
+
 ---
 
 ## Review agents (AMENDMENT_01 Part 3)
