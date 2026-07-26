@@ -922,3 +922,24 @@ built layer (Fable 5). Triage decisions (Wendy):
   the capped-min cap-mechanic citation. Full testthat suite green after all fixes.
 - STILL pending for publish (unchanged): hand-curate contract bands + movability (source +
   as_of_date), Synergy case studies + coach-agent gate, cap/CBA primary-source verification.
+
+**R/14 movability + advantage pass (2026-07-25, post-merge follow-up).** Wendy supplied
+contract data from the Her Hoop Stats WNBA Salary Cap Database (as_of 2026-07-25), covering
+8 of 11 shortlisted candidates (Taylor, Gustafson, Johnson still need a second source).
+Three refinements built:
+- **Cored players are excluded, not just flagged.** movability now gates the POOL:
+  `core` / `untouchable` are dropped before ranking (a cored player cannot be approached),
+  and the shortlist backfills with the next on-style candidate. Plum (LAS, Core tag) drops
+  out; DAL/GSV/MIN/TOR reflow, and one new name (Barker) was auto-appended to the template
+  for curation. `keep` (long-term, not core) and `available` stay in, annotated.
+- **Advantage label** on every recommendation: production tier + primary shot bucket (e.g.
+  "top mid-range scoring", "upper rotation perimeter shooting") -- what the acquiring team
+  gains. New advantage / primary_bucket columns in fit_targets.csv.
+- **Expansion-draft logic in movability**: `available` means not core and not long-term, so
+  a team may deal her for value before the expansion draft rather than lose her for nothing;
+  documented in the md. Affordability is now LIVE where a band is filled (e.g. Copper's max
+  band reads "over-tier" for tight/capped teams; it is flagged, not yet dropped).
+- Template is now self-maintaining (append new backfilled candidates blank, preserve filled
+  rows). New test: cored/untouchable candidates never appear; every row carries an advantage.
+  Full suite green. STILL pending: the 3 missing bands, the provisional movability review,
+  and a possible move from flagging to dropping over-tier candidates.
