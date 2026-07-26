@@ -39,7 +39,7 @@ On-style depth that protects the shot hierarchy:
 
 - Ogwumike (LAS, 22 g / 695 min) -- advantage: top mid-range scoring; rim 31 / mid 39 / three 30; on-style 1.0; affordable (tight); movability: available; [target]
 - Plum (LAS, 12 g / 414 min) -- advantage: top perimeter shooting; rim 24 / mid 32 / three 43; on-style 0.9; over-tier (tight cannot absorb max); movability: core; [context]
-- Leite (PDX, 23 g / 586 min) -- advantage: top mid-range scoring; rim 35 / mid 45 / three 20; on-style 0.9; affordable (tight); movability: keep; [target]
+- Leite (PDX, 23 g / 586 min) -- advantage: top mid-range scoring; rim 35 / mid 45 / three 20; on-style 0.9; affordable (tight); movability: movability: hand-curate; [target]
 - Hiedeman (SEA, 26 g / 756 min) -- advantage: upper rotation perimeter shooting; rim 16 / mid 38 / three 46; on-style 0.9; affordable (tight); movability: available; [target]
 - Copper (PHX, 24 g / 777 min) -- advantage: upper rotation perimeter shooting; rim 28 / mid 33 / three 39; on-style 0.9; over-tier (tight cannot absorb max); movability: available; [context]
 
@@ -53,7 +53,7 @@ On-style depth that protects the shot hierarchy:
 - Hiedeman (SEA, 26 g / 756 min) -- advantage: upper rotation perimeter shooting; rim 16 / mid 38 / three 46; on-style 0.9; over-tier (capped cannot absorb mid); movability: available; [context]
 - Copper (PHX, 24 g / 777 min) -- advantage: upper rotation perimeter shooting; rim 28 / mid 33 / three 39; on-style 0.9; over-tier (capped cannot absorb max); movability: available; [context]
 - Engstler (PDX, 25 g / 596 min) -- advantage: rotation perimeter shooting; rim 34 / mid 27 / three 40; on-style 0.9; affordable (capped); movability: available; [target]
-- Johnson (SEA, 26 g / 740 min) -- advantage: rotation perimeter shooting; rim 32 / mid 31 / three 38; on-style 0.9; affordable (capped); movability: keep; [target]
+- Johnson (SEA, 26 g / 740 min) -- advantage: rotation perimeter shooting; rim 32 / mid 31 / three 38; on-style 0.9; affordable (capped); movability: movability: hand-curate; [target]
 - Burrell (LAS, 23 g / 637 min) -- advantage: rotation perimeter shooting; rim 36 / mid 26 / three 38; on-style 0.9; band: hand-curate; movability: movability: hand-curate; [target]
 
 ## MIN (buyer -- amplify)
@@ -64,7 +64,7 @@ On-style depth that protects the shot hierarchy:
 
 - Ogwumike (LAS, 22 g / 695 min) -- advantage: top mid-range scoring; rim 31 / mid 39 / three 30; on-style 1.0; affordable (tight); movability: available; [target]
 - Plum (LAS, 12 g / 414 min) -- advantage: top perimeter shooting; rim 24 / mid 32 / three 43; on-style 0.9; over-tier (tight cannot absorb max); movability: core; [context]
-- Leite (PDX, 23 g / 586 min) -- advantage: top mid-range scoring; rim 35 / mid 45 / three 20; on-style 0.9; affordable (tight); movability: keep; [target]
+- Leite (PDX, 23 g / 586 min) -- advantage: top mid-range scoring; rim 35 / mid 45 / three 20; on-style 0.9; affordable (tight); movability: movability: hand-curate; [target]
 - Copper (PHX, 24 g / 777 min) -- advantage: upper rotation perimeter shooting; rim 28 / mid 33 / three 39; on-style 0.9; over-tier (tight cannot absorb max); movability: available; [context]
 - Diggins (CHI, 19 g / 553 min) -- advantage: upper rotation mid-range scoring; rim 27 / mid 42 / three 31; on-style 0.9; affordable (tight); movability: available; [target]
 
@@ -88,9 +88,9 @@ Low-priority depth only: offense is roughly league-average and is not the primar
 
 - Gustafson (PDX, 24 g / 549 min) -- advantage: upper rotation rim finishing; rim 45 / mid 20 / three 36; on-style 0.9; affordable (tight); movability: available; [target]
 - Copper (PHX, 24 g / 777 min) -- advantage: upper rotation perimeter shooting; rim 28 / mid 33 / three 39; on-style 0.9; over-tier (tight cannot absorb max); movability: available; [context]
-- Morrow (CON, 17 g / 386 min) -- advantage: upper rotation rim finishing; rim 45 / mid 24 / three 31; on-style 0.9; affordable (tight); movability: keep; [target]
+- Morrow (CON, 17 g / 386 min) -- advantage: upper rotation rim finishing; rim 45 / mid 24 / three 31; on-style 0.9; affordable (tight); movability: movability: hand-curate; [target]
 - Engstler (PDX, 25 g / 596 min) -- advantage: rotation perimeter shooting; rim 34 / mid 27 / three 40; on-style 1.0; affordable (tight); movability: available; [target]
-- Johnson (SEA, 26 g / 740 min) -- advantage: rotation perimeter shooting; rim 32 / mid 31 / three 38; on-style 1.0; affordable (tight); movability: keep; [target]
+- Johnson (SEA, 26 g / 740 min) -- advantage: rotation perimeter shooting; rim 32 / mid 31 / three 38; on-style 1.0; affordable (tight); movability: movability: hand-curate; [target]
 
 ## ATL (bubble -- hold-judgment)
 
