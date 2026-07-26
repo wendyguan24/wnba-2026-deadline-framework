@@ -690,6 +690,68 @@ blockers the earlier gates missed, plus warnings; Wendy ACCEPTED all and they we
   gates supplement rather than replace human spec-tracing.
 A gm-agent re-gate on the corrected identity_summary column is the remaining follow-up.
 
+**Full three-gate review run (2026-07-26) -- PROPOSED, awaiting Wendy's decision.** Ran all
+three review agents on the current output at Wendy's request: analytics-reviewer on the full
+findings draft, gm-agent on the deadline-read table + framework sections, coach-agent on the
+fit reads + case-study template (the Synergy case studies are still stubs, so coach reviewed
+`output/fit_targets.md` / `deadline_read.md` / `analysis/case_study_template.Rmd` and was told
+to flag the case-study gap rather than penalize the intentional stub). Every framework number
+traced clean (analytics-reviewer reconciled ICCs, trajectory trends, gen/making percentiles,
+split-half, stratification, garbage-time, H2 intervals to source CSVs); all guardrails passed
+(vocabulary, Synergy quarantine, tiers-not-dollars, H1/H2/H3/H-null verbatim, language hygiene).
+The material findings cluster on the findings draft being stale relative to the pipeline, and
+on two action-shaped columns that disagree. Consolidated triage, proposals only:
+
+- **TIER A (>=2 gates independently, high-confidence, pure edits):**
+  - A1 -- Deadline-read action columns disagree; "Lever" reads like the action but is diagnosis
+    (gm #1 + analytics-reviewer #2). PROPOSE ACCEPT: rename Lever -> "Offense diagnosis," make
+    Recommendation the leftmost action column, delete the now-false §5 buyer-seller limitation
+    bullet (R/12 encodes exactly that posture now).
+  - A2 -- Doubled `movability: movability: hand-curate` token + `[target]` tag on uncurated
+    rows (Leite/Johnson/Morrow) (gm #3 + coach). PROPOSE ACCEPT: fix token, drop to `[context]`
+    until curated.
+  - A3 -- "Affordability PENDING" header contradicts populated affordability rows (gm #4 +
+    coach). PROPOSE ACCEPT: delete the PENDING line (bands are filled 10/11).
+  - A4 -- BLUP/`shot_making_residual`/random-slope machinery leaking into reader-facing table
+    footers (coach #7 + gm). PROPOSE ACCEPT: restate as "finishing relative to shot quality" /
+    "directional trend," move the fallback sentence to an appendix, keep the caveat.
+- **TIER B (single-gate, concrete correctness):**
+  - B1 -- Provenance line unrunnable: claims R/01-10 but R/08 needs standing.csv from R/12
+    (analytics-reviewer #1). PROPOSE ACCEPT: state real run set/order (...07, 08, 11, 12, with
+    12 before 08).
+  - B2 -- TOR "25 games" -> 24 (analytics-reviewer #3; 1,630 shots correct, team-games sum to
+    364 only with TOR at 24). PROPOSE ACCEPT.
+  - B3 -- Below-floor over-read as a deadline mandate; CBA remedy is a season payout, not a
+    forced trade (gm #2). PROPOSE ACCEPT: downgrade to "soft nudge," which also clears the PDX
+    "must add vs sell" contradiction.
+  - B4 -- TOR `lean buy` on a zero-spanning trajectory while ATL (also zero-spanning) gets no
+    list (gm #5). PROPOSE ACCEPT: demote TOR to "reassess after the break."
+  - B5 -- `player_value.csv` emits a per-40 value-vs-replacement (9.207) reading like the VOR
+    layer methodology says does not exist (analytics-reviewer #5). PROPOSE ACCEPT: relabel as an
+    ordinal box-score production tier; confirm no such figure reaches findings.
+- **TIER C (coach-usability, accept-after-fix, larger than a token edit):**
+  - C1 -- No position/size column anywhere (coach; single biggest coach gap -- cannot slot a
+    lineup). PROPOSE ACCEPT if time; else DEFER with an explicit "offense-only, no position"
+    caveat on each list.
+  - C2 -- Fit reads stop at shot diet, not fit; label by role (creator/movement/secondary) not
+    bucket; add on-ball/off-ball + duplication clause (coach). PROPOSE ACCEPT (prose).
+  - C3 -- No defensive read for buyer teams (DAL/MIN/IND) with no case study (coach). PROPOSE
+    ACCEPT the minimal version: one "offense-only, get your own defensive read" line per list.
+  - C4 -- Ogwumike is lead `[target]` for DAL+MIN+TOR at once (gm #7 + coach). PROPOSE ACCEPT:
+    cross-reference the thin-market note so no one treats one player as three adds.
+- **TIER D (defer post-deadline):** emit `window_rank` into standing.csv (or header note) so
+  rank-vs-window stops looking contradictory (analytics-reviewer #4); §2 inline directional
+  caveat cross-ref (analytics-reviewer #6); expansion-draft seller-timing lever; per-team
+  roster-spot counts; broader "trajectory non-informative this half" note in §3.
+- **MANDATORY pre-publish (unchanged, both gates):** re-pull cap tiers within 48h -- IND is
+  tier-fragile at $6,654 from capped, one minimum move flips its conditioning; keep the $5.95M
+  floor figure (CBA structural constant, within tiers-not-dollars) on the re-verify list.
+- **Universally accepted / forwardable (no action):** the ATL hold (all three gates); the
+  cap-feasibility conditioning of `acquire` (CBA-current -- "the part I'd trust at the table");
+  the generation-vs-making split; the full reproducible numeric core.
+
+Nothing here has been applied yet -- these are proposals for Wendy to triage before publish.
+
 ## Data download (session 2, 2026-07-18)
 
 `R/01_download.R` run against commit `773ce292bb2cd9bc6ec98d70de95176607ccbaeb`.
