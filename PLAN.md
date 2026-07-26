@@ -214,13 +214,16 @@ metrics use equal weighting.
       post-deadline), log the triage below** -- RUN 2026-07-19, scoped to the trajectory
       layer (incl. the new 5th metric) and the R/07 expected-points outputs. Findings
       logged below under "analytics-reviewer, post-06/07 gate run." Triage is PROPOSED,
-      NOT yet accepted -- awaiting Wendy's decision on each item before any fix is applied.
+      NOT yet accepted -- awaiting Wendy's decision on each item before any fix is applied. (SINCE RESOLVED: accepted and applied during the PR #1 work.)
 
 ## Jul 23 — Data refresh check; expected-points baseline; deadline-read table; cap-context CSV
 
-- [ ] Check `shufinskiy/nba_data` for a commit newer than `773ce29`; re-pin and re-run
+- [x] Check `shufinskiy/nba_data` for a commit newer than `773ce29`; re-pin and re-run
       01-04 if found, confirm tests still pass; update baseline expectations
-      deliberately if counts shift
+      deliberately if counts shift -- CHECKED 2026-07-20: repo HEAD advanced to
+      `e829d46`, but the WNBA 2026 cdn dataset is byte-identical (same 2,333,836-byte
+      archive, same 182 games / 89,735 rows). The newer commit touched other datasets,
+      not ours. No re-pin, no baseline shift, tests unaffected; pin stays at `773ce29`.
 - [x] Implement `R/07_expected_points.R` (stratified expected-points baseline / qSQ-lite,
       NOT a trained model) -- 49 strata over zone x shot_class x context, cdn-only, 2026
       in-season, MIN_CELL_N=100 collapse cascade (full cell -> zone x context -> zone ->
@@ -229,7 +232,7 @@ metrics use equal weighting.
       `team_game_shot_making.rds` (the `shot_making_residual` column feeding R/06's
       trajectory layer). Season identity generation + making = actual holds < 1e-8 for all
       15 teams; all xpts in [0.66, 1.54]. Run 2026-07-19 on the clean VM.
-- [ ] Implement `R/08_deadline_read.R` — skeleton now includes the `trajectory`
+- [x] Implement `R/08_deadline_read.R` (DONE 2026-07-20, clean VM) -- skeleton now includes the `trajectory`
       column (improving / flat / declining, footnoted when the interval spans zero,
       via `format_trajectory_column()`), the `cap_context` column (room / tight /
       capped, AMENDMENT_02 §3b), the feasibility-conditioned `lever` rule (an
@@ -242,14 +245,18 @@ metrics use equal weighting.
       surface it, so a residual-slope-approximation trajectory is never presented as a
       random-slope BLUP; (NOTE 5) always surface the `interval_spans_zero` footnote so an
       "improving"/"declining" label is never read as a fact when its interval spans zero.
-- [ ] **Gather `data/reference/cap_context_2026.csv` (AMENDMENT_02 §3a/§4) — all 15
+- [x] **Gather `data/reference/cap_context_2026.csv` (AMENDMENT_02 §3a/§4) -- DONE (populated
+      on main, commit 8f6956b: 15 teams, flexibility_tier + source Spotrac + as_of_date
+      2026-07-19; expiring_count/max_supermax_count left NA by design) -- all 15
       teams, hand-curated by Wendy from Spotrac WNBA team pages and Her Hoop Stats
       contract data, NOT scripted scraping. ~1 hour, same day as script 08. Every row
       needs a `source` and `as_of_date`. Tiers, not to-the-dollar figures.**
-- [ ] Present the deadline-read table (the core deliverable)
-- [ ] **Run `gm-agent` on the deadline-read table before any prose is written around
+- [x] Present the deadline-read table (the core deliverable) -- `output/deadline_read.csv`
+      + `.md`; lever distribution 5 acquire / 4 adjust / 6 hold, every acquire cap-conditioned
+- [x] **Run `gm-agent` on the deadline-read table before any prose is written around
       it — triage feedback, log below. Includes the cap-conditioning check added by
-      AMENDMENT_02 §4.**
+      AMENDMENT_02 §4.** RUN 2026-07-20; findings + PROPOSED triage logged below under
+      "gm-agent, deadline-read table run." Triage is PROPOSED, awaiting Wendy's decision. (SINCE RESOLVED: accepted and applied in ea2ee92; see the acceptance note in the triage log.)
 
 ## Jul 24-25 — Synergy case-study enrichment + fit reads (time-boxed)
 
@@ -266,12 +273,17 @@ metrics use equal weighting.
 
 ## Jul 25-26 — Writing, graphics, methodology notes
 
-- [ ] Implement `R/09_graphics.R` (includes one trajectory graphic maximum — small
+- [x] Implement `R/09_graphics.R` (includes one trajectory graphic maximum -- small
       multiples, adjusted trends, expansion teams highlighted; no rolling-window
-      machinery, no month-by-month split tables)
-- [ ] Draft `output/findings.md`, including framework evaluation criteria
+      machinery, no month-by-month split tables) -- DONE 2026-07-20: `output/identity_map.png`,
+      `output/generation_vs_making.png`, `output/trajectory_small_multiples.png`
+- [x] Draft `output/findings.md`, including framework evaluation criteria
       (AMENDMENT_01 §2c: face validity, split-half stability, sensitivity check,
-      garbage-time disposition)
+      garbage-time disposition) -- DRAFT DONE 2026-07-20. The split-half and
+      alt-stratification §2c checks are scripted in a new `R/10_framework_evaluation.R`
+      (-> `output/framework_evaluation.md`); garbage-time §2c is in R/06
+      (`output/trajectory_sensitivity.md`); face validity is qualitative in the draft.
+      Synergy case studies and the §3d structural paragraph are left as marked stubs.
 - [ ] **Structural paragraph (AMENDMENT_02 §3d, league-wide, findings draft):** what
       the first post-CBA deadline means structurally — contract-length distribution
       after the 2026 free agency rush, what that implies about market liquidity
@@ -289,9 +301,11 @@ metrics use equal weighting.
          since deadline-week moves will stale it within days.
 - [ ] **Run `coach-agent` on case-study sections (GSV, TOR, PDX) once fit reads are
       drafted — triage feedback, log below**
-- [ ] **Run `analytics-reviewer` on the full findings draft — triage feedback, log
+- [x] **Run `analytics-reviewer` on the full findings draft -- triage feedback, log
       below. Includes the cap-figure traceability and tiers-only checks added by
-      AMENDMENT_02 §4.**
+      AMENDMENT_02 §4.** RUN 2026-07-20; findings + PROPOSED triage logged below under
+      "analytics-reviewer, findings-draft run." Triage is PROPOSED, awaiting Wendy's
+      decision -- no fix applied to `findings.md`. (SINCE RESOLVED: accepted and applied in ea2ee92.)
 
 ## Jul 26-27 — Publish (repo + writeup + WHoopsLab version)
 
@@ -301,6 +315,118 @@ metrics use equal weighting.
 
 - [ ] Boki Wang (GSV), Eli Horowitz / Lauren Manis / Mark Schindler (Toronto),
       Portland HC contact (Portland). Optional: Todd Whitehead (Synergy courtesy).
+
+## Fit analysis and future modeling
+
+**Methodology doc (DONE 2026-07-21):** `output/methodology.md` -- the why-these-methods
+rationale companion to findings.md, including the "defining fit" design (gap-fill vs
+style-amplify, philosophy selects the mode, the honest value-vs-cost split).
+
+**In-scope fit first part (DONE 2026-07-21, analytics-reviewer gated): `R/11_generation_gap.R`**
+-> `output/generation_gap.md` + `.csv`. Decomposes each team's generation gap versus the league
+into a VOLUME gap (FGA per 100 possessions -- turnovers, offensive rebounds, pace) and a MIX
+gap (shot selection, attributed by zone via a centered-pps split), which sum to the team's
+total gap and reconcile with shot_generation_per100 (Pearson 0.99). Reports a primary_driver
+per team (volume for 10 teams, mix for 5), labels each mix zone (missing efficient looks vs
+over-reliant on low-value), flags identity-driven zones (protect, not fill) via the ICC>=0.15
+anchor rule, and assigns a fit mode (gap-fill: NYL/PHX/SEA/WAS; style-amplify/protect: the
+other 11). Question-1 refinement, offense-only, NO player-value or dollar component.
+Analytics-reviewer gate run 2026-07-20/21: no R/11 blockers; the volume+mix redesign was built
+in response to its WAS warning (a low-volume team judged only on per-shot mix is misread), and
+its methodology fixes (centered-formula description, Spearman 0.98 generation / 1.00 making)
+were applied. Reviewer NOTES deferred: minor wording only.
+
+**Standing / window layer (DONE 2026-07-21, gm-agent gated): `R/12_standing.R`** ->
+`output/standing.csv`. Computes each team's record from game results and a `window` tier
+(buyer / bubble / seller), blending win-loss record AND per-game scoring margin (equal-weight
+z-scores, so a lucky record is not miscast). Window conditions the RECOMMENDATION, never the
+diagnosis (identity/generation/making/trajectory stay record-independent -- the separation is
+what preserves the "reads beyond the record" claim). Distribution: 5 buyer / 4 bubble / 6
+seller. R/08 (deadline read) and R/11 (generation gap) both gained a window-conditioned
+`recommendation`/`fit_read` derived from one SHARED logic (keyed on window + generation tier +
+making + making-trajectory), so the two documents agree verb-for-verb. Design highlight the
+standing data surfaced: record and offense-diagnosis disagree sharply -- LVA is 17-7 (buyer)
+on the 7th-percentile shot generation carried by 100th-percentile but declining making, so it
+reads "reassess" (a paper tiger); WAS is a .522 bubble team despite the league's worst offense.
+gm-agent runs 2026-07-21: (1) on the pre-standing generation gap -- affirmed the volume-vs-mix
+split, flagged that the recommendation ignored standing; (2) re-run with the standing gate --
+affirmed the window layer "earns its place", named LVA the headline insight, and flagged a
+point-differential window bug (PDX) plus a recommendation verb-seam between the two docs. Both
+were fixed in a follow-up pass (point differential made a real window axis -> PDX reflows to
+seller; the two documents unified on one recommendation vocabulary). Remaining gm items are
+deferred to the case studies (the salary-out ledger, roster spots, zones-to-roles, market
+supply). FOLLOW-UP before publish: an analytics-reviewer pass on R/12 + the standing-gated
+R/08/R/11 -- DONE 2026-07-22, gate CLOSED (see the triage log entry
+"analytics-reviewer, standing-layer gate (2026-07-22)" below).
+
+**analytics-reviewer, standing-layer gate (2026-07-22) -- CLOSED.** Read-only pass on
+R/12_standing.R and the standing-gated R/08/R/11. Returned NO BLOCKERS, two warnings and
+two notes. Wendy accepted all four; applied 2026-07-22:
+- **W1 (ACCEPT) -- trajectory-directional caveat in the recommendation.** The reassess
+  and bubble recommendations lean on the making-trajectory direction, but all four
+  affected teams (LVA/NYL/ATL/TOR) have a shot_making_residual interval that spans zero.
+  Carried `making_interval_spans_zero` into `reconcile_recommendation()` (R/08) and
+  `buyer_branch_text()`/`bubble_branch_text()`/`load_making_trajectory()` (R/11); the
+  reassess and bubble strings now append "(trajectory directional)" when the interval
+  spans zero, so the recommendation carries the same caveat the "*" gives the trajectory
+  column. Diagnostic columns verified byte-identical before/after; cross-doc agreement holds.
+- **W2 (ACCEPT) -- "bubble" is a blended-window read, not the literal 8-seed.** The
+  standing_score blend can pull a sub-.500, several-games-back team up into the bubble band
+  on scoring margin (the TOR case: 10-14, window "bubble" on a -70 differential). Added a
+  clause to the R/12 header and output/methodology.md pointing readers to
+  games_back_from_8th for literal playoff-line distance and reframing "straddling the
+  8-seed line" as "near the standing_score playoff line".
+- **Note 3 (ACCEPT) -- reconciliation citation.** R/12 header now cites the actual test
+  (tests/testthat/test-possession-invariants.R:10) instead of "R/04_reconcile.R / the test
+  suite".
+- **Note 4 (ACCEPT) -- precise wording.** methodology.md "point differential far worse than
+  most sellers'" -> "worse than the median seller" (PDX -130 vs the -118 seller median).
+
+**Still post-deadline, NOT prioritized (build only if time, out of scope for Aug 2 --
+cut list, tiers-not-dollars, no player-value layer):**
+
+- **Fit-vs-cost target scoring (value per cap dollar).** Rank candidate targets by
+  `(fit_delta x player_value_over_replacement) / cost`, where cost = cap hit + outgoing asset
+  value. Requires: a player-value metric (win shares / RAPM, not currently built), to-the-
+  dollar cap data (breaks tiers-not-dollars; year-one-CBA trackers lag), and asset valuation
+  for the outgoing package (a trade machine, explicitly on the cut list). The in-scope first
+  part above (R/11, naming the gap) is now built; what remains post-deadline is the
+  player-value and cost sides. Recommended interim step that stays in scope: a
+  "cost-adjusted feasibility" read -- keep fit categorical but rank profiles by fit WITHIN a
+  team's feasible asset class, so the output is "best fit you can afford," never "best fit,
+  cap be damned." Needs no new data.
+- **Trade-outcome / win-share-boost model.** Predict a team's win delta from a fit-adjusted
+  roster add. Requires: a player-value baseline, a counterfactual lineup / minutes model, a
+  style-fit interaction term, and transaction history as training labels -- none identifiable
+  from one half-season of open play-by-play, and it produces the fake-trade content the
+  gm-agent persona rejects. Different product, not a tweak to this one.
+
+**Mentor-informed v2 roadmap (defense + lineup flexibility), 2026-07-23.** From a mentor
+brain dump. Decision (Wendy, 2026-07-23): case studies + v2 roadmap; NO in-window quant
+build (deadline physics, and the three publish blockers keep priority). Defense enters v1
+QUALITATIVELY through the Synergy case studies -- the case-study template now carries a
+"Defensive fit and roster-disruption read" checklist (switchability, athleticism,
+screen-assist/off-ball context, second-unit stabilization, defensive pace/activity,
+roster-disruption cost), coach-agent gated, Synergy-attributed, quarantined. The
+reproducible quantitative versions are v2 (all buildable from open PBP; feasibility probed
+2026-07-23 -- box-defense events and 5-man lineup reconstruction both present, NO tracking /
+matchup / defender / screen columns exist):
+- **v2 FLAGSHIP -- lineup-flexibility "chess match" layer.** Reconstruct 5-man lineups from
+  substitutions (proven via R/13's 99.9% 5-on-court gate); measure a target's teammate /
+  lineup versatility and the acquiring team's thin second-unit slots (minutes drop-off from
+  starters to bench). Most novel reproducible direction; needs a real build window.
+- **Defensive-activity screen (symmetric to R/13).** DREB/40, STL/40, BLK/40, forced-TOV
+  (steals + drawn offensive fouls), foul rate, as coarse tiers. Box-only, heavily caveated
+  (no rim-protection or matchup context). Would extend R/13 / a new R/15.
+- **Usage / offense-disruption fit-cost (the "easy add").** Per-player usage tier (usage
+  already computable as poss_used); flag "improves defense without demanding the ball" =
+  high defensive-activity tier AND low usage AND adequate 3P rate. Cheapest; reuses R/13.
+- **Defensive rebounding by opponent shot-zone (the Dallas midrange example)** and
+  **pace-fit** (transition-involvement proxy). Smaller follow-ons; A4 needs event-linkage.
+- OUT OF SCOPE (no open-data support, not clean from Synergy exports either): tracking-based
+  switch rates, true rim-deterrence, matchup-level defensive load, hustle stats.
+- Dependency: apply the pending R/13/R/14 review triage before any v2 work builds on the
+  value/fit layer.
 
 ---
 
@@ -480,6 +606,90 @@ New post-deadline cleanup tracked from this triage:
 - Repo-wide language-hygiene sweep (em dashes -> `--` in R/02-R/06 comments and PLAN.md
   prose). Deferred per WARNING 4.
 
+**Triage for the two 2026-07-20 gates (gm-agent + analytics-reviewer) below: ACCEPTED by
+Wendy and APPLIED in commit `ea2ee92`.** Applied: gm NOT YET 4 (R/08 below-floor flag;
+WAS/PDX show "room (below floor)"), analytics BLOCKER 1 (removed the PDX assisted-rate
+identity claims), WARNING 2 (R/07 writes `output/team_generation_making.csv`), WARNING 3
+(WAS wording), WARNING 4 (World Cup dates cited to AMENDMENT_02), NOTES 6-7 (wording +
+fallback-p caveat). Held as decided: gm NOT YET 2 (deferred, case-study scope), NOT YET 3
+(rejected the dollar-band fix, tiers-not-dollars), NOTE 5 (deferred); gm NOT YET 1/5 and
+the room questions were already handled in the findings prose.
+
+**gm-agent, deadline-read table run (2026-07-20).** Ran on `output/deadline_read.md` +
+`.csv` the moment R/08 produced them, before any prose. The agent affirmed the floor:
+the lever rule is applied correctly across all 15 rows, every acquire is cap-conditioned
+and attributed, no CBA mechanic is unattributed, no old-CBA intuition leaked. It named
+the LVA <-> ATL mirror as the forwardable idea and ATL as the sharpest disagreement with
+consensus. **Triage below is PROPOSED, NOT applied; the deadline-read table is unchanged
+pending Wendy's decision.** (SINCE RESOLVED: Wendy accepted this triage; fixes applied in ea2ee92.)
+
+- **NOT YET 1 (ATL hold vs its own declining making trajectory) -- PROPOSED ACCEPT, in
+  findings prose.** Addressed in `findings.md` Section 5: ATL argued explicitly, the
+  declining-making contra-signal named as the open risk. Table unchanged.
+- **NOT YET 2 (acquire rows have no need-profile) -- PROPOSED DEFER (scope).** Fit/need
+  profiles are case-study-only attended work (HANDOFF §5f, AMENDMENT_02 §3c). Real gap
+  flagged: the planned case studies (GSV/TOR/PDX) cover zero acquire teams.
+- **NOT YET 3 ("tight -> minimum/depth only" over-compresses PHX vs NYL) -- PROPOSED
+  REJECT the dollar-band fix** (violates tiers-not-dollars, AMENDMENT_02 §3a); alternative
+  (soften the string, or split the tight tier) is Wendy's cap-curation call.
+- **NOT YET 4 (salary floor flips WAS/PDX) -- PROPOSED ACCEPT (strongest fix).** Floor is
+  85% of cap = $5.95M (cba_rules §1); WAS and PDX (both room tier) sit below it, so pushed
+  to add. Add a below-floor boolean flag (tiers-compatible), publish "room (below floor)".
+  Not applied; awaiting greenlight.
+- **NOT YET 5 (adjust needs a driver) -- PROPOSED ACCEPT, in findings prose.** Addressed
+  in `findings.md` Section 5 (e.g. IND overperforming its process -> consolidate). Table
+  unchanged.
+- **THE ROOM'S QUESTIONS (buyer/seller posture, roster spots, market supply, expansion
+  overlay, break-both-ways) -- PROPOSED DEFER** to the structural paragraph (§3d) and case
+  studies. The buyer/seller limitation is stated as a caveat in `findings.md` Section 5.
+
+**analytics-reviewer, findings-draft run (2026-07-20).** The full-findings-draft gate on
+`output/findings.md`. The reviewer confirmed the core numbers all trace to source files
+(ICCs, the five league trends and p-values, generation/making percentiles, split-half and
+Spearman values, garbage-time 3.9%, reconciliation deltas), that H1/H2 nulls and the H3
+refutation are written against the registry, and that vocabulary, hygiene, tiers-not-dollars,
+and Synergy quarantine all pass. **Triage below is PROPOSED, NOT applied; `findings.md` is
+unchanged pending Wendy's decision.** (SINCE RESOLVED: Wendy accepted this triage; fixes applied in ea2ee92.)
+
+- **BLOCKER 1 (assisted-rate identity claim on a shrunk BLUP; self-contradiction) --
+  PROPOSED ACCEPT.** assisted_rate ICC 0.0004 shrinks all BLUPs to ~0.649, so the PDX
+  "decision-relevant mover" sentence (Section 1) and "PDX's schedule-adjusted assisted rate
+  is first in the league" clause (Section 4) are claims on noise and contradict Section 1's
+  own "close to noise" line. Fix: delete both, keep only the interval-caveated trajectory
+  direction note. Recommend accept (correctness fix).
+- **WARNING 2 (GSV "+0.6 per 100" not in a readable output) -- PROPOSED ACCEPT.** The value
+  lives only in binary `team_generation_making.rds`; the H3 refutation rests on its sign.
+  Fix: have R/07 also write a readable `output/team_generation_making.csv` and cite it (the
+  50th percentile alone does not establish "above own expectation").
+- **WARNING 3 ("WAS worst on both axes" inaccurate) -- PROPOSED ACCEPT.** WAS is 0th on
+  generation but 7th on making; ATL is 0th on making. Fix: "worst on generation and
+  near-worst on making."
+- **WARNING 4 (World Cup dates cited to cba_rules §5, which does not contain them) --
+  PROPOSED ACCEPT.** The Aug 31-Sep 16 bracket traces to AMENDMENT_02 line 34, not
+  cba_rules §5. Fix the citation in `findings.md`, `deadline_read.md`, and R/08.
+- **NOTE 5 (test summary not captured to a file) -- PROPOSED DEFER.** Optionally write the
+  testthat summary to output for a stranger's reproducibility.
+- **NOTE 6 ("independent confirmation" overstates split-half vs ICC) -- PROPOSED ACCEPT
+  (soften).** Both measure within-season stability on the same data; change to "consistent
+  with the ICC ordering."
+- **NOTE 7 (trajectory p-values are from the documented fallback) -- PROPOSED ACCEPT.** Add
+  a one-line caveat that the p-values are approximate under the random-intercept fallback.
+
+**Fable-5 analytics-reviewer second-opinion run (2026-07-20)** on `output/findings.md` + PLAN.md.
+Confirmed every core number still traces to source and the guardrails hold. Found two real
+blockers the earlier gates missed, plus warnings; Wendy ACCEPTED all and they were APPLIED:
+- B1: `build_identity_summary()` now filters the z-score pool to metrics with mixed-model
+  ICC >= 0.15 (eda_notes.md spec change 6), so the deadline-read identity column no longer
+  anchors on noise metrics. GSV now reads as a perimeter profile, matching the findings prose.
+- B2: `deadline_read.md` discloses the random-intercept fallback behind the trajectory labels.
+- W1-W5 (findings + reconciliation_report): H2 interval claim corrected, stale salary-floor
+  sentence fixed, test summary captured to `output/test_summary.txt`, trajectory fallback-output
+  deviation disclosed, and the stale em dashes in reconciliation_report.md regenerated out.
+- W6-W7 (PLAN): the pre-Jul-23 data-refresh caveat and the stale "PROPOSED" statements annotated.
+- Deferred (notes): readable strata CSV, "0.996" rounding, one methodology line that agent
+  gates supplement rather than replace human spec-tracing.
+A gm-agent re-gate on the corrected identity_summary column is the remaining follow-up.
+
 ## Data download (session 2, 2026-07-18)
 
 `R/01_download.R` run against commit `773ce292bb2cd9bc6ec98d70de95176607ccbaeb`.
@@ -569,15 +779,146 @@ contract data beyond case-study rosters and named candidates; multi-year cap
 projections or 2027 free-agency analysis; any contract-protection claim without a
 source.
 
-## Next session should
+## Still REQUIRED before publish (2026-07-22, do not drop -- these are open, not done)
 
-Reconciliation gate is cleared (see "Reconciliation gate results" above; 0 test
-failures) and the EDA gate is now cleared too — `analysis/eda_midseason.Rmd` runs
-cleanly end to end (verified via `knitr::knit()`; no pandoc installed locally so
-HTML rendering wasn't checked, only that every chunk executes without error) and
-`output/eda_notes.md` is written. Next stop per the session roadmap: implement
-`R/05_features.R` against the EDA gate's 3 forced spec changes (`pace_poss` as
-primary pace, `is_ot` flag, `garbage_time_poss_share` column), then `R/06_models.R`
-including the trajectory extension, then run `analytics-reviewer` on the results.
-`data/reference/cap_context_2026.csv` still needs Wendy's manual entry (AMENDMENT_02
-§3a/§4, Jul 23 block) before script 08 can be implemented against real cap data.
+The framework pipeline (01-12), the three graphics, the framework evaluation, and the
+analytics-reviewer / gm-agent gates are built and closed. The following are still
+NECESSARY before the July 26-27 publish window and are NOT optional polish:
+
+1. **Synergy case studies + the §3d structural paragraph in `output/findings.md`.**
+   Currently TODO stubs. Synergy numbers stay quarantined in `analysis/` case-study
+   prose with the "Source: Synergy Sports | 2026 WNBA" attribution and never enter
+   data/models/output tables (reproducibility boundary).
+2. **`coach-agent` gate.** Not yet run. Required on the drafted case-study sections
+   (GSV, TOR, PDX) once they exist, per AMENDMENT_01 Part 3. This is the one mandatory
+   review gate still un-fired.
+3. **Primary-source cap/CBA verification + date-stamp (AMENDMENT_02 §4).** The four-item
+   pre-publish checklist against `data/reference/cap_context_2026.csv` and
+   `cba_rules_2026.md` still needs Wendy's manual re-verification and a fresh as-of date
+   before the numbers are defended in print. Tiers-not-dollars stands regardless.
+
+These three block publish. The player-value work below does NOT block publish and does
+not displace them.
+
+## Next: fit-vs-cost / player-value layer (2026-07-22, moved from post-deadline)
+
+Wendy has elected to attempt this layer this week (time permits: ~5 days to the publish
+window). NOTE THE STANDING CONFLICT before building: this layer as originally specced
+`(fit_delta x player_value_over_replacement) / cost` collides with two published rules --
+(a) no player-value metric exists in the framework, and none is cleanly derivable from
+one half-season of open play-by-play (a validated RAPM/win-shares figure is a separate
+product); (b) "cost = cap hit" is dollars, which breaks the tiers-not-dollars rule
+(AMENDMENT_02 §3a); and (c) the outgoing-asset / trade-machine side is on the handoff §6
+cut list. A guardrail-compliant version has to decide the player-value SOURCE and the
+COST representation up front. Whatever is built here is additive and
+must not touch the reproducibility boundary of the published 01-12 numbers.
+
+**Scoping decisions (2026-07-22).** Value source: player-value proxy derived from open
+PBP (stays inside the reproducibility boundary). Cost: tiers + coarse contract bands
+(min/mid/max), never dollars. Primary metric: box value over replacement. Placement:
+a new published table plus prose (later narrowed by review, see below).
+
+**Design review, 2026-07-22 (analytics-reviewer + gm-agent, both on Fable 5).** Ran both
+agents on a written design doc BEFORE writing code, to catch a wrong foundation cheaply.
+They converged. Findings and PROPOSED triage (NOT yet Wendy-approved; recorded so the
+record exists while forward motion continues on the low-regret core):
+
+- Metric: **Game Score per 40 minutes** is the right engine (both). Reject Win Shares
+  ("wins" is an overclaim from a half-season; assembly cost buys false precision), PER
+  (opaque, biased), custom weights (un-citable), RAPM-family (half-season noise). Weights
+  are NBA-derived and unvalidated for the WNBA -- disclose like the 0.44-FT convention.
+  PROPOSED: ACCEPT.
+- **Per-40, not per-100.** The doc's premise that possessions.rds sidesteps minutes
+  reconstruction was wrong: a player per-100 needs stint/lineup attribution, MORE work
+  and adjacent to the on-off cut list. PROPOSED: ACCEPT, commit to per-40.
+- **Demote the value number.** A VOR leaderboard is the piece's biggest overclaim
+  (volume-rewarded, defense-blind, half-season-unstable). Build it league-wide and
+  reproducible, publish it only as production TIERS on NAMED candidates inside fit reads.
+  Reframe R/13 = the screen, R/14 = the fit-first deliverable. PROPOSED: ACCEPT.
+- **Fit-to-need is the product; value is a secondary filter.** Shop order: need ->
+  attainability -> tier -> value. Candidate pool = the sellers in standing.csv (currently
+  absent). Fit table must obey the deadline_read recommendation verbs (no buy lists for
+  LVA/reassess or sellers). PROPOSED: ACCEPT.
+- **No value/cost ratio, ever** (needs per-player dollars + package valuation, both out).
+  Rank fit-then-value WITHIN the feasible asset class. Strike "wins replaced" language.
+  PROPOSED: ACCEPT.
+- **Offensive-fits-only scope statement** (not a footnote): a defensive need cannot be
+  served by this table. PROPOSED: ACCEPT.
+- **Replacement anchor:** drop 20th-pct-of-rotation (circular); anchor to sub-rotation
+  mean, keep 20th-pct as a sensitivity. PROPOSED: ACCEPT.
+- **Eligibility floor** must include the handoff §5g player-claim threshold (>=100 FGA or
+  >=150 possessions used) AND a minutes floor (~300 min). PROPOSED: ACCEPT.
+- **Register the layer as EXPLORATORY** (dated addendum; eda_notes.md is frozen) -- no
+  hypothesis test, all statements descriptive. PROPOSED: ACCEPT.
+- **Abort criterion:** minutes-reconstruction validation gate green by end of Jul 24, else
+  the layer returns to post-deadline (does not displace the three publish blockers).
+  PROPOSED: ACCEPT.
+- Split-half reliability on GmSc/40 in R/10; garbage-time sensitivity for bench box stats;
+  coarse rim/mid/three + creation-class fit buckets (5-zone is noise at the FGA floor);
+  fallback degrades to tiers-only if it fires; disclose shot-diet context contamination.
+  PROPOSED: ACCEPT.
+- Team-pace sensitivity, empirical-Bayes shrinkage, bootstrap bands, header run-order.
+  PROPOSED: DEFER post-deadline.
+
+- **BLOCKER (analytics), flagged not resolved -- Wendy's call:** the layer conflicts with
+  handoff §5f ("No league-wide fit matrix ... no new player-level models"). Per CLAUDE.md
+  this must be FLAGGED, not silently built past. PROPOSED resolution: log an explicit §5f
+  amendment and restrict PUBLISHED fit-matching + value tiers to NAMED candidates; the
+  league-wide Game Score table stays a reproducible output/ exhibit only. AWAITING Wendy's
+  explicit decision before anything is published league-wide or R/14 is written.
+
+**Proceeding now on the low-regret core only:** build and validate the reproducible R/13
+Game Score engine (needed under every non-abort option). HOLDING the contested publication
+decisions (§5f, R/14 fit table, what enters findings.md) for Wendy's explicit sign-off.
+
+**BUILD STATUS (2026-07-22):**
+- §5f conflict RESOLVED: Wendy authorized adjusting the handoff to match the scope.
+  HANDOFF_wnba_deadline_framework.md §5f now carries the dated amendment (value screen +
+  fit layer in scope; league-wide value stays an exhibit; published matching/tiers on
+  named candidates only; tiers-not-dollars; seller pool; verb obedience; exploratory).
+- **R/13_player_value.R built** (commit e17b7b0). Game Score over replacement per 40 min;
+  minutes reconstructed from substitutions, 5-on-court gate 99.9% (abort criterion met);
+  eligibility = §5g floor + 200 min; replacement anchored to the below-eligibility pool;
+  split-half GmSc/40 per-40-rate reliability r = 0.65 (assists included); published as
+  production tiers. Output output/player_value.csv
+  (exhibit) + tests/testthat/test-player-value.R (green). Face validity holds (Wilson,
+  Bueckers, Stewart, Mitchell, Ogwumike lead).
+- **R/14_fit_targets.R built.** Wendy authorized running it. Candidate pool = eligible
+  players on seller teams (attainability); on-style match (coarse rim/mid/three) as a fit
+  GATE, then production tier within it (value as the within-fit ranker); verb-obedient
+  (amplify DAL/GSV/MIN get on-style depth lists; buy-judgment TOR tentative; adjust IND
+  low-priority; reassess LVA + hold-judgment + sellers get a deliberate no-list with the
+  reason). Contract bands are a hand-curation template (data/reference/candidate_contracts_2026.csv,
+  15 named candidates, bands blank), never fabricated; affordability gated by the acquiring
+  team's cap tier only where a band is filled. Outputs output/fit_targets.md + .csv +
+  tests/testthat/test-fit-targets.R (green).
+
+**R/13 + R/14 review gate CLOSED (2026-07-23).** gm-agent + analytics-reviewer run on the
+built layer (Fable 5). Triage decisions (Wendy):
+- analytics BLOCKER "csv does not reproduce / non-monotonic tiers" -- REJECTED, verified
+  false: R/13 re-run diffs byte-identical and tiers are perfectly monotonic (0 violations).
+  Kept the suggested tier-monotonicity test as a cheap guard (now in test-player-value.R).
+- analytics BLOCKER "split-half mislabeled + omits assists" -- ACCEPTED and FIXED: the
+  reliability now correlates the PER-40 rate (not per-game totals) with assists included and
+  sub-5-minute games dropped; the honest number is r = 0.65 (was a miscomputed 0.76). Still
+  supports coarse tiers.
+- D1 (minutes floor): keep 200 (logged rationale in R/13; deliberately below the ~300
+  suggestion for midseason rotation inclusion).
+- D2 (IND adjust list): CAP adjust-team lists at upper rotation -- IND already has three
+  top-tier scorers and a thin bench, so a fourth star is the wrong "depth"; the list now
+  shows only upper-rotation/rotation on-style pieces. Amplify teams keep top-tier.
+- D3 (affordability inert + no movability screen, gm blockers): SHIP v1 with affordability
+  PENDING and movability disclosed. Added a `movability` column to the contract template and
+  md disclosures (affordability pending, movability not screened, asset cost out of scope,
+  rim-heavy sellers absent by construction). Bands + movability remain Wendy's hand-curation.
+- D4 (fallback branch): replaced the per-game fallback with stop() (abort criterion; the gate
+  passes 99.9%).
+- Also applied: coarse_profile NA-area bug fixed (three defined by shot type); games/minutes
+  surfaced on each shortlist line (flags e.g. Plum's 12-game sample); style_match relabeled
+  "on-style" and rounded; test-fit-targets de-brittled (no-list teams derived from
+  deadline_read, not hardcoded) + an adjust-cap test; PLAN candidate count corrected 15 -> 11.
+- DEFERRED (logged, post-deadline): full per-(game,period,team) minutes invariant test,
+  creation-class fit bucket, garbage-time bench sensitivity, sorting player_value.csv by team,
+  the capped-min cap-mechanic citation. Full testthat suite green after all fixes.
+- STILL pending for publish (unchanged): hand-curate contract bands + movability (source +
+  as_of_date), Synergy case studies + coach-agent gate, cap/CBA primary-source verification.

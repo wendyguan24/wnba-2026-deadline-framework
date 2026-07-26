@@ -1,0 +1,218 @@
+personId,playerName,team,games,minutes,minutes_method,FGA,poss_used,game_score,gs_rate,rate_unit,replacement_rate,vor,eligible,production_tier
+1628932,Wilson,LVA,22,696.6,reconstructed,390,519.9,476.9,27.385,per40min,9.207,316.56,TRUE,top
+1642784,Bueckers,DAL,23,769.8,reconstructed,353,434.5,386.6,20.09,per40min,9.207,209.42,TRUE,top
+1629491,Shepard,DAL,24,788.5,reconstructed,246,331.2,388.8,19.724,per40min,9.207,207.3,TRUE,top
+1627668,Stewart,NYL,23,758.3,reconstructed,336,461.4,378.5,19.965,per40min,9.207,203.95,TRUE,top
+1643426,Miles,MIN,23,699.8,reconstructed,303,430.7,356.7,20.389,per40min,9.207,195.62,TRUE,top
+203827,Howard,MIN,25,755.3,reconstructed,287,405.6,361.8,19.161,per40min,9.207,187.94,TRUE,top
+1628909,Mitchell,IND,24,782,reconstructed,385,483.2,363.8,18.61,per40min,9.207,183.81,TRUE,top
+203014,Ogwumike,LAS,22,694.9,reconstructed,277,338.5,341.7,19.67,per40min,9.207,181.76,TRUE,top
+1641648,Boston,IND,22,605.9,reconstructed,269,365.7,310.8,20.52,per40min,9.207,171.34,TRUE,top
+1642289,Cardoso,CHI,23,617.9,reconstructed,221,303.4,304.7,19.724,per40min,9.207,162.46,TRUE,top
+1629497,Mabrey,TOR,23,673.2,reconstructed,358,474.6,312.8,18.587,per40min,9.207,157.85,TRUE,top
+1629498,Young,LVA,24,775,reconstructed,311,389.6,329.1,16.985,per40min,9.207,150.7,TRUE,top
+1631009,Howard,ATL,23,803.4,reconstructed,329,398.2,335.2,16.689,per40min,9.207,150.26,TRUE,top
+1627673,Jones,NYL,23,683.9,reconstructed,227,314.5,305.1,17.845,per40min,9.207,147.67,TRUE,top
+203826,Thomas,PHX,23,767.8,reconstructed,251,382.1,320.3,16.686,per40min,9.207,143.55,TRUE,top
+203825,McBride,MIN,25,806.7,reconstructed,321,401.8,326.4,16.185,per40min,9.207,140.71,TRUE,upper rotation
+1642286,Clark,IND,20,588.8,reconstructed,302,441.4,266.1,18.077,per40min,9.207,130.57,TRUE,top
+1642291,Reese,ATL,23,705.4,reconstructed,284,428.1,290.9,16.496,per40min,9.207,128.53,TRUE,upper rotation
+204324,Hamby,LAS,23,683.7,reconstructed,237,328.5,282,16.498,per40min,9.207,124.62,TRUE,upper rotation
+1628276,Plum,LAS,12,413.9,reconstructed,188,256.7,212.9,20.577,per40min,9.207,117.64,TRUE,top
+1629567,Hiedeman,SEA,26,755.7,reconstructed,328,420.7,291,15.402,per40min,9.207,117.04,TRUE,upper rotation
+1628277,Gray,ATL,24,794.3,reconstructed,345,447.4,299.7,15.093,per40min,9.207,116.87,TRUE,upper rotation
+1628886,Canada,ATL,24,752.5,reconstructed,211,302.1,289.8,15.406,per40min,9.207,116.6,TRUE,upper rotation
+1627675,Williams,MIN,25,774.5,reconstructed,363,424.8,293.5,15.158,per40min,9.207,115.22,TRUE,upper rotation
+1642785,Citron,WAS,20,681.5,reconstructed,224,331.8,270.2,15.86,per40min,9.207,113.34,TRUE,upper rotation
+1642304,Leite,PDX,23,585.8,reconstructed,235,377.8,246.4,16.825,per40min,9.207,111.56,TRUE,top
+1631019,Smith,LVA,24,573.9,reconstructed,175,240,239.6,16.698,per40min,9.207,107.49,TRUE,top
+1642792,Iriafen,WAS,20,560.7,reconstructed,221,303.3,232.7,16.602,per40min,9.207,103.65,TRUE,top
+1628931,Williams,GSV,24,613.5,reconstructed,303,383.2,244.4,15.934,per40min,9.207,103.17,TRUE,upper rotation
+1631007,Burton,GSV,25,705.3,reconstructed,236,322.1,261.9,14.852,per40min,9.207,99.54,TRUE,upper rotation
+1628279,Sykes,TOR,15,476.7,reconstructed,228,308.8,209.2,17.555,per40min,9.207,99.48,TRUE,top
+1631022,Austin,WAS,22,640.5,reconstructed,247,364.9,244.3,15.258,per40min,9.207,96.88,TRUE,upper rotation
+1629484,Gustafson,PDX,24,549.2,reconstructed,211,244.2,221.3,16.118,per40min,9.207,94.88,TRUE,upper rotation
+1627674,Copper,PHX,24,777.2,reconstructed,384,513,273.2,14.06,per40min,9.207,94.29,TRUE,upper rotation
+1642767,Salaun,GSV,25,568.7,reconstructed,247,297.9,222.9,15.677,per40min,9.207,91.98,TRUE,upper rotation
+1630442,Mack,PHX,18,452.2,reconstructed,115,148.1,190.7,16.867,per40min,9.207,86.6,TRUE,top
+1642798,Malonga,SEA,18,459.7,reconstructed,241,320.8,187.8,16.342,per40min,9.207,81.99,TRUE,upper rotation
+203398,Griner,CON,14,356.2,reconstructed,145,192.9,162.8,18.282,per40min,9.207,80.81,TRUE,top
+203833,Gray,LVA,24,790.6,reconstructed,239,331.5,261.8,13.246,per40min,9.207,79.82,TRUE,rotation
+203400,Diggins,CHI,19,552.9,reconstructed,222,294.2,205,14.83,per40min,9.207,77.73,TRUE,upper rotation
+1631055,Sabally,TOR,17,412,reconstructed,133,177,171.6,16.661,per40min,9.207,76.77,TRUE,top
+1631135,Nelson-Ododa,CON,20,409.7,reconstructed,120,183,167.4,16.343,per40min,9.207,73.09,TRUE,upper rotation
+1629524,Carleton,PDX,24,727,reconstructed,257,316,234.7,12.914,per40min,9.207,67.36,TRUE,rotation
+1631083,Engstler,PDX,25,595.8,reconstructed,187,257.8,204.3,13.717,per40min,9.207,67.17,TRUE,rotation
+1630150,Carter,LVA,13,219.9,reconstructed,100,133.3,115.8,21.061,per40min,9.207,65.18,TRUE,top
+1631136,Astier,NYL,24,583.9,reconstructed,154,225.2,198.8,13.619,per40min,9.207,64.4,TRUE,rotation
+1642321,Taylor,CHI,22,420.2,reconstructed,226,286.2,158.5,15.088,per40min,9.207,61.78,TRUE,upper rotation
+1643425,Fudd,DAL,23,713.3,reconstructed,269,300.4,224.5,12.589,per40min,9.207,60.3,TRUE,rotation
+1643428,Johnson,SEA,26,739.5,reconstructed,306,405.2,230.1,12.445,per40min,9.207,59.87,TRUE,rotation
+204330,Harrison,TOR,14,342.1,reconstructed,145,183.4,137.7,16.1,per40min,9.207,58.95,TRUE,upper rotation
+1643431,Okot,ATL,24,241.1,reconstructed,101,151.5,111.8,18.545,per40min,9.207,56.29,TRUE,top
+1628269,Coffey,MIN,25,668.4,reconstructed,163,191.4,207.8,12.436,per40min,9.207,53.95,TRUE,rotation
+1628922,Stevens,CHI,19,466.7,reconstructed,196,249.2,157.4,13.49,per40min,9.207,49.97,TRUE,rotation
+1643445,Rice,TOR,10,266.6,reconstructed,75,107.8,111.3,16.697,per40min,9.207,49.92,FALSE,below threshold
+1642800,Morrow,CON,17,385.7,reconstructed,178,224.7,138.7,14.383,per40min,9.207,49.91,TRUE,upper rotation
+1642822,Chen,GSV,25,365.6,reconstructed,131,170.6,133.2,14.572,per40min,9.207,49.04,TRUE,upper rotation
+1642782,Barker,PDX,24,607.9,reconstructed,200,265.4,186.5,12.273,per40min,9.207,46.58,TRUE,rotation
+1629566,Xu,NYL,24,301.4,reconstructed,96,113.2,114.6,15.208,per40min,9.207,45.22,FALSE,below threshold
+1630996,Burrell,LAS,23,637.4,reconstructed,227,310.8,189.2,11.874,per40min,9.207,42.49,TRUE,rotation
+1629482,Cunningham,IND,23,526,reconstructed,143,182.8,163.2,12.412,per40min,9.207,42.13,TRUE,rotation
+1642793,James,DAL,24,293.5,reconstructed,146,177.3,109.6,14.939,per40min,9.207,42.05,TRUE,upper rotation
+203026,Hayes,GSV,23,363.5,reconstructed,119,167.5,125.6,13.82,per40min,9.207,41.92,TRUE,upper rotation
+204323,Parker-Tyus,LVA,21,222.6,reconstructed,73,103,92.5,16.623,per40min,9.207,41.27,FALSE,below threshold
+1628881,Billings,IND,23,465.3,reconstructed,101,147.3,148.3,12.749,per40min,9.207,41.19,TRUE,rotation
+1642290,Edwards,CON,18,351.5,reconstructed,132,181.1,121.6,13.837,per40min,9.207,40.69,TRUE,upper rotation
+1629481,Ogunbowale,DAL,24,695,reconstructed,287,355.8,200.3,11.528,per40min,9.207,40.33,TRUE,rotation
+1642303,Lacan,CON,15,434.7,reconstructed,167,211.5,140.4,12.918,per40min,9.207,40.33,TRUE,rotation
+1643420,Juskaite,TOR,24,553.5,reconstructed,162,224.6,166.8,12.055,per40min,9.207,39.4,TRUE,rotation
+1631141,Melbourne,SEA,25,591.2,reconstructed,150,234,175.1,11.846,per40min,9.207,39,TRUE,rotation
+1643427,Betts,WAS,23,372.6,reconstructed,114,153.2,124,13.311,per40min,9.207,38.22,TRUE,rotation
+1642287,Brink,LAS,15,259.7,reconstructed,85,142.2,96.8,14.91,per40min,9.207,37.02,FALSE,below threshold
+1641652,Siegrist,DAL,23,314.9,reconstructed,110,124.9,108.3,13.758,per40min,9.207,35.82,TRUE,upper rotation
+1627700,Allemand,TOR,18,520.8,reconstructed,85,118.5,153.4,11.782,per40min,9.207,33.52,FALSE,below threshold
+204333,Cloud,CHI,23,632.3,reconstructed,161,247.6,176.2,11.146,per40min,9.207,30.65,TRUE,rotation
+1630149,Sabally,NYL,13,217.8,reconstructed,98,132.8,79.9,14.674,per40min,9.207,29.77,FALSE,below threshold
+1642797,Kosu,MIN,24,267.5,reconstructed,73,102.6,91.2,13.638,per40min,9.207,29.63,FALSE,below threshold
+1629546,Johannes,NYL,24,560.6,reconstructed,185,237.8,157.2,11.217,per40min,9.207,28.16,TRUE,rotation
+1629477,Ionescu,NYL,12,357,reconstructed,143,184.1,110.2,12.349,per40min,9.207,28.03,TRUE,rotation
+1643443,Fam,SEA,20,588.4,reconstructed,188,237.8,162.9,11.073,per40min,9.207,27.45,TRUE,rotation
+1642777,Akoa Makani,PHX,14,338.6,reconstructed,94,142.4,105,12.406,per40min,9.207,27.07,FALSE,below threshold
+201886,Bonner,PHX,25,664.5,reconstructed,209,250.7,179.8,10.822,per40min,9.207,26.83,TRUE,fringe
+1643505,Nogic,PHX,16,322.5,reconstructed,119,158.7,99.8,12.378,per40min,9.207,25.56,TRUE,rotation
+202664,Vandersloot,CHI,7,124.3,reconstructed,38,60.1,52.7,16.956,per40min,9.207,24.08,FALSE,below threshold
+204322,Williams,CHI,24,409.2,reconstructed,109,155,117.9,11.526,per40min,9.207,23.71,TRUE,rotation
+1630386,Kuier,DAL,21,355.6,reconstructed,91,121.7,105.1,11.823,per40min,9.207,23.25,FALSE,below threshold
+1642307,Holmes,SEA,21,228.6,reconstructed,40,56.6,72.1,12.618,per40min,9.207,19.49,FALSE,below threshold
+1642288,Jackson,CHI,4,118,reconstructed,60,77.7,46,15.596,per40min,9.207,18.84,FALSE,below threshold
+1643447,Jaquez,CHI,20,451.6,reconstructed,142,189.9,122.3,10.832,per40min,9.207,18.35,TRUE,rotation
+204468,Ayayi,PHX,19,320.6,reconstructed,90,145.3,91.5,11.417,per40min,9.207,17.71,FALSE,below threshold
+1642815,Timpson,IND,23,317.6,reconstructed,53,77.8,90.2,11.359,per40min,9.207,17.09,FALSE,below threshold
+1628242,Cannon,LAS,9,69.8,reconstructed,23,34.2,32.8,18.806,per40min,9.207,16.74,FALSE,below threshold
+1642817,Van Lith,CON,11,173.1,reconstructed,62,77.5,55.2,12.752,per40min,9.207,15.34,FALSE,below threshold
+1641656,Amihere,GSV,21,245.4,reconstructed,58,91.5,70.5,11.494,per40min,9.207,14.02,FALSE,below threshold
+1629574,Yueru,DAL,16,142,reconstructed,38,55.1,46,12.96,per40min,9.207,13.32,FALSE,below threshold
+203822,Gardner,NYL,23,340.8,reconstructed,84,112.2,91.3,10.716,per40min,9.207,12.86,FALSE,below threshold
+1643506,Oblak,PDX,19,256.7,reconstructed,97,150.3,71.5,11.142,per40min,9.207,12.41,TRUE,rotation
+1628508,Zandalasini,GSV,21,370.4,reconstructed,150,195.4,97.6,10.541,per40min,9.207,12.35,TRUE,fringe
+1643436,Williams,PDX,21,238.7,reconstructed,58,84,67,11.227,per40min,9.207,12.05,FALSE,below threshold
+1643495,Pissott,LVA,2,23.5,reconstructed,13,14,15.6,26.517,per40min,9.207,10.18,FALSE,below threshold
+1642210,Vanloo,NYL,5,81.1,reconstructed,17,30.8,28.6,14.099,per40min,9.207,9.92,FALSE,below threshold
+1630142,Fiebich,NYL,14,407.8,reconstructed,102,137.6,103.1,10.114,per40min,9.207,9.24,TRUE,fringe
+1627701,Fagbenle,TOR,8,142.9,reconstructed,39,54.3,41.9,11.725,per40min,9.207,9,FALSE,below threshold
+1630134,Sutton,PDX,12,153.2,reconstructed,52,69.3,43.3,11.303,per40min,9.207,8.03,FALSE,below threshold
+1643453,Vanslooten,SEA,13,71.8,reconstructed,11,17.5,24.2,13.483,per40min,9.207,7.67,FALSE,below threshold
+1642786,Coulibaly,CHI,13,174.8,reconstructed,48,71.5,47.8,10.94,per40min,9.207,7.57,FALSE,below threshold
+1643494,Buhner,PDX,22,320.8,reconstructed,105,135.8,81.1,10.113,per40min,9.207,7.26,TRUE,fringe
+1631064,Bibby,CHI,1,19.4,reconstructed,11,11.9,11,22.661,per40min,9.207,6.53,FALSE,below threshold
+1630446,Onyenwere,WAS,19,488.6,reconstructed,141,200.1,118.5,9.701,per40min,9.207,6.03,TRUE,fringe
+1643441,Beers,CON,19,201,reconstructed,46,73.9,52.2,10.39,per40min,9.207,5.94,FALSE,below threshold
+1629478,Samuelson,SEA,20,313.6,reconstructed,66,81.5,77.4,9.873,per40min,9.207,5.21,FALSE,below threshold
+1641650,Jones,PDX,5,56.6,reconstructed,17,26.5,17.3,12.226,per40min,9.207,4.27,FALSE,below threshold
+203824,Sims,DAL,15,220,reconstructed,70,95,54.2,9.853,per40min,9.207,3.55,FALSE,below threshold
+1643424,Verona,DAL,1,5.8,reconstructed,2,2,4.8,33.199,per40min,9.207,3.47,FALSE,below threshold
+1630384,Carrera,NYL,12,67.8,reconstructed,11,20.4,18.9,11.148,per40min,9.207,3.29,FALSE,below threshold
+1629568,Burke,CON,23,539.6,reconstructed,159,218.9,127.4,9.445,per40min,9.207,3.2,TRUE,fringe
+1643488,Cechova,MIN,3,51.8,reconstructed,16,23.5,15.1,11.659,per40min,9.207,3.18,FALSE,below threshold
+1643490,Hamzova,MIN,10,72.9,reconstructed,14,30,19.8,10.867,per40min,9.207,3.02,FALSE,below threshold
+204329,Stokes,GSV,25,553.1,reconstructed,82,101.6,130.3,9.423,per40min,9.207,2.98,FALSE,below threshold
+1642820,King,MIN,8,73.4,reconstructed,16,25.4,19.7,10.738,per40min,9.207,2.81,FALSE,below threshold
+1630471,Caldwell,MIN,25,345.2,reconstructed,102,124.5,82.2,9.524,per40min,9.207,2.73,TRUE,fringe
+1642768,Linskens,PHX,16,165.9,reconstructed,50,67.5,40.8,9.836,per40min,9.207,2.61,FALSE,below threshold
+1630154,Smalls,PDX,2,30.2,reconstructed,10,14.4,9.4,12.46,per40min,9.207,2.45,FALSE,below threshold
+1643686,Fingall,GSV,4,10,reconstructed,2,2,4.7,18.769,per40min,9.207,2.39,FALSE,below threshold
+1641695,Prechtel,GSV,1,4.8,reconstructed,3,4,3.4,28.333,per40min,9.207,2.3,FALSE,below threshold
+1628915,Nurse,TOR,24,268.8,reconstructed,92,113.3,63.7,9.479,per40min,9.207,1.82,FALSE,below threshold
+1643455,Dugalic,WAS,23,283.8,reconstructed,81,109.1,66.6,9.387,per40min,9.207,1.28,FALSE,below threshold
+1630112,Harris,IND,19,282.8,reconstructed,69,91.4,66.3,9.379,per40min,9.207,1.21,FALSE,below threshold
+1643470,Ciezki,PHX,2,9.5,reconstructed,2,2,2.6,10.986,per40min,9.207,0.42,FALSE,below threshold
+1629496,Magbegor,SEA,4,53.6,reconstructed,16,20,12.5,9.325,per40min,9.207,0.16,FALSE,below threshold
+1642788,Hall,IND,2,10.7,reconstructed,5,5,2.6,9.72,per40min,9.207,0.14,FALSE,below threshold
+1643706,Bankole,TOR,2,10.4,reconstructed,1,1.9,2.5,9.585,per40min,9.207,0.1,FALSE,below threshold
+1643429,Kneepkens,CON,19,158.6,reconstructed,49,59.6,36.6,9.229,per40min,9.207,0.08,FALSE,below threshold
+1630138,Williams,PHX,1,5.8,reconstructed,1,1,1.4,9.711,per40min,9.207,0.07,FALSE,below threshold
+1642292,Sheldon,CHI,24,513.9,reconstructed,126,158.3,118.3,9.209,per40min,9.207,0.02,TRUE,fringe
+1643461,Ziegler,LAS,3,29.3,reconstructed,8,9.3,6.6,9.007,per40min,9.207,-0.15,FALSE,below threshold
+1642808,Quinerly,DAL,2,12.4,reconstructed,3,3,2.7,8.686,per40min,9.207,-0.16,FALSE,below threshold
+1642324,Martin,LAS,13,100.1,reconstructed,33,38.5,22.6,9.03,per40min,9.207,-0.44,FALSE,below threshold
+1629539,Okonkwo,ATL,1,1.3,reconstructed,1,1.9,-0.2,-6,per40min,9.207,-0.51,FALSE,below threshold
+1642293,Pili,LAS,3,17.8,reconstructed,4,5,3.4,7.648,per40min,9.207,-0.69,FALSE,below threshold
+1630389,Evans,LVA,1,17.8,reconstructed,8,9.9,3.1,6.979,per40min,9.207,-0.99,FALSE,below threshold
+1642826,Griffin,NYL,4,7.7,reconstructed,1,2,0.6,3.109,per40min,9.207,-1.18,FALSE,below threshold
+1628244,Whitcomb,PHX,3,40.8,reconstructed,12,16.9,8.2,8.04,per40min,9.207,-1.19,FALSE,below threshold
+1642302,Borlase,ATL,24,294.4,reconstructed,92,115.7,66.3,9.008,per40min,9.207,-1.47,FALSE,below threshold
+1630115,Holmes,SEA,1,14.7,reconstructed,4,6,1.9,5.158,per40min,9.207,-1.49,FALSE,below threshold
+1643527,Harrison,PDX,3,32,reconstructed,10,12.9,5.8,7.239,per40min,9.207,-1.58,FALSE,below threshold
+1630108,Fasoula,TOR,3,15.3,reconstructed,5,7,1.7,4.44,per40min,9.207,-1.83,FALSE,below threshold
+203866,Thornton,GSV,25,626.3,reconstructed,187,222.7,142.1,9.075,per40min,9.207,-2.07,TRUE,fringe
+1630097,Charles,GSV,25,496.1,reconstructed,143,181.2,111.9,9.022,per40min,9.207,-2.3,TRUE,fringe
+1642790,Feagin,LAS,3,10.2,reconstructed,1,1,-0.2,-0.784,per40min,9.207,-2.55,FALSE,below threshold
+1643449,Leger-Walker,CON,24,531.2,reconstructed,157,210.5,119.7,9.013,per40min,9.207,-2.58,TRUE,fringe
+1643479,Mwenentanda,GSV,5,12.9,reconstructed,1,2,0.3,0.93,per40min,9.207,-2.67,FALSE,below threshold
+1641657,Juhasz,MIN,3,60.4,reconstructed,16,19,11.1,7.353,per40min,9.207,-2.8,FALSE,below threshold
+1642801,Nye,ATL,12,17.8,reconstructed,5,6,1.3,2.913,per40min,9.207,-2.81,FALSE,below threshold
+1642802,Olsen,WAS,16,132.1,reconstructed,40,53.4,27.5,8.327,per40min,9.207,-2.91,FALSE,below threshold
+1643437,Jackson,CON,6,62.6,reconstructed,10,13.9,11.5,7.347,per40min,9.207,-2.91,FALSE,below threshold
+203405,Alexander,TOR,2,23,reconstructed,2,5.8,2.3,4.002,per40min,9.207,-2.99,FALSE,below threshold
+1641660,Cooke,SEA,26,383.1,reconstructed,179,233.5,85.2,8.896,per40min,9.207,-2.99,TRUE,fringe
+1631039,Sowah,GSV,2,5.8,reconstructed,2,2,-1.8,-12.45,per40min,9.207,-3.13,FALSE,below threshold
+1628278,Walker-Kimbrough,IND,2,6.5,reconstructed,1,2,-1.7,-10.408,per40min,9.207,-3.2,FALSE,below threshold
+1643444,Latson,LAS,10,50,reconstructed,11,24.6,8,6.399,per40min,9.207,-3.51,FALSE,below threshold
+1643469,Nivar,ATL,20,61.3,reconstructed,18,27.7,10.4,6.784,per40min,9.207,-3.71,FALSE,below threshold
+1643448,Angloma,CON,20,218.7,reconstructed,63,97.7,46.6,8.523,per40min,9.207,-3.74,FALSE,below threshold
+203024,Dantas,IND,11,90.7,reconstructed,31,44,17.1,7.541,per40min,9.207,-3.78,FALSE,below threshold
+1643493,Brochant,PHX,24,529.5,reconstructed,117,139.1,118.1,8.922,per40min,9.207,-3.78,TRUE,fringe
+1629581,Hof,MIN,3,20.6,reconstructed,6,10.9,0.9,1.746,per40min,9.207,-3.85,FALSE,below threshold
+1643473,Mair,SEA,3,13.2,reconstructed,6,7.9,-0.8,-2.418,per40min,9.207,-3.85,FALSE,below threshold
+1631044,Hillmon,ATL,23,688.9,reconstructed,172,214.4,154.6,8.977,per40min,9.207,-3.97,TRUE,fringe
+1643438,Suarez,PHX,10,96.5,reconstructed,32,40.2,18,7.458,per40min,9.207,-4.22,FALSE,below threshold
+1641683,Winterburn,PDX,13,99.1,reconstructed,31,43.6,18.5,7.467,per40min,9.207,-4.31,FALSE,below threshold
+1628317,Samuelson,PDX,14,191.8,reconstructed,39,49.8,39.6,8.257,per40min,9.207,-4.56,FALSE,below threshold
+1643458,Poffenbarger,CHI,5,25.5,reconstructed,4,4,0.9,1.411,per40min,9.207,-4.97,FALSE,below threshold
+1642814,Thierry,SEA,9,38.3,reconstructed,8,9,3.2,3.344,per40min,9.207,-5.61,FALSE,below threshold
+1631263,Milic,TOR,7,63.1,reconstructed,19,25.8,8.7,5.519,per40min,9.207,-5.81,FALSE,below threshold
+1643525,Fowler,NYL,2,31.3,reconstructed,10,13.9,1.3,1.662,per40min,9.207,-5.9,FALSE,below threshold
+1630469,Fauthoux,NYL,3,16.4,reconstructed,2,4,-2.2,-5.355,per40min,9.207,-5.98,FALSE,below threshold
+1628899,Hines-Allen,IND,22,337.8,reconstructed,73,114.2,71.2,8.432,per40min,9.207,-6.55,FALSE,below threshold
+1642794,Jocyte,GSV,9,58.4,reconstructed,26,34.8,6.7,4.587,per40min,9.207,-6.75,FALSE,below threshold
+1643433,Johnson,IND,24,326.2,reconstructed,98,127.4,68.2,8.362,per40min,9.207,-6.89,FALSE,below threshold
+1628882,Brown,SEA,10,147.9,reconstructed,26,38.6,26.7,7.221,per40min,9.207,-7.34,FALSE,below threshold
+1642818,Westbeld,CHI,3,28.5,reconstructed,6,7,-0.8,-1.124,per40min,9.207,-7.35,FALSE,below threshold
+1643489,Delaere,MIN,25,335.2,reconstructed,60,74.8,69.4,8.281,per40min,9.207,-7.76,FALSE,below threshold
+1629479,McCowan,MIN,10,68.3,reconstructed,15,22.3,7.3,4.273,per40min,9.207,-8.43,FALSE,below threshold
+1642775,Wilson,WAS,4,57.9,reconstructed,15,18.3,4.8,3.315,per40min,9.207,-8.53,FALSE,below threshold
+1630993,Maley,NYL,5,39.4,reconstructed,5,5.9,-0.2,-0.203,per40min,9.207,-9.26,FALSE,below threshold
+1631118,Held,PHX,24,402.1,reconstructed,118,149.9,82.8,8.237,per40min,9.207,-9.76,TRUE,fringe
+204365,Wheeler,LAS,23,635.1,reconstructed,193,255.6,136.4,8.591,per40min,9.207,-9.78,TRUE,fringe
+1643487,Carter,PHX,13,80.6,reconstructed,18,27,8.2,4.07,per40min,9.207,-10.35,FALSE,below threshold
+1628878,Atkins,LAS,21,556.7,reconstructed,187,237.8,117.5,8.443,per40min,9.207,-10.64,TRUE,fringe
+1631021,Kone,ATL,23,138.3,reconstructed,49,65.4,20.6,5.956,per40min,9.207,-11.25,FALSE,below threshold
+1630148,Park,LAS,18,160.3,reconstructed,35,46.6,24.5,6.113,per40min,9.207,-12.4,FALSE,below threshold
+1643457,Key,TOR,22,201.5,reconstructed,36,52.8,33.5,6.651,per40min,9.207,-12.88,FALSE,below threshold
+1641651,Horston,SEA,21,383.2,reconstructed,105,139.8,75.2,7.849,per40min,9.207,-13.01,TRUE,fringe
+1643450,Harmon,WAS,10,67.5,reconstructed,10,23.8,2.5,1.482,per40min,9.207,-13.03,FALSE,below threshold
+1642804,Paopao,ATL,24,301.2,reconstructed,93,112.5,54.2,7.199,per40min,9.207,-15.12,FALSE,below threshold
+1629576,Conde,TOR,24,632.1,reconstructed,191,241.2,130.2,8.239,per40min,9.207,-15.3,TRUE,fringe
+1631086,Hull,IND,24,485.6,reconstructed,119,148,96,7.908,per40min,9.207,-15.77,TRUE,fringe
+1630461,Williams,LAS,16,211.6,reconstructed,65,82.1,32.8,6.201,per40min,9.207,-15.9,FALSE,below threshold
+1629488,Turner,LVA,21,219.3,reconstructed,19,28.9,34.4,6.275,per40min,9.207,-16.07,FALSE,below threshold
+202252,Clark,DAL,16,145.9,reconstructed,29,40.4,17.4,4.771,per40min,9.207,-16.18,FALSE,below threshold
+1629501,Smith,DAL,20,283.7,reconstructed,78,106.2,49.1,6.924,per40min,9.207,-16.19,FALSE,below threshold
+1642809,Rivers,CON,21,475.5,reconstructed,157,208.7,93.2,7.84,per40min,9.207,-16.25,TRUE,fringe
+1643647,Pouye,TOR,16,163.1,reconstructed,49,66.6,21.3,5.223,per40min,9.207,-16.25,FALSE,below threshold
+1643462,Gray,LAS,20,199.4,reconstructed,43,59.3,29.3,5.878,per40min,9.207,-16.6,FALSE,below threshold
+204296,Allen,NYL,9,90.5,reconstructed,21,29.6,2.3,1.017,per40min,9.207,-18.53,FALSE,below threshold
+1641649,Miller,CON,24,526.7,reconstructed,189,248.7,101.1,7.677,per40min,9.207,-20.15,TRUE,fringe
+1643644,Florez,WAS,14,261.7,reconstructed,77,113.4,39,5.962,per40min,9.207,-21.23,FALSE,below threshold
+1643430,McMahon,WAS,21,422.9,reconstructed,119,166.7,75.3,7.122,per40min,9.207,-22.05,TRUE,fringe
+203828,Dolson,SEA,26,466.5,reconstructed,73,109.4,82.9,7.108,per40min,9.207,-24.49,FALSE,below threshold
+204319,Loyd,LVA,22,610.3,reconstructed,166,197.8,116,7.603,per40min,9.207,-24.49,TRUE,fringe
+203855,Talbot,LVA,24,457.3,reconstructed,78,103.6,80,6.997,per40min,9.207,-25.27,FALSE,below threshold
+204335,Laney-Hamilton,NYL,17,285.4,reconstructed,69,106.4,39.8,5.578,per40min,9.207,-25.89,FALSE,below threshold
+1631006,Bell,LVA,19,213.1,reconstructed,59,68.9,23.1,4.336,per40min,9.207,-25.95,FALSE,below threshold
+1630143,Geiselsoder,PDX,19,333,reconstructed,98,121.6,49.6,5.958,per40min,9.207,-27.05,FALSE,below threshold
+1627671,Banham,CHI,21,294.8,reconstructed,92,116,37.7,5.115,per40min,9.207,-30.16,FALSE,below threshold
+1642296,Puoch,PDX,24,407,reconstructed,98,118.2,37.3,3.666,per40min,9.207,-56.39,FALSE,below threshold
+1643467,Prosper,WAS,19,256.7,reconstructed,69,90.1,0.9,0.14,per40min,9.207,-58.18,FALSE,below threshold
+1642781,Amoore,WAS,23,523.7,reconstructed,131,197.8,60.1,4.591,per40min,9.207,-60.44,TRUE,fringe

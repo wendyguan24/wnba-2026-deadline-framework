@@ -17,7 +17,7 @@
 #           the EDA gate found it covers only 14 of 15 teams, so every
 #           shot-level feature in this framework is built from cdn instead.)
 # Outputs: data/processed/expected_points_baseline.rds,
-#          data/processed/team_generation_making.rds (season-level, per team),
+#          data/processed/team_generation_making.rds (+ output/team_generation_making.csv, season-level, per team),
 #          data/processed/team_game_shot_making.rds (team-game level, feeds
 #            the 06_models.R trajectory layer).
 
@@ -195,12 +195,17 @@ main <- function() {
   season     <- compute_shot_generation(shots, xpts_table, possessions)
 
   dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
+  dir.create("output", recursive = TRUE, showWarnings = FALSE)
   saveRDS(xpts_table, "data/processed/expected_points_baseline.rds")
   saveRDS(season,     "data/processed/team_generation_making.rds")
   saveRDS(team_game,  "data/processed/team_game_shot_making.rds")
+  # Readable export of the season generation/making table so downstream prose
+  # can cite shot_making_per100 (its sign is what makes the H3 read) without
+  # opening the binary .rds.
+  readr::write_csv(season, "output/team_generation_making.csv")
 
   message("Wrote expected_points_baseline.rds (", nrow(xpts_table), " strata), ",
-          "team_generation_making.rds (", nrow(season), " teams), ",
+          "team_generation_making.rds + output/team_generation_making.csv (", nrow(season), " teams), ",
           "team_game_shot_making.rds (", nrow(team_game), " team-games)")
 
   invisible(list(xpts_table = xpts_table, season = season, team_game = team_game))

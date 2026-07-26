@@ -50,6 +50,42 @@ library(tidyverse)
      One or two fit reads maximum. If archetype data is 2025-based, say so
      explicitly here. No league-wide fit matrix, no refreshed clustering. -->
 
+### Defensive fit and roster-disruption read (qualitative; video / Synergy only)
+
+<!--
+  WHY THIS SECTION: the open-data framework (R/01-14) is OFFENSE-ONLY. The open
+  PBP has no matchup, tracking, defender, or screen data, so a defensive read
+  cannot be quantified from it. Defense enters the framework HERE, qualitatively,
+  from film and Synergy team-aggregate context, quarantined and cited like all
+  Synergy content. Keep it to the case-study teams (GSV, TOR, PDX); do not build
+  a league-wide defensive table. The reproducible quantitative versions of these
+  ideas (box-defense screen, usage/disruption fit-cost, lineup flexibility) are
+  the v2 roadmap in PLAN.md, not this cycle.
+
+  Address, for each named candidate, only the items the film actually supports:
+  - Switchability / matchup versatility: can she credibly guard more than one
+    position; does she let the defense switch ball screens without a mismatch.
+  - Defensive athleticism: length, foot speed, lateral quickness, recovery.
+    Especially valuable for a big or a bigger guard who can cover multiple spots.
+  - Off-ball and screen-navigation context around an offensive player: screen
+    assists, gravity, cutting, and screening work that box scores never capture.
+    Use this to add texture to an offensive player, not to invent a stat.
+  - Second-unit stabilization: does she hold up when the starters sit, so the
+    bench minutes stop leaking (the mentor's point that this is where a defensive
+    add pays off most).
+  - Defensive pace / activity fit: can she play at the team's pace on both ends;
+    active hands and defensive-rebound reliability against the shot types this
+    team's identity concedes (e.g. cleaning midrange misses for a midrange-heavy,
+    transition-heavy opponent).
+  - Roster-disruption cost: does adding this player DEMAND the ball or shot
+    volume, and would that disrupt the acquiring team's shot allocation and
+    hierarchy. The low-disruption defensive add (improves defense without
+    demanding usage) is the easy win; flag high-usage adds as an offensive cost.
+
+  Every Synergy-sourced number carries: "Source: Synergy Sports | 2026 WNBA".
+  If a claim rests on film judgment rather than a cited number, say so plainly.
+-->
+
 ### Deadline read
 
 <!-- One sentence: acquire / adjust / hold, and why. -->

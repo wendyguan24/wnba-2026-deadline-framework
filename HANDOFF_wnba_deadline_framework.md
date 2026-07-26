@@ -120,6 +120,26 @@ Per team, one row: adjusted identity summary · generation percentile · making 
 ### 5f. Fit layer (case studies only — GSV full treatment; TOR, PDX lighter)
 Framework output ("what they need") → WHoopsLab archetype that addresses it → named candidate profiles from existing app outputs (archetypes + synergy deltas), in coaching vocabulary. One or two fit reads per case-study team, maximum. No league-wide fit matrix, no refreshed clustering, no new player-level models.
 
+**AMENDMENT 2026-07-22 (scope adjustment, Wendy-authorized; supersedes the last
+sentence of 5f above).** A reproducible open-data player-value SCREEN
+(R/13_player_value.R, Hollinger Game Score over replacement per 40 minutes) and a
+fit-first target layer (R/14) are now in scope. Guardrails on the adjustment:
+(a) the league-wide per-player value table stays a reproducibility EXHIBIT in
+output/ (output/player_value.csv), not a published leaderboard; PUBLISHED
+fit-matching and value TIERS appear only on NAMED candidates inside case-study /
+acquiring-team fit reads. (b) The player-value proxy is a box-score PRODUCTION
+screen, not an impact metric, offense-weighted, half-season, published as coarse
+tiers with the box-proxy caveat -- never "wins," never a ranked decimal. (c) No
+value/cost ratio and no salary-matching: rank fit-then-value WITHIN the acquiring
+team's feasible asset class (its flexibility_tier); per-player contract enters only
+as hand-curated, attributed tier/band annotations for named candidates
+(data/reference/), never a league-wide contract table (tiers-not-dollars stands).
+(d) The candidate pool is restricted to sellers (standing.csv window) for
+attainability, and the fit layer obeys the deadline_read recommendation verbs (no
+buy-side target lists for reassess teams or sellers). (e) This layer is EXPLORATORY:
+no hypothesis test, all statements descriptive. Design gated by analytics-reviewer
+and gm-agent (2026-07-22); see PLAN.md.
+
 ### 5g. Guardrails
 - Never call descriptor-derived features "play types." They are shot-creation profiles. Synergy play-type language appears only in Synergy-sourced case-study prose.
 - Player-level claims require ≥100 FGA or ≥150 possessions used.
