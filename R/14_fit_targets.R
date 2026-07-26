@@ -330,7 +330,10 @@ writeLines(md, proj_path("output", "fit_targets.md"))
 # ------------------------------------------------------------------------------
 # 6. console summary
 # ------------------------------------------------------------------------------
-excluded_core <- contracts %>% filter(movability %in% c("core", "untouchable"))
+excluded_core <- if (file.exists(ref_path)) {
+  read_csv(ref_path, show_col_types = FALSE, col_types = cols(.default = "c")) %>%
+    filter(movability %in% c("core", "untouchable"))
+} else tibble(playerName = character(), movability = character())
 have_band <- contracts %>% filter(!is.na(contract_band)) %>% pull(personId)
 
 cat("=== R/14 fit-first target reads ===\n")

@@ -1,13 +1,13 @@
 personId,playerName,current_team,contract_band,movability,source,as_of_date
 203400,Diggins,CHI,mid,available,Her Hoop Stats WNBA Salary Cap Database,2026-07-25
-1642321,Taylor,CHI,NA,NA,NA,NA
+1642321,Taylor,CHI,min,available,Spotrac WNBA contracts,2026-07-25
 1642800,Morrow,CON,min,keep,Her Hoop Stats WNBA Salary Cap Database,2026-07-25
 203014,Ogwumike,LAS,mid,available,Her Hoop Stats WNBA Salary Cap Database,2026-07-25
 1628276,Plum,LAS,max,core,Her Hoop Stats WNBA Salary Cap Database,2026-07-25
 1642782,Barker,PDX,NA,NA,NA,NA
 1631083,Engstler,PDX,min,available,Her Hoop Stats WNBA Salary Cap Database,2026-07-25
-1629484,Gustafson,PDX,NA,NA,NA,NA
+1629484,Gustafson,PDX,mid,available,Spotrac WNBA contracts,2026-07-25
 1642304,Leite,PDX,min,keep,Her Hoop Stats WNBA Salary Cap Database,2026-07-25
 1627674,Copper,PHX,max,available,Her Hoop Stats WNBA Salary Cap Database,2026-07-25
 1629567,Hiedeman,SEA,mid,available,Her Hoop Stats WNBA Salary Cap Database,2026-07-25
-1643428,Johnson,SEA,NA,NA,NA,NA
+1643428,Johnson,SEA,min,keep,Spotrac WNBA contracts,2026-07-25
