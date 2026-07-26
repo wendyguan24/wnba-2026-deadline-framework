@@ -54,7 +54,7 @@ On-style depth that protects the shot hierarchy:
 - Copper (PHX, 24 g / 777 min) -- advantage: upper rotation perimeter shooting; rim 28 / mid 33 / three 39; on-style 0.9; over-tier (capped cannot absorb max); movability: available; [context]
 - Engstler (PDX, 25 g / 596 min) -- advantage: rotation perimeter shooting; rim 34 / mid 27 / three 40; on-style 0.9; affordable (capped); movability: available; [target]
 - Johnson (SEA, 26 g / 740 min) -- advantage: rotation perimeter shooting; rim 32 / mid 31 / three 38; on-style 0.9; affordable (capped); movability: movability: hand-curate; [target]
-- Burrell (LAS, 23 g / 637 min) -- advantage: rotation perimeter shooting; rim 36 / mid 26 / three 38; on-style 0.9; band: hand-curate; movability: movability: hand-curate; [target]
+- Burrell (LAS, 23 g / 637 min) -- advantage: rotation perimeter shooting; rim 36 / mid 26 / three 38; on-style 0.9; affordable (capped); movability: available; [target]
 
 ## MIN (buyer -- amplify)
 
