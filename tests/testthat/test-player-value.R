@@ -31,6 +31,26 @@ test_that("reconstructed player-minutes sum to 5 on court per team-period", {
   expect_lt(abs(reconstructed - expected) / expected, 0.01)
 })
 
+test_that("production tiers are monotonic in gs_rate among eligible players", {
+  pv <- readr::read_csv(proj_path("output", "player_value.csv"), show_col_types = FALSE)
+  elig <- pv %>% dplyr::filter(eligible)
+  ord <- c("fringe" = 1, "rotation" = 2, "upper rotation" = 3, "top" = 4)
+  # no eligible player in a lower tier may out-rate a player in a higher tier
+  ranked <- elig %>%
+    dplyr::mutate(ti = ord[production_tier]) %>%
+    dplyr::arrange(gs_rate) %>%
+    dplyr::mutate(max_ti_so_far = cummax(ti))
+  expect_true(all(ranked$ti >= ranked$max_ti_so_far))
+})
+
+test_that("reconstructed minutes are within sane per-player bounds", {
+  pv <- readr::read_csv(proj_path("output", "player_value.csv"), show_col_types = FALSE)
+  skip_if_not(all(pv$minutes_method == "reconstructed"))
+  # no negative minutes, and no one exceeds ~48 minutes per game played
+  expect_true(all(pv$minutes >= 0))
+  expect_true(all(pv$minutes <= pv$games * 48))
+})
+
 test_that("eligibility floors are enforced and replacement is anchored below them", {
   pv <- readr::read_csv(proj_path("output", "player_value.csv"), show_col_types = FALSE)
   elig <- pv %>% dplyr::filter(eligible)

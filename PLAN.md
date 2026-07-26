@@ -879,7 +879,8 @@ decisions (§5f, R/14 fit table, what enters findings.md) for Wendy's explicit s
 - **R/13_player_value.R built** (commit e17b7b0). Game Score over replacement per 40 min;
   minutes reconstructed from substitutions, 5-on-court gate 99.9% (abort criterion met);
   eligibility = §5g floor + 200 min; replacement anchored to the below-eligibility pool;
-  split-half GmSc/40 r = 0.76; published as production tiers. Output output/player_value.csv
+  split-half GmSc/40 per-40-rate reliability r = 0.65 (assists included); published as
+  production tiers. Output output/player_value.csv
   (exhibit) + tests/testthat/test-player-value.R (green). Face validity holds (Wilson,
   Bueckers, Stewart, Mitchell, Ogwumike lead).
 - **R/14_fit_targets.R built.** Wendy authorized running it. Candidate pool = eligible
@@ -891,6 +892,33 @@ decisions (§5f, R/14 fit table, what enters findings.md) for Wendy's explicit s
   15 named candidates, bands blank), never fabricated; affordability gated by the acquiring
   team's cap tier only where a band is filled. Outputs output/fit_targets.md + .csv +
   tests/testthat/test-fit-targets.R (green).
-- NEXT: run the gm-agent + analytics-reviewer GATE on the R/14 deliverable (Phase 2 gate),
-  then triage. Still pending for publish: hand-curate the contract bands (source + as_of_date),
-  the Synergy case studies + coach-agent gate, and the cap/CBA primary-source verification.
+
+**R/13 + R/14 review gate CLOSED (2026-07-23).** gm-agent + analytics-reviewer run on the
+built layer (Fable 5). Triage decisions (Wendy):
+- analytics BLOCKER "csv does not reproduce / non-monotonic tiers" -- REJECTED, verified
+  false: R/13 re-run diffs byte-identical and tiers are perfectly monotonic (0 violations).
+  Kept the suggested tier-monotonicity test as a cheap guard (now in test-player-value.R).
+- analytics BLOCKER "split-half mislabeled + omits assists" -- ACCEPTED and FIXED: the
+  reliability now correlates the PER-40 rate (not per-game totals) with assists included and
+  sub-5-minute games dropped; the honest number is r = 0.65 (was a miscomputed 0.76). Still
+  supports coarse tiers.
+- D1 (minutes floor): keep 200 (logged rationale in R/13; deliberately below the ~300
+  suggestion for midseason rotation inclusion).
+- D2 (IND adjust list): CAP adjust-team lists at upper rotation -- IND already has three
+  top-tier scorers and a thin bench, so a fourth star is the wrong "depth"; the list now
+  shows only upper-rotation/rotation on-style pieces. Amplify teams keep top-tier.
+- D3 (affordability inert + no movability screen, gm blockers): SHIP v1 with affordability
+  PENDING and movability disclosed. Added a `movability` column to the contract template and
+  md disclosures (affordability pending, movability not screened, asset cost out of scope,
+  rim-heavy sellers absent by construction). Bands + movability remain Wendy's hand-curation.
+- D4 (fallback branch): replaced the per-game fallback with stop() (abort criterion; the gate
+  passes 99.9%).
+- Also applied: coarse_profile NA-area bug fixed (three defined by shot type); games/minutes
+  surfaced on each shortlist line (flags e.g. Plum's 12-game sample); style_match relabeled
+  "on-style" and rounded; test-fit-targets de-brittled (no-list teams derived from
+  deadline_read, not hardcoded) + an adjust-cap test; PLAN candidate count corrected 15 -> 11.
+- DEFERRED (logged, post-deadline): full per-(game,period,team) minutes invariant test,
+  creation-class fit bucket, garbage-time bench sensitivity, sorting player_value.csv by team,
+  the capped-min cap-mechanic citation. Full testthat suite green after all fixes.
+- STILL pending for publish (unchanged): hand-curate contract bands + movability (source +
+  as_of_date), Synergy case studies + coach-agent gate, cap/CBA primary-source verification.

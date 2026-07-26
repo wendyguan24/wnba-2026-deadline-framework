@@ -18,11 +18,24 @@ test_that("no buy-side target list is produced for reassess, seller, or hold tea
   ft <- readr::read_csv(proj_path("output", "fit_targets.csv"), show_col_types = FALSE)
   # only amplify / gap-fill / buy-judgment / adjust actions may carry rows
   expect_true(all(ft$action %in% c("amplify", "gap-fill", "buy-judgment", "adjust")))
-  # concretely, the reassess buyer (LVA) and any seller must not appear
-  expect_false("LVA" %in% ft$team)
+
+  # derive the no-list team sets from deadline_read (not hardcoded), so this stays
+  # correct after the Jul 23 data refresh reshuffles which teams are which
+  dread <- readr::read_csv(proj_path("output", "deadline_read.csv"), show_col_types = FALSE)
+  no_list <- dread %>%
+    dplyr::filter(grepl("^reassess|^sell|hold or sell|judgment \\(hold", recommendation)) %>%
+    dplyr::pull(team)
+  expect_length(intersect(ft$team, no_list), 0)
+
   sellers <- readr::read_csv(proj_path("output", "standing.csv"), show_col_types = FALSE) %>%
     dplyr::filter(window == "seller") %>% dplyr::pull(team)
   expect_length(intersect(ft$team, sellers), 0)
+})
+
+test_that("adjust teams get no top-tier candidate (depth cap, not a star splash)", {
+  ft <- readr::read_csv(proj_path("output", "fit_targets.csv"), show_col_types = FALSE)
+  adjust_rows <- ft %>% dplyr::filter(action == "adjust")
+  expect_true(all(adjust_rows$production_tier != "top"))
 })
 
 test_that("every shortlisted candidate cleared the R/13 eligibility screen", {
