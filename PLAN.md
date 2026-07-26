@@ -941,5 +941,16 @@ Three refinements built:
   band reads "over-tier" for tight/capped teams; it is flagged, not yet dropped).
 - Template is now self-maintaining (append new backfilled candidates blank, preserve filled
   rows). New test: cored/untouchable candidates never appear; every row carries an advantage.
-  Full suite green. STILL pending: the 3 missing bands, the provisional movability review,
-  and a possible move from flagging to dropping over-tier candidates.
+  Full suite green.
+- **HYBRID keep-and-flag (2026-07-25, Wendy's decision, planned Opus / executed Sonnet per
+  /planning-executing).** Replaced the drop-and-backfill of cored players with a hybrid:
+  nothing is excluded from the pool; every best on-style fit is KEPT and flagged, and each
+  list is guaranteed to carry at least N_GETTABLE=3 actionable rows (gettable + affordable),
+  extending past unavailable/over-tier names (cap MAX_LIST=8) rather than dropping them.
+  Each row now carries a `status` of `target` (movability available/keep AND band affordable
+  or unknown) or `context` (core/untouchable, or over-tier band). Rationale: dropping gave a
+  tidy list but hid the reasoning a GM wants to make; the hybrid shows "your best on-style fit
+  is X but she is cored/over-tier" AND the realistic targets. Plum (core, max) now reappears
+  in DAL/GSV/MIN/TOR marked `context`, each list keeping 3-4 `target` rows. Contract bands are
+  now filled for 10 of 11 (Taylor/Gustafson/Johnson from Spotrac 2026-07-25; only the
+  backfilled Barker is blank). STILL pending: Barker's band, the provisional movability review.

@@ -38,15 +38,19 @@ test_that("adjust teams get no top-tier candidate (depth cap, not a star splash)
   expect_true(all(adjust_rows$production_tier != "top"))
 })
 
-test_that("cored / untouchable candidates are excluded from every shortlist", {
+test_that("every shortlisted candidate carries an advantage label", {
   ft <- readr::read_csv(proj_path("output", "fit_targets.csv"), show_col_types = FALSE)
-  ref <- readr::read_csv(proj_path("data", "reference", "candidate_contracts_2026.csv"),
-                         show_col_types = FALSE)
-  core_ids <- ref %>% dplyr::filter(movability %in% c("core", "untouchable")) %>%
-    dplyr::pull(personId)
-  expect_length(intersect(ft$personId, core_ids), 0)
-  # every listed row carries an advantage label
   expect_true(all(!is.na(ft$advantage) & nzchar(ft$advantage)))
+})
+
+test_that("every buy-side team's shortlist has at least one actionable target", {
+  # hybrid keep-and-flag: cored/untouchable and over-tier candidates stay on the
+  # list as `context`, but each team's list is guaranteed at least one gettable
+  # and affordable `target` row (the actionable floor, N_GETTABLE in R/14).
+  ft <- readr::read_csv(proj_path("output", "fit_targets.csv"), show_col_types = FALSE)
+  by_team <- ft %>% dplyr::group_by(team) %>%
+    dplyr::summarise(n_target = sum(status == "target"), .groups = "drop")
+  expect_true(all(by_team$n_target >= 1))
 })
 
 test_that("every shortlisted candidate cleared the R/13 eligibility screen", {
