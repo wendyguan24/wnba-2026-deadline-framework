@@ -95,6 +95,35 @@ team_profile   <- coarse_profile(pbp %>% filter(!is.na(teamTricode)), "teamTrico
   rename(team = teamTricode)
 
 # ------------------------------------------------------------------------------
+# creation profile: on-ball creator vs off-ball finisher (a SHOT-CREATION
+# PROFILE, descriptor-derived from the open PBP -- never a play-type claim).
+# The share of a player's made field goals that were ASSISTED separates a player
+# who scores off others' creation (high assisted share -> off-ball / movement /
+# catch-and-shoot) from one who creates her own (low assisted share -> on-ball
+# creator). This is what tells a coach whether "perimeter shooting" means a lead
+# ball-handler who needs the ball or a movement shooter who plays off one, and it
+# is the signal the staff uses to judge duplication against its own creators
+# (the duplication read itself is the coach's, against the incumbent roster --
+# not modeled here). Thresholds are a stated judgment call at 0.40 / 0.65.
+# ------------------------------------------------------------------------------
+creation_profile <- pev %>%
+  filter(actionType %in% c("2pt", "3pt"), shotResult == "Made") %>%
+  group_by(personId) %>%
+  summarise(made_fg = n(),
+            assisted = sum(!is.na(assistPersonId) & assistPersonId != 0),
+            .groups = "drop") %>%
+  mutate(
+    assisted_share = assisted / made_fg,
+    creation = case_when(
+      made_fg < 30            ~ "creation n/a (small sample)",
+      assisted_share >= 0.65  ~ "off-ball finisher",
+      assisted_share <= 0.40  ~ "on-ball creator",
+      TRUE                    ~ "combo creator/finisher"
+    )
+  ) %>%
+  select(personId, creation)
+
+# ------------------------------------------------------------------------------
 # 2. candidate pool: eligible players on seller teams (attainability)
 # ------------------------------------------------------------------------------
 seller_teams <- standing %>% filter(window == "seller") %>% pull(team)
@@ -111,13 +140,18 @@ ref_path <- proj_path("data", "reference", "candidate_contracts_2026.csv")
 if (file.exists(ref_path)) {
   ref_tbl <- read_csv(ref_path, show_col_types = FALSE, col_types = cols(.default = "c"))
   if (!"movability" %in% names(ref_tbl)) ref_tbl$movability <- NA_character_
+  # position is hand-curated reference metadata (guard / wing / forward / center),
+  # the same class as contract_band and movability -- it is NOT in the open PBP
+  # (no roster/height field), so it is curated + attributed, never derived. Blank
+  # until curated from a roster source, exactly as the bands were.
+  if (!"position" %in% names(ref_tbl)) ref_tbl$position <- NA_character_
   contracts <- ref_tbl %>%
     mutate(personId = as.numeric(personId)) %>%
-    select(personId, contract_band, movability, source, as_of_date)
+    select(personId, contract_band, movability, position, source, as_of_date)
 } else {
   contracts <- tibble(personId = numeric(), contract_band = character(),
-                      movability = character(), source = character(),
-                      as_of_date = character())
+                      movability = character(), position = character(),
+                      source = character(), as_of_date = character())
 }
 
 bucket_desc <- c(rim = "rim finishing", mid = "mid-range scoring", three = "perimeter shooting")
@@ -125,8 +159,10 @@ bucket_desc <- c(rim = "rim finishing", mid = "mid-range scoring", three = "peri
 candidates <- pv %>%
   filter(eligible, team %in% seller_teams) %>%
   left_join(player_profile, by = "personId") %>%
-  left_join(contracts %>% select(personId, contract_band, movability), by = "personId") %>%
+  left_join(creation_profile, by = "personId") %>%
+  left_join(contracts %>% select(personId, contract_band, movability, position), by = "personId") %>%
   mutate(
+    creation = tidyr::replace_na(creation, "creation n/a (small sample)"),
     primary_bucket = dplyr::case_when(
       rim_share >= mid_share & rim_share >= three_share ~ "rim",
       mid_share >= three_share ~ "mid",
@@ -135,7 +171,7 @@ candidates <- pv %>%
   ) %>%
   select(personId, playerName, current_team = team, production_tier, prod_score,
          games, minutes, rim_share, mid_share, three_share,
-         primary_bucket, advantage, contract_band, movability)
+         primary_bucket, advantage, creation, contract_band, movability, position)
 
 # ------------------------------------------------------------------------------
 # 3. per-team action category from the deadline_read recommendation verb
@@ -239,10 +275,11 @@ if (file.exists(ref_path)) {
   existing <- read_csv(ref_path, show_col_types = FALSE, col_types = cols(.default = "c")) %>%
     mutate(personId = as.numeric(personId))
   if (!"movability" %in% names(existing)) existing$movability <- NA_character_
+  if (!"position" %in% names(existing)) existing$position <- NA_character_
   new_rows <- shortlisted_ids %>%
     filter(!personId %in% existing$personId) %>%
     mutate(contract_band = NA_character_, movability = NA_character_,
-           source = NA_character_, as_of_date = NA_character_)
+           position = NA_character_, source = NA_character_, as_of_date = NA_character_)
   bind_rows(existing, new_rows) %>%
     arrange(current_team, playerName) %>%
     write_csv(ref_path)
@@ -250,7 +287,7 @@ if (file.exists(ref_path)) {
 } else {
   shortlisted_ids %>%
     mutate(contract_band = NA_character_, movability = NA_character_,
-           source = NA_character_, as_of_date = NA_character_) %>%
+           position = NA_character_, source = NA_character_, as_of_date = NA_character_) %>%
     arrange(current_team, playerName) %>%
     write_csv(ref_path)
   n_new <- nrow(shortlisted_ids)
@@ -265,7 +302,7 @@ cap_tier <- dread %>% transmute(team, flex = cap_context)
 # ------------------------------------------------------------------------------
 long <- shortlists %>%
   select(team, window, action, recommendation, picks) %>%
-  unnest(picks) %>%          # contract_band + movability already carried on picks
+  unnest(picks) %>%          # contract_band + movability + position + creation carried on picks
   left_join(cap_tier, by = "team") %>%
   rowwise() %>%
   mutate(
@@ -273,17 +310,41 @@ long <- shortlists %>%
       else if (contract_band %in% affordable_bands_for(flex)) paste0("affordable (", flex, ")")
       else paste0("over-tier (", flex, " cannot absorb ", contract_band, ")"),
     movability_disp = if (is.na(movability)) "hand-curate" else movability,
+    position_disp = if (is.na(position)) "pos: hand-curate" else paste0("pos ", position),
     profile = sprintf("rim %.0f / mid %.0f / three %.0f",
                       100 * rim_share, 100 * mid_share, 100 * three_share),
     status = if_else(actionable, "target", "context")
   ) %>%
   ungroup()
 
+# C4 (accepted review fix, 2026-07-28): flag a candidate who is an actionable
+# `target` on more than one team's list, so a reader never treats one player as
+# several independent adds (the thin-market problem in the flesh -- Ogwumike is
+# the lead target for DAL, MIN, and TOR at once). shared_note lists every team
+# she is a target for; it is empty for single-team targets and for context rows.
+shared <- long %>%
+  filter(status == "target") %>%
+  distinct(personId, team) %>%
+  group_by(personId) %>%
+  summarise(target_team_list = paste(sort(unique(team)), collapse = ", "),
+            n_target_teams = dplyr::n_distinct(team), .groups = "drop")
+
+long <- long %>%
+  left_join(shared, by = "personId") %>%
+  mutate(
+    n_target_teams = tidyr::replace_na(n_target_teams, 0L),
+    shared_note = if_else(
+      status == "target" & n_target_teams > 1,
+      paste0(" -- SHARED TARGET (targeted by ", target_team_list, "): one player, not independent adds"),
+      ""
+    )
+  )
+
 write_csv(
   long %>% select(team, window, action, personId, playerName, current_team,
-                  production_tier, games, minutes, prod_score, primary_bucket, advantage,
-                  style_match, profile, contract_band, movability, affordability,
-                  actionable, status),
+                  position, production_tier, games, minutes, prod_score, primary_bucket,
+                  advantage, creation, style_match, profile, contract_band, movability,
+                  affordability, actionable, status, n_target_teams),
   proj_path("output", "fit_targets.csv")
 )
 
@@ -299,7 +360,20 @@ md <- c(
   "",
   "Read the following before acting on any row:",
   "- Each line leads with the ADVANTAGE the player would add (production tier + her",
-  "  primary shot bucket), i.e. what the acquiring team actually gains.",
+  "  primary shot bucket), i.e. what the acquiring team actually gains, qualified by",
+  "  her CREATION PROFILE.",
+  "- CREATION PROFILE (on-ball creator / off-ball finisher / combo) is a shot-creation",
+  "  profile derived from the share of her made field goals that were assisted (a",
+  "  descriptor-derived signal, not a play-type claim). It is what separates a lead",
+  "  ball-handler who needs the ball from a movement shooter who plays off one, so two",
+  "  players with the same `perimeter shooting` advantage can be different adds. Use it",
+  "  to judge DUPLICATION against your own creators; that duplication read is the",
+  "  coaching staff's against its incumbent roster, not modeled here.",
+  "- POSITION (`pos G/W/F/C`) is hand-curated reference metadata, the same class as the",
+  "  contract band: it is NOT in the open play-by-play, so a blank reads `pos:",
+  "  hand-curate` until curated from a roster source. The reproducible interior-vs-",
+  "  perimeter signal in the meantime is the rim / mid / three profile on each line",
+  "  (a stretch big shoots threes, so read profile and position together).",
   "- Movability (hand-curated, from contract designation + judgment) marks each row",
   "  `target` (actionable: gettable and affordable) or `context` (kept for visibility,",
   "  not actionable). `core` and `untouchable` players are KEPT for context, not a",
@@ -345,12 +419,20 @@ team_block <- function(row) {
   } else {
     "On-style depth that protects the shot hierarchy:"
   }
+  # C3 (accepted review fix, 2026-07-28): the screen is offense-only. State it on
+  # every buy-side list so no reader mistakes an on-style shot-diet fit for a
+  # full fit -- the open play-by-play has no matchup, tracking, or defender data.
+  def_note <- paste(
+    "Offense-only: this list matches shot diet, not defense. The open play-by-play",
+    "carries no matchup or tracking data, so get your own defensive read",
+    "(switchability, matchup fit, second-unit hold-up) on any name before acting."
+  )
   picks <- long %>% filter(team == row$team) %>%
-    mutate(line = sprintf("- %s (%s, %d g / %d min) -- advantage: %s; %s; on-style %.1f; %s; movability: %s; [%s]",
-                          playerName, current_team, games, round(minutes),
-                          advantage, profile, style_match, affordability,
-                          movability_disp, status))
-  c(hdr, "", rec, "", note, "", picks$line, "")
+    mutate(line = sprintf("- %s (%s, %s, %d g / %d min) -- advantage: %s (%s); profile %s; on-style %.1f; %s; movability: %s; [%s]%s",
+                          playerName, current_team, position_disp, games, round(minutes),
+                          advantage, creation, profile, style_match, affordability,
+                          movability_disp, status, shared_note))
+  c(hdr, "", rec, "", note, "", picks$line, "", def_note, "")
 }
 
 ordered_teams <- teams %>% mutate(ord = action_order[action]) %>% arrange(ord, team)

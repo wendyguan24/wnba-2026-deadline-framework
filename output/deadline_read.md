@@ -1,6 +1,6 @@
 # WNBA 2026 Trade Deadline Read
 
-Generated: 2026-07-28 02:39:06 UTC
+Generated: 2026-07-28 13:53:55 UTC
 
 The Recommendation column is the action, and it is the only action column: it is conditioned on the standing-derived window and the cap tier. The Offense diagnosis column is descriptive of the offense only (generation-short / balanced / generation-rich) and is not an instruction. Diagnosis is generation/making-driven per HANDOFF 5e: generation is the process axis (expected points per 100 given shot diet, from the stratified expected-points baseline), making is the finishing axis (actual minus expected). Trajectory shown is the finishing trend (finishing relative to shot quality, rising or falling).
 

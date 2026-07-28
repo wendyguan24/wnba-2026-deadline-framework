@@ -1,6 +1,6 @@
 # WNBA 2026 Offensive Generation Gap: Volume + Mix Decomposition
 
-Generated: 2026-07-28 02:40:09 UTC
+Generated: 2026-07-28 13:53:58 UTC
 
 Each team's generation gap versus the league (generation = volume x mix quality: FGA per 100 possessions, times expected points per shot given shot diet) is split into a VOLUME gap ((team FGA/100 minus league FGA/100) times league mix quality) and a MIX gap (team FGA/100 times the difference between the team's and the league's mix quality), the second attributed by zone with a centered-pps contribution. The two components sum to the team's total generation gap, which reconciles with the team's shot_generation_per100 standing (generation and making percentile shown per team, computed in R/11 via percent_rank of shot_generation_per100 / shot_making_per100, both from 07_expected_points.R). primary_driver names which component (volume, mix, or both when each individually exceeds 0.75 per 100 possessions) accounts for the gap.
 

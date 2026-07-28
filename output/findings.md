@@ -74,7 +74,10 @@ The decomposition separates teams the record conflates:
 
 The ATL and LVA rows are mirror images, and the framework refuses to let hot or
 cold finishing drive the read. That discipline is the point of the decomposition.
-See `output/generation_vs_making.png`.
+These are single-season reads: shot making is only moderately stable split-half
+(0.56, Section 6), so "finishing result" and "unsustainable" are directional
+signals to act on with that caution, not settled facts. See
+`output/generation_vs_making.png`.
 
 ## 3. Trajectory (what teams are becoming)
 
@@ -105,6 +108,15 @@ with their intervals.
 See `output/trajectory_small_multiples.png`, which shows the per-team slopes with
 95% intervals: most intervals span zero, so per-team labels are directional, not
 standalone claims.
+
+The practical consequence for the deadline read: no team's finishing trajectory
+this half-season clears "clearly improving" (every per-team interval spans zero or
+nearly so), so a trajectory arrow cannot by itself justify a buy. The deadline
+read treats this honestly. Bubble teams whose interval spans zero default to hold
+rather than reading a buy or sell into a directionless slope (this is why TOR,
+improving on the point estimate but with an interval spanning zero, reads
+hold-and-reassess, not lean buy). Trajectory earns its place as a required column
+by flagging what is NOT distinguishable, not by manufacturing a direction.
 
 ## 4. Results against the hypotheses registry
 
@@ -202,7 +214,20 @@ rather than papered over):
   floor)" and reads the nudge that way.
 - Roster spots and market supply are unmodeled: acquire and minimum-or-depth reads
   both presume an open spot and an available profile, and four tight-or-capped
-  teams chasing the same depth tier is a thin market.
+  teams chasing the same depth tier is a thin market. The fit reads make this
+  concrete by flagging any candidate who is an actionable target for more than one
+  team (Ogwumike is the lead target for both DAL and MIN): one player, not two
+  independent adds.
+- Seller timing is shaped by the expansion draft, which the framework does not
+  price. A seller may deal a non-core player now, before an expansion draft can
+  take her for nothing, which is a reason a name is available and a reason her
+  price moves. The fit reads use this only to mark availability; they do not model
+  its effect on what a seller will ask.
+- The fit reads are offense-only. They match shot diet and shot-creation profile,
+  not defense: the open play-by-play has no matchup, tracking, or defender data, so
+  a defensive fit (switchability, matchup, second-unit hold-up) is the coaching
+  staff's own read, stated as such on every buy-side list rather than implied by an
+  on-style match.
 - Forward strength-of-schedule is not modeled (the open play-by-play has no forward
   schedule). The one calendar fact carried is the World Cup Hiatus (August 31 to
   September 16, dates per AMENDMENT_02), which makes a hold a mid-schedule reset

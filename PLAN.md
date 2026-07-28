@@ -793,12 +793,49 @@ regenerated):
   value-over-replacement / wins metric; production_tier stays the published unit.
   R/14 updated to consume prod_score. The number does not enter findings.
 
-Still OPEN from this triage: Tier C (position/size column, shot-diet-vs-fit role
-labels, defensive read for non-case-study buyers, Ogwumike triple-list
-cross-reference), Tier D (window_rank column, §2 caveat cross-ref, expansion-draft
-seller timing, roster-spot counts), and the MANDATORY pre-publish cap re-pull
-(IND tier-fragile at $6,654 from capped) with the $5.95M figure on the re-verify
-list.
+**APPLIED 2026-07-28 (Wendy's decision: "fix tier c and d"). Tier C + Tier D
+accepted and implemented; outputs regenerated, full testthat suite green (60/0).**
+- C1 (R/14 + candidate_contracts_2026.csv): added a hand-curated `position` column
+  to the candidate reference file (guard/wing/forward/center), the same class as
+  contract_band -- it is NOT in the open PBP, so it is curated + attributed, blank
+  until filled from a roster source (renders `pos: hand-curate`). The reproducible
+  interior-vs-perimeter signal is the rim/mid/three profile already on each line;
+  the doc says to read profile and position together (a stretch big shoots threes).
+  Position VALUES still need Wendy's roster-source curation, exactly as the bands
+  did before she supplied them.
+- C2 (R/14): added a reproducible `creation` profile per candidate (on-ball creator
+  / off-ball finisher / combo) from the assisted share of her made field goals (a
+  shot-creation profile, descriptor-derived, never a play-type claim; thresholds
+  0.40/0.65 stated). It qualifies the advantage line so Plum (on-ball creator) and
+  Taylor/Hiedeman (movement/combo) no longer read as the same "perimeter shooting."
+  Duplication vs incumbents is stated as the coach's own read, not modeled.
+- C3 (R/14): every buy-side list now carries an explicit offense-only defensive
+  disclaimer (no matchup/tracking data in the open PBP; get your own defensive read).
+- C4 (R/14 + findings §5): a candidate who is an actionable `target` on more than
+  one list is flagged inline ("SHARED TARGET (targeted by DAL, MIN): one player,
+  not independent adds"); findings §5 names the Ogwumike DAL+MIN case (TOR dropped
+  off after the B4 demotion, so the shared set is DAL+MIN, not the pre-fix
+  DAL/MIN/TOR).
+- D1 (R/12): standing.csv now emits `window_rank` (the standing_score rank that
+  actually assigns the window) next to `window`, so it no longer looks broken
+  against the win_pct `rank` column (they are different orderings by design).
+- D2 (findings §2): added the inline directional caveat cross-ref (shot making
+  split-half only 0.56, Section 6) to the ATL "finishing result" / LVA
+  "unsustainable" single-season claims.
+- D3 (findings §5): added the expansion-draft seller-timing limitation (a seller
+  may deal a non-core player before the expansion draft; the framework uses it only
+  to mark availability, does not price its effect on the ask).
+- D4 (findings §5): the roster-spot / open-spot assumption is stated, and the
+  offense-only fit-read limitation is now an explicit bullet.
+- D5 (findings §3): added the plain statement that no team's finishing trajectory
+  this half clears "clearly improving," so a trajectory arrow cannot justify a buy
+  and bubble teams with zero-spanning intervals default to hold (the TOR case).
+
+Only the MANDATORY pre-publish cap re-pull remains open from this triage: re-verify
+the cap tiers within 48h of the deadline (IND is tier-fragile at $6,654 from
+capped, one minimum move flips its conditioning) and keep the $5.95M floor figure
+on the re-verify list. Position VALUES in the candidate reference file also await
+Wendy's roster-source curation (the column and rendering are in place).
 
 ## Data download (session 2, 2026-07-18)
 

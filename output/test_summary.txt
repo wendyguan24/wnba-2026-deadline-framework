@@ -1,3 +1,3 @@
-testthat summary (generated 2026-07-28 02:41:31 UTC)
+testthat summary (generated 2026-07-28 13:55:49 UTC)
 PASS: 60  FAIL: 0  SKIP: 0  across 37 blocks
 Run: Rscript tests/testthat.R
