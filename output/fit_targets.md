@@ -13,15 +13,16 @@ Read the following before acting on any row:
   `target` -- a cored player cannot be approached, but the best on-style fit is still
   worth seeing. `keep` means not core but in the team's plans, so low availability;
   `available` means not core and not long-term, where a team may deal her for value
-  before the expansion draft rather than lose her for nothing. Blank movability does
-  not block `target` status -- hand-curate it. A list may extend past five names to
-  guarantee at least a few gettable and affordable `target` rows.
+  before the expansion draft rather than lose her for nothing. A blank (uncurated)
+  movability reads `context`, never `target`, until it is hand-curated. A list may
+  extend past five names to guarantee at least a few gettable and affordable `target` rows.
 - style_match is a COARSE on-style gate (rim / mid / three shares), not a precise
   ranker; do not read the second decimal, and it is not the deadline_read descriptor.
 - A candidate's shot profile reflects her CURRENT team's system; that it travels to a
   new offense is an assumption, disclosed not modeled.
-- Affordability is PENDING until the contract bands are hand-curated. Bands and
-  movability are hand-curated, attributed, tiers not dollars.
+- Affordability is shown where a contract band has been hand-curated; a blank band
+  reads `band: hand-curate`. Bands and movability are hand-curated, attributed,
+  tiers not dollars.
 - ASSET COST (what the acquiring team sends out) is out of scope; the affordability
   column is salary tier only. A top-tier candidate at a min band still costs real assets.
 - Rim-heavy sellers (centers) may be absent from perimeter teams' on-style lists by
@@ -39,9 +40,10 @@ On-style depth that protects the shot hierarchy:
 
 - Ogwumike (LAS, 22 g / 695 min) -- advantage: top mid-range scoring; rim 31 / mid 39 / three 30; on-style 1.0; affordable (tight); movability: available; [target]
 - Plum (LAS, 12 g / 414 min) -- advantage: top perimeter shooting; rim 24 / mid 32 / three 43; on-style 0.9; over-tier (tight cannot absorb max); movability: core; [context]
-- Leite (PDX, 23 g / 586 min) -- advantage: top mid-range scoring; rim 35 / mid 45 / three 20; on-style 0.9; affordable (tight); movability: movability: hand-curate; [target]
+- Leite (PDX, 23 g / 586 min) -- advantage: top mid-range scoring; rim 35 / mid 45 / three 20; on-style 0.9; affordable (tight); movability: hand-curate; [context]
 - Hiedeman (SEA, 26 g / 756 min) -- advantage: upper rotation perimeter shooting; rim 16 / mid 38 / three 46; on-style 0.9; affordable (tight); movability: available; [target]
 - Copper (PHX, 24 g / 777 min) -- advantage: upper rotation perimeter shooting; rim 28 / mid 33 / three 39; on-style 0.9; over-tier (tight cannot absorb max); movability: available; [context]
+- Diggins (CHI, 19 g / 553 min) -- advantage: upper rotation mid-range scoring; rim 27 / mid 42 / three 31; on-style 1.0; affordable (tight); movability: available; [target]
 
 ## GSV (buyer -- amplify)
 
@@ -53,7 +55,7 @@ On-style depth that protects the shot hierarchy:
 - Hiedeman (SEA, 26 g / 756 min) -- advantage: upper rotation perimeter shooting; rim 16 / mid 38 / three 46; on-style 0.9; over-tier (capped cannot absorb mid); movability: available; [context]
 - Copper (PHX, 24 g / 777 min) -- advantage: upper rotation perimeter shooting; rim 28 / mid 33 / three 39; on-style 0.9; over-tier (capped cannot absorb max); movability: available; [context]
 - Engstler (PDX, 25 g / 596 min) -- advantage: rotation perimeter shooting; rim 34 / mid 27 / three 40; on-style 0.9; affordable (capped); movability: available; [target]
-- Johnson (SEA, 26 g / 740 min) -- advantage: rotation perimeter shooting; rim 32 / mid 31 / three 38; on-style 0.9; affordable (capped); movability: movability: hand-curate; [target]
+- Johnson (SEA, 26 g / 740 min) -- advantage: rotation perimeter shooting; rim 32 / mid 31 / three 38; on-style 0.9; affordable (capped); movability: hand-curate; [context]
 - Burrell (LAS, 23 g / 637 min) -- advantage: rotation perimeter shooting; rim 36 / mid 26 / three 38; on-style 0.9; affordable (capped); movability: available; [target]
 
 ## MIN (buyer -- amplify)
@@ -64,21 +66,10 @@ On-style depth that protects the shot hierarchy:
 
 - Ogwumike (LAS, 22 g / 695 min) -- advantage: top mid-range scoring; rim 31 / mid 39 / three 30; on-style 1.0; affordable (tight); movability: available; [target]
 - Plum (LAS, 12 g / 414 min) -- advantage: top perimeter shooting; rim 24 / mid 32 / three 43; on-style 0.9; over-tier (tight cannot absorb max); movability: core; [context]
-- Leite (PDX, 23 g / 586 min) -- advantage: top mid-range scoring; rim 35 / mid 45 / three 20; on-style 0.9; affordable (tight); movability: movability: hand-curate; [target]
+- Leite (PDX, 23 g / 586 min) -- advantage: top mid-range scoring; rim 35 / mid 45 / three 20; on-style 0.9; affordable (tight); movability: hand-curate; [context]
 - Copper (PHX, 24 g / 777 min) -- advantage: upper rotation perimeter shooting; rim 28 / mid 33 / three 39; on-style 0.9; over-tier (tight cannot absorb max); movability: available; [context]
 - Diggins (CHI, 19 g / 553 min) -- advantage: upper rotation mid-range scoring; rim 27 / mid 42 / three 31; on-style 0.9; affordable (tight); movability: available; [target]
-
-## TOR (bubble -- buy-judgment)
-
-Recommendation: judgment (lean buy): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
-
-Tentative (bubble lean-buy): pursue only if the deal is clearly on-style and affordable.
-
-- Ogwumike (LAS, 22 g / 695 min) -- advantage: top mid-range scoring; rim 31 / mid 39 / three 30; on-style 0.9; affordable (tight); movability: available; [target]
-- Plum (LAS, 12 g / 414 min) -- advantage: top perimeter shooting; rim 24 / mid 32 / three 43; on-style 0.9; over-tier (tight cannot absorb max); movability: core; [context]
-- Gustafson (PDX, 24 g / 549 min) -- advantage: upper rotation rim finishing; rim 45 / mid 20 / three 36; on-style 0.9; affordable (tight); movability: available; [target]
-- Copper (PHX, 24 g / 777 min) -- advantage: upper rotation perimeter shooting; rim 28 / mid 33 / three 39; on-style 0.9; over-tier (tight cannot absorb max); movability: available; [context]
-- Taylor (CHI, 22 g / 420 min) -- advantage: upper rotation perimeter shooting; rim 28 / mid 18 / three 54; on-style 0.9; affordable (tight); movability: available; [target]
+- Engstler (PDX, 25 g / 596 min) -- advantage: rotation perimeter shooting; rim 34 / mid 27 / three 40; on-style 0.9; affordable (tight); movability: available; [target]
 
 ## IND (buyer -- adjust)
 
@@ -88,19 +79,26 @@ Low-priority depth only: offense is roughly league-average and is not the primar
 
 - Gustafson (PDX, 24 g / 549 min) -- advantage: upper rotation rim finishing; rim 45 / mid 20 / three 36; on-style 0.9; affordable (tight); movability: available; [target]
 - Copper (PHX, 24 g / 777 min) -- advantage: upper rotation perimeter shooting; rim 28 / mid 33 / three 39; on-style 0.9; over-tier (tight cannot absorb max); movability: available; [context]
-- Morrow (CON, 17 g / 386 min) -- advantage: upper rotation rim finishing; rim 45 / mid 24 / three 31; on-style 0.9; affordable (tight); movability: movability: hand-curate; [target]
+- Morrow (CON, 17 g / 386 min) -- advantage: upper rotation rim finishing; rim 45 / mid 24 / three 31; on-style 0.9; affordable (tight); movability: hand-curate; [context]
 - Engstler (PDX, 25 g / 596 min) -- advantage: rotation perimeter shooting; rim 34 / mid 27 / three 40; on-style 1.0; affordable (tight); movability: available; [target]
-- Johnson (SEA, 26 g / 740 min) -- advantage: rotation perimeter shooting; rim 32 / mid 31 / three 38; on-style 1.0; affordable (tight); movability: movability: hand-curate; [target]
+- Johnson (SEA, 26 g / 740 min) -- advantage: rotation perimeter shooting; rim 32 / mid 31 / three 38; on-style 1.0; affordable (tight); movability: hand-curate; [context]
+- Burrell (LAS, 23 g / 637 min) -- advantage: rotation perimeter shooting; rim 36 / mid 26 / three 38; on-style 1.0; affordable (tight); movability: available; [target]
 
 ## ATL (bubble -- hold-judgment)
 
-Recommendation: judgment (lean hold or sell): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
+Recommendation: judgment (hold): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
 
 No target list: the World Cup break favors hold-and-reassess unless the trajectory is clearly improving.
 
 ## NYL (bubble -- hold-judgment)
 
-Recommendation: judgment (lean hold or sell): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
+Recommendation: judgment (hold): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
+
+No target list: the World Cup break favors hold-and-reassess unless the trajectory is clearly improving.
+
+## TOR (bubble -- hold-judgment)
+
+Recommendation: judgment (hold): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
 
 No target list: the World Cup break favors hold-and-reassess unless the trajectory is clearly improving.
 

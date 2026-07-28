@@ -502,7 +502,11 @@ buyer_branch_text <- function(generation_pctile, making_pctile, making_trajector
 #' @return character, the bubble fit-read text
 bubble_branch_text <- function(making_trajectory, making_interval_spans_zero) {
   traj_caveat <- if (isTRUE(making_interval_spans_zero)) " (trajectory directional)" else ""
+  # A directional lean is only asserted when the interval does NOT span zero;
+  # a zero-spanning trend is indistinguishable from flat and defaults to "hold"
+  # (accepted gm fix, 2026-07-26, matching R/08_deadline_read.R's bubble branch).
   verb <- case_when(
+    isTRUE(making_interval_spans_zero) ~ "hold",
     identical(making_trajectory, "improving") ~ "lean buy",
     identical(making_trajectory, "declining") ~ "lean hold or sell",
     TRUE ~ "hold"

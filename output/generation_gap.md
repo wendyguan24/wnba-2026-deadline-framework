@@ -1,6 +1,6 @@
 # WNBA 2026 Offensive Generation Gap: Volume + Mix Decomposition
 
-Generated: 2026-07-22 01:57:11 UTC
+Generated: 2026-07-28 02:40:09 UTC
 
 Each team's generation gap versus the league (generation = volume x mix quality: FGA per 100 possessions, times expected points per shot given shot diet) is split into a VOLUME gap ((team FGA/100 minus league FGA/100) times league mix quality) and a MIX gap (team FGA/100 times the difference between the team's and the league's mix quality), the second attributed by zone with a centered-pps contribution. The two components sum to the team's total generation gap, which reconciles with the team's shot_generation_per100 standing (generation and making percentile shown per team, computed in R/11 via percent_rank of shot_generation_per100 / shot_making_per100, both from 07_expected_points.R). primary_driver names which component (volume, mix, or both when each individually exceeds 0.75 per 100 possessions) accounts for the gap.
 
@@ -20,7 +20,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
   - Above the Break 3: slightly below-mean volume (mix contribution: -0.023)
   - Corner 3: missing efficient looks (mix contribution: -0.015)
 - Secondary tune (non-identity): Above the Break 3: slightly below-mean volume (mix contribution: -0.023)
-- Fit read: judgment (lean hold or sell): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
+- Fit read: judgment (hold): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
 
 ## CHI
 
@@ -133,7 +133,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
   - Restricted Area: missing efficient looks (mix contribution: -0.274)
   - Above the Break 3: slightly below-mean volume (mix contribution: -0.121) (identity-driven: protect)
 - Secondary tune (non-identity): Restricted Area: missing efficient looks (mix contribution: -0.274)
-- Fit read: judgment (lean hold or sell): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
+- Fit read: judgment (hold): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
 
 ## PDX
 
@@ -186,7 +186,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 - Mix gap, total (per 100 poss): 0.70
 - Total gap (per 100 poss): -0.48
 - Secondary tune (non-identity): Mid-Range: over-reliant on low-value looks (mix contribution: -0.049)
-- Fit read: judgment (lean buy): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
+- Fit read: judgment (hold): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional)
 
 ## WAS
 

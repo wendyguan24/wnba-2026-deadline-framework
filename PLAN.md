@@ -750,7 +750,55 @@ on two action-shaped columns that disagree. Consolidated triage, proposals only:
   cap-feasibility conditioning of `acquire` (CBA-current -- "the part I'd trust at the table");
   the generation-vs-making split; the full reproducible numeric core.
 
-Nothing here has been applied yet -- these are proposals for Wendy to triage before publish.
+**APPLIED 2026-07-28 (Wendy's decision: "start on tier a and b"). Tier A + Tier B
+accepted and implemented; Tier C + Tier D remain open.** Changes, all reproduced
+through the scripts (full testthat suite green, 60 pass / 0 fail; outputs
+regenerated):
+- A1 (R/08 + findings §5): the deadline-read table's action-verb "Lever" column is
+  renamed "Offense diagnosis" and shows descriptive phrases (generation-short /
+  balanced / generation-rich, new classify_diagnosis()); the Recommendation column
+  is moved to be the leading action column and is the only action column. The
+  acquire/adjust/hold machinery still runs internally (feeds cap conditioning and
+  the recommendation), just no longer displayed as an action. findings §5's stale
+  "the lever encodes no buyer-or-seller posture" limitation bullet is deleted
+  (R/12 window now supplies that posture) and replaced with the window-is-a-proxy
+  limitation; a diagnosis-vs-window reconciliation paragraph added.
+- A2 (R/14): fixed the doubled `movability: movability: hand-curate` token
+  (movability_disp drops the redundant prefix), and a blank/uncurated movability
+  now reads `context`, never `target`, until curated (actionable no longer treats
+  NA movability as gettable). Leite/Morrow/Johnson/Barker correctly drop to context.
+- A3 (R/14): deleted the stale "Affordability is PENDING" header line (bands are
+  curated 10/11); replaced with an accurate "shown where a band is curated" note.
+- A4 (R/08): removed BLUP / shot_making_residual / random-slope machinery from the
+  reader-facing deadline_read.md intro and trajectory footnote; restated as
+  "finishing relative to shot quality" and "directional trend," modeling detail
+  pointed to methodology.md.
+- B1 (findings): provenance line corrected to the real run order (01-09, then 11
+  and 12, then 08; 13 then 14) -- the old "R/01-R/10" was unrunnable (R/08 reads
+  R/12's standing.csv).
+- B2 (findings): Toronto "25 games" corrected to 24 (10-14 in standing.csv;
+  team-games sum to 364 only at 24). 1,630 shots was already correct.
+- B3 (R/08 + findings §5): below-floor downgraded from "pushed to add salary" to a
+  soft nudge (a below-floor team can satisfy the floor by paying the shortfall out
+  over the season; it is not a deadline-forcing mandate). Resolves the PDX
+  "below-floor must add" vs "seller: sell" contradiction.
+- B4 (R/08 + R/11, both bubble branches): a bubble team no longer asserts a
+  directional lean (lean buy / lean hold or sell) when the making-trajectory
+  interval spans zero; it defaults to "hold." TOR drops from `lean buy` to
+  `judgment (hold)` and loses its fit_targets list (now hold-judgment, no list),
+  matching ATL/NYL. WAS keeps its lean (its interval does not span zero). R/08 and
+  R/11 stay verb-for-verb consistent.
+- B5 (R/13 + R/14): the player-value exhibit's `vor` column renamed `prod_score`
+  and reframed as an ordinal box-score production index in Game-Score points, NOT a
+  value-over-replacement / wins metric; production_tier stays the published unit.
+  R/14 updated to consume prod_score. The number does not enter findings.
+
+Still OPEN from this triage: Tier C (position/size column, shot-diet-vs-fit role
+labels, defensive read for non-case-study buyers, Ogwumike triple-list
+cross-reference), Tier D (window_rank column, §2 caveat cross-ref, expansion-draft
+seller timing, roster-spot counts), and the MANDATORY pre-publish cap re-pull
+(IND tier-fragile at $6,654 from capped) with the $5.95M figure on the re-verify
+list.
 
 ## Data download (session 2, 2026-07-18)
 

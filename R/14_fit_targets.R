@@ -133,7 +133,7 @@ candidates <- pv %>%
       TRUE ~ "three"),
     advantage = paste0(production_tier, " ", bucket_desc[primary_bucket])
   ) %>%
-  select(personId, playerName, current_team = team, production_tier, vor,
+  select(personId, playerName, current_team = team, production_tier, prod_score,
          games, minutes, rim_share, mid_share, three_share,
          primary_bucket, advantage, contract_band, movability)
 
@@ -199,9 +199,14 @@ rank_for_team <- function(t_rim, t_mid, t_three, action, flex) {
   gate <- quantile(scored$style_match, 0.5, na.rm = TRUE)
   pool <- scored %>%
     filter(style_match >= gate) %>%
-    arrange(desc(tier_rank), desc(vor), desc(style_match)) %>%
+    arrange(desc(tier_rank), desc(prod_score), desc(style_match)) %>%
     mutate(
-      actionable = (is.na(movability) | movability %in% c("available", "keep")) &
+      # A blank (uncurated) movability is NOT actionable: a row is only a `target`
+      # once its availability has been hand-curated to available/keep. This keeps
+      # `target` from ever being asserted on a candidate whose availability is a
+      # TODO (accepted gm + coach review fix, 2026-07-26). Band still gives benefit
+      # of the doubt only where it is genuinely uncurated (NA).
+      actionable = movability %in% c("available", "keep") &
         (is.na(contract_band) | contract_band %in% affordable_bands_for(flex))
     )
 
@@ -267,7 +272,7 @@ long <- shortlists %>%
     affordability = if (is.na(contract_band)) "band: hand-curate"
       else if (contract_band %in% affordable_bands_for(flex)) paste0("affordable (", flex, ")")
       else paste0("over-tier (", flex, " cannot absorb ", contract_band, ")"),
-    movability_disp = if (is.na(movability)) "movability: hand-curate" else movability,
+    movability_disp = if (is.na(movability)) "hand-curate" else movability,
     profile = sprintf("rim %.0f / mid %.0f / three %.0f",
                       100 * rim_share, 100 * mid_share, 100 * three_share),
     status = if_else(actionable, "target", "context")
@@ -276,7 +281,7 @@ long <- shortlists %>%
 
 write_csv(
   long %>% select(team, window, action, personId, playerName, current_team,
-                  production_tier, games, minutes, vor, primary_bucket, advantage,
+                  production_tier, games, minutes, prod_score, primary_bucket, advantage,
                   style_match, profile, contract_band, movability, affordability,
                   actionable, status),
   proj_path("output", "fit_targets.csv")
@@ -301,15 +306,16 @@ md <- c(
   "  `target` -- a cored player cannot be approached, but the best on-style fit is still",
   "  worth seeing. `keep` means not core but in the team's plans, so low availability;",
   "  `available` means not core and not long-term, where a team may deal her for value",
-  "  before the expansion draft rather than lose her for nothing. Blank movability does",
-  "  not block `target` status -- hand-curate it. A list may extend past five names to",
-  "  guarantee at least a few gettable and affordable `target` rows.",
+  "  before the expansion draft rather than lose her for nothing. A blank (uncurated)",
+  "  movability reads `context`, never `target`, until it is hand-curated. A list may",
+  "  extend past five names to guarantee at least a few gettable and affordable `target` rows.",
   "- style_match is a COARSE on-style gate (rim / mid / three shares), not a precise",
   "  ranker; do not read the second decimal, and it is not the deadline_read descriptor.",
   "- A candidate's shot profile reflects her CURRENT team's system; that it travels to a",
   "  new offense is an assumption, disclosed not modeled.",
-  "- Affordability is PENDING until the contract bands are hand-curated. Bands and",
-  "  movability are hand-curated, attributed, tiers not dollars.",
+  "- Affordability is shown where a contract band has been hand-curated; a blank band",
+  "  reads `band: hand-curate`. Bands and movability are hand-curated, attributed,",
+  "  tiers not dollars.",
   "- ASSET COST (what the acquiring team sends out) is out of scope; the affordability",
   "  column is salary tier only. A top-tier candidate at a min band still costs real assets.",
   "- Rim-heavy sellers (centers) may be absent from perimeter teams' on-style lists by",

@@ -23,7 +23,7 @@ types. The expected-points layer is a stratified expected-points baseline
 - The auxiliary shotdetail feed covers only 14 of 15 teams (Toronto is absent from
   shotdetail), so to keep all 15 teams on equal footing every shot-level feature is
   built from the cdn feed (area / areaDetail / descriptor), never shotdetail. Toronto
-  itself is fully present in the analysis via the cdn feed (25 games, 1,630 shots with
+  itself is fully present in the analysis via the cdn feed (24 games, 1,630 shots with
   zone data, and rows in every framework output); the gap is limited to the unused
   shotdetail feed and affects no published number.
 - Test suite: 38 expectations, 0 failures, 0 skipped, including the data-dependent
@@ -140,19 +140,31 @@ Written against the pre-registered H1 / H2 / H3 / H-null registry in
 ## 5. The deadline read (synthesis)
 
 The deadline-read table (`output/deadline_read.csv`, `output/deadline_read.md`) is
-one row per team: identity summary, generation and making percentiles, the
-shot-making-residual trajectory, cap-context tier, and a feasibility-conditioned
-lever (acquire / adjust / hold). The lever is generation-and-making-driven and is
-gated on cap feasibility: only an acquire read is conditioned, becoming
-constrained for a tight team and requiring salary out for a capped team, grounded
-in the hard-cap rule (`data/reference/cba_rules_2026.md` Section 2).
+one row per team. The bottom line is the Recommendation column: the action
+(amplify / adjust / gap-fill / reassess / sell / a bubble judgment call),
+conditioned on the team's standing-derived window (buyer / bubble / seller, from
+`R/12_standing.R`) and its cap tier. The rest of the row is the diagnosis behind
+that action: an offense-diagnosis label (generation-short / balanced /
+generation-rich), the generation and making percentiles, the finishing
+trajectory, the cap-context tier, and the descriptive identity summary. The
+offense diagnosis is generation-and-making-driven and is descriptive only; it is
+not itself an instruction. Acquire feasibility is conditioned on the cap inside
+the recommendation logic: a capped team's acquire requires salary out, a tight
+team's is limited to minimum-or-depth, grounded in the hard-cap rule
+(`data/reference/cba_rules_2026.md` Section 2).
 
-Lever distribution: 5 acquire (WAS on the room tier; NYL, PHX, SEA constrained by
-limited room; LVA constrained, requires salary out), 4 adjust (IND, LAS, PDX,
-TOR), 6 hold (ATL, CHI, CON, DAL, GSV, MIN).
+Diagnosis and window can point in opposite directions, and the recommendation
+reconciles them. A generation-short offense diagnoses as an acquire candidate, but
+if the standing layer reads the team as a seller the recommendation is
+sell/accumulate, not a buy: PHX and SEA diagnose short on generation yet are out
+of the race, so the read is to deal expirings, not to add. This is the buyer-or-
+seller posture the earlier draft of this section said the framework lacked; the
+`R/12` standing layer now supplies it, so the diagnosis and the action are
+separate columns by design.
 
-Headline read (the framework's sharpest disagreement with consensus): ATL is told
-to HOLD. A record-and-eye read of the team that leaves the most points on the
+Headline read (the framework's sharpest disagreement with consensus): ATL's read
+is hold, a bubble judgment call the diagnosis backs rather than a buy. A
+record-and-eye read of the team that leaves the most points on the
 floor in the league would say buy a finisher. The framework says the looks are
 100th-percentile and the losses are finishing, which a deadline acquisition of
 shot creation does not fix. The open risk, stated honestly: ATL's shot-making
@@ -161,23 +173,33 @@ generation, not a bet that the making trend reverts up. If making is a personnel
 ceiling rather than variance, this is the read that ages badly. It is the piece's
 headline bet and is presented as a bet, not a certainty.
 
-Adjust drivers (so the softest lever is not a hedge): IND is overperforming its
-process (making 86th percentile on 36th-percentile generation), an argument to
-consolidate rather than overpay; TOR and PDX sit in the competitive middle on both
-axes, an argument for scheme-level gains over a splashy move.
+Balanced offenses, split by window (so the softest diagnosis is not a hedge): four
+teams diagnose balanced (mid generation), and the window is what separates their
+reads. IND is a buyer and the one balanced offense told to adjust: it is
+overperforming its process (making 86th percentile on 36th-percentile generation),
+an argument to consolidate rather than overpay. TOR is a balanced offense on the
+bubble, so its read is a hold-and-reassess judgment around the World Cup break, not
+a splash. PDX and LAS are balanced offenses too, but the standing layer reads them
+as sellers, so a balanced diagnosis does not become a buy: their read is
+sell/accumulate. Same offense diagnosis, three different actions, because the
+window conditions the recommendation.
 
 Limitations a front office would raise (from the gm-agent review, carried honestly
 rather than papered over):
 
-- The lever encodes no buyer-or-seller posture. WAS is worst on generation and
-  near-worst on making and likely rebuilding, yet the rule maps bottom-generation to
-  acquire mechanically; a cellar team acquiring at the deadline is a different act
-  than a contender adding.
+- The window is a record-derived proxy, not a front office's private book. The
+  standing layer supplies the buyer-or-seller posture the offense diagnosis alone
+  cannot, but it reads the posture from win-loss record and scoring margin only. A
+  front office overrides it with information the data does not carry (an ownership
+  mandate, injuries, the value of picks), so the recommendation is a starting
+  position, not a verdict.
 - The salary floor is carried as a flag, not a dollar tier. The team-salary floor is 85% of the
   cap (`cba_rules_2026.md` Section 1), and the two room-tier teams (WAS, PDX) sit
-  below it, so they are pushed to add salary rather than free to stand pat. The
-  deadline-read table now flags this: WAS and PDX display "room (below floor)", and
-  a below-floor team is pushed to add salary.
+  below it. A below-floor team must reach the floor over the season, but it can
+  satisfy that by paying the shortfall out to its players (`cba_rules_2026.md`
+  Section 1), so the flag is a soft nudge toward adding salary, not a
+  deadline-forcing mandate. The deadline-read table marks these teams "room (below
+  floor)" and reads the nudge that way.
 - Roster spots and market supply are unmodeled: acquire and minimum-or-depth reads
   both presume an open spot and an available profile, and four tight-or-capped
   teams chasing the same depth tier is a thin market.
@@ -226,7 +248,10 @@ stub.
 
 ---
 
-Provenance: framework findings reproduce from `R/01`-`R/10` against `shufinskiy/nba_data`
-commit `773ce29`. Cap tiers from `data/reference/cap_context_2026.csv` (Spotrac,
+Provenance: framework findings reproduce from the numbered scripts against
+`shufinskiy/nba_data` commit `773ce29`, run in order `R/01` through `R/09`, then
+`R/11` and `R/12`, then `R/08` (the deadline read reads `output/standing.csv` from
+`R/12`, so `R/12` runs before `R/08`); the player screen and fit reads are `R/13`
+then `R/14`. Cap tiers from `data/reference/cap_context_2026.csv` (Spotrac,
 2026-07-19), CBA mechanics from `data/reference/cba_rules_2026.md`, both to be
 re-verified before publish (AMENDMENT_02 Section 4).

@@ -106,6 +106,28 @@ classify_lever <- function(generation_tier, making_tier, identity_summary = NULL
   "adjust"
 }
 
+#' Describe a team's offense in the table's "Offense diagnosis" column.
+#'
+#' This is a DESCRIPTIVE phrase of the generation (process) axis, not an
+#' action verb. The acquire/adjust/hold machinery (classify_lever) still runs
+#' internally and feeds the cap conditioning and the Recommendation column, but
+#' the displayed diagnosis column deliberately drops the action verbs so a
+#' reader cannot mistake the diagnosis for the recommendation (accepted gm +
+#' analytics-reviewer fix, 2026-07-26). The action lives in exactly one place:
+#' the Recommendation column.
+#'
+#' @param generation_tier integer, ntile(shot_generation_per100, 3), 1=low..3=high
+#' @return character, one of "generation-short"/"balanced"/"generation-rich"
+classify_diagnosis <- function(generation_tier) {
+  switch(
+    as.character(generation_tier),
+    "1" = "generation-short",
+    "2" = "balanced",
+    "3" = "generation-rich",
+    stop("classify_diagnosis(): unexpected generation_tier: ", generation_tier)
+  )
+}
+
 #' Format a team's trajectory value for the deadline-read table, with a
 #' footnote marker when its interval spans zero (AMENDMENT_01 §1)
 #'
@@ -257,7 +279,13 @@ reconcile_recommendation <- function(lever, generation_tier, making_tier, making
   }
 
   # window == "bubble"
+  # A directional lean (lean buy / lean hold or sell) is only asserted when the
+  # per-team making trajectory interval does NOT span zero. When it spans zero
+  # the direction is indistinguishable from flat, so the recommendation defaults
+  # to "hold" rather than reading a buy or sell into a zero-spanning slope
+  # (accepted gm fix, 2026-07-26: no bubble buy/sell on a directionless trend).
   verb <- case_when(
+    isTRUE(making_interval_spans_zero) ~ "hold",
     identical(making_trajectory, "improving") ~ "lean buy",
     identical(making_trajectory, "declining") ~ "lean hold or sell",
     TRUE ~ "hold"
@@ -402,11 +430,13 @@ build_deadline_read <- function(team_blups, team_generation_making, team_traject
   identity_summary <- build_identity_summary(team_blups)
 
   # Team-salary floor is 85% of the $7.0M cap = $5,950,000 (cba_rules_2026.md
-  # Section 1). A team below the floor is pushed to add salary (or pay the
-  # shortfall out), which strengthens an acquire and weakens a hold. The flag is
-  # a tier-compatible boolean; committed_salary_est is used only to derive it and
-  # is never published (tiers-not-dollars, AMENDMENT_02 Section 3a). The clean
-  # flexibility_tier (not the floor-annotated display string) drives the lever.
+  # Section 1). A team below the floor must reach it over the SEASON, which it can
+  # satisfy by paying the shortfall out to its players (cba_rules_2026.md Section
+  # 1) -- so being below the floor is a soft nudge toward adding salary, not a
+  # deadline-forcing mandate. The flag is a tier-compatible boolean;
+  # committed_salary_est is used only to derive it and is never published
+  # (tiers-not-dollars, AMENDMENT_02 Section 3a). The clean flexibility_tier (not
+  # the floor-annotated display string) drives the lever.
   team_salary_floor <- 5950000
   cap <- cap_context %>%
     mutate(
@@ -428,6 +458,7 @@ build_deadline_read <- function(team_blups, team_generation_making, team_traject
     mutate(
       lever_raw = classify_lever(generation_tier, making_tier, identity_summary),
       lever = condition_lever_on_cap(lever_raw, flexibility_tier),
+      diagnosis = classify_diagnosis(generation_tier),
       recommendation = reconcile_recommendation(lever, generation_tier, making_tier, trajectory, interval_spans_zero, window)
     ) %>%
     ungroup() %>%
@@ -435,7 +466,7 @@ build_deadline_read <- function(team_blups, team_generation_making, team_traject
       team, identity_summary, generation_pctile, making_pctile,
       generation_tier, making_tier, trajectory, interval_spans_zero,
       trajectory_display, cap_context, below_floor, lever_raw, lever,
-      window, recommendation
+      diagnosis, window, recommendation
     )
 
   lever_order <- c("acquire", "adjust", "hold")
@@ -456,17 +487,22 @@ render_deadline_read_md <- function(deadline_read) {
     paste0("Generated: ", format(Sys.time(), "%Y-%m-%d %H:%M:%S %Z")),
     "",
     paste(
-      "Lever is generation/making-driven per HANDOFF 5e; generation is the",
-      "process axis (expected points per 100 given shot diet, from the",
-      "stratified expected-points baseline), making is the finishing axis",
-      "(actual minus expected). Trajectory shown is the shot_making_residual",
-      "trend."
+      "The Recommendation column is the action, and it is the only action",
+      "column: it is conditioned on the standing-derived window and the cap",
+      "tier. The Offense diagnosis column is descriptive of the offense only",
+      "(generation-short / balanced / generation-rich) and is not an",
+      "instruction. Diagnosis is generation/making-driven per HANDOFF 5e:",
+      "generation is the process axis (expected points per 100 given shot",
+      "diet, from the stratified expected-points baseline), making is the",
+      "finishing axis (actual minus expected). Trajectory shown is the",
+      "finishing trend (finishing relative to shot quality, rising or",
+      "falling)."
     ),
     ""
   )
 
   table_header <- c(
-    "| Team | Identity | Gen %ile | Making %ile | Trajectory | Cap | Lever | Window | Recommendation |",
+    "| Team | Recommendation | Window | Cap | Offense diagnosis | Gen %ile | Making %ile | Trajectory | Identity |",
     "|---|---|---|---|---|---|---|---|---|"
   )
 
@@ -474,14 +510,14 @@ render_deadline_read_md <- function(deadline_read) {
     mutate(
       row = paste0(
         "| ", team,
-        " | ", identity_summary,
+        " | ", recommendation,
+        " | ", window,
+        " | ", cap_context,
+        " | ", diagnosis,
         " | ", generation_pctile,
         " | ", making_pctile,
         " | ", trajectory_display,
-        " | ", cap_context,
-        " | ", lever,
-        " | ", window,
-        " | ", recommendation, " |"
+        " | ", identity_summary, " |"
       )
     ) %>%
     pull(row)
@@ -507,16 +543,19 @@ render_deadline_read_md <- function(deadline_read) {
       "dollar figure; source data/reference/cap_context_2026.csv (Spotrac,",
       "2026-07-19), grounded in cba_rules_2026.md Section 2. A \"(below floor)\"",
       "tag marks a team below the 85%-of-cap team-salary floor ($5.95M,",
-      "cba_rules_2026.md Section 1), which is pushed to add salary rather than",
-      "free to stand pat. Re-verify before publish (AMENDMENT_02 Section 4)."
+      "cba_rules_2026.md Section 1). A below-floor team must reach the floor",
+      "over the season, which it can satisfy by paying the shortfall out to its",
+      "players -- a soft nudge toward adding salary, not a deadline-forcing",
+      "mandate. Re-verify before publish (AMENDMENT_02 Section 4)."
     ),
     "",
     paste(
-      "Trajectory note: all five trajectory metrics used the documented",
-      "random-intercept-plus-residual-slope fallback (the full random-slope fit",
-      "was singular); the improving/flat/declining labels are directional reads,",
-      "not random-slope BLUPs. Source: output/trajectory_league_trends.csv",
-      "(fallback_used = TRUE for all five)."
+      "Trajectory note: the improving/flat/declining labels are directional",
+      "reads of each team's within-season finishing trend, not standalone",
+      "claims; the per-team intervals span zero (the \"*\" marker). The",
+      "modeling detail (the full trend fit was singular, so a documented",
+      "fallback was used) is in output/methodology.md. Source:",
+      "output/trajectory_league_trends.csv."
     ),
     "",
     paste(
