@@ -837,6 +837,19 @@ capped, one minimum move flips its conditioning) and keep the $5.95M floor figur
 on the re-verify list. Position VALUES in the candidate reference file also await
 Wendy's roster-source curation (the column and rendering are in place).
 
+**Team-level metric unit: percentile -> league rank (2026-07-28, Wendy's request).**
+On a 15-team basis a percentile ("7th percentile") is false precision, so every
+team-level generation/making standing is now DISPLAYED as league rank of 15
+(1 = best): deadline_read.md "Gen rank"/"Making rank" columns and footnote (R/08),
+generation_gap.md per-team "Generation rank: N of 15" line (R/11), and findings.md
+prose (ATL generation 1st of 15 / making 15th of 15, LVA 14th / 1st, GSV 5th / 8th,
+IND making 3rd on 10th-of-15 generation). The internal tier logic is unchanged:
+R/08 still uses ntile(x, 3) tiers and R/11 still keys its fit_read branches on the
+generation_pctile/making_pctile thresholds (kept internal), and rank agrees with
+the tertiles by construction (rank 1-5 = top tertile, 6-10 mid, 11-15 bottom). The
+player-level screen (R/13) keeps production tiers across ~100 players -- percentiles
+there are not the issue; this change is team-level only. Full testthat green (60/0).
+
 ## Data download (session 2, 2026-07-18)
 
 `R/01_download.R` run against commit `773ce292bb2cd9bc6ec98d70de95176607ccbaeb`.

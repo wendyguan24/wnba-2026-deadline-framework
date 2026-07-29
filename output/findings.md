@@ -64,12 +64,12 @@ shots only. Per team:
 
 The decomposition separates teams the record conflates:
 
-- ATL: shot generation 100th percentile, shot making 0th. The looks are the best
+- ATL: shot generation 1st of 15, shot making 15th of 15. The looks are the best
   in the league; the points left on the floor are a finishing result, not a
   process failure.
-- LVA: shot generation 7th percentile, shot making 100th. The inverse: poor looks
+- LVA: shot generation 14th of 15, shot making 1st of 15. The inverse: poor looks
   carried by finishing that a baseline reads as unsustainable.
-- GSV (the flagship): shot generation 71st percentile, shot making 50th. Neither a
+- GSV (the flagship): shot generation 5th of 15, shot making 8th of 15. Neither a
   generation deficit nor a making deficit (see H3 below).
 
 The ATL and LVA rows are mirror images, and the framework refuses to let hot or
@@ -138,7 +138,7 @@ Written against the pre-registered H1 / H2 / H3 / H-null registry in
 - H3 (GSV's low field-goal percentage is shot making below expectation on an
   acceptable shot diet; trajectory: is GSV trending toward expectation or flat):
   the premise is REFUTED. GSV makes shots at or slightly above expectation (shot
-  making 50th percentile; shot_making_per100 is +0.6 in
+  making 8th of 15; shot_making_per100 is +0.6 in
   output/team_generation_making.csv). GSV's low field-goal
   percentage is not a making deficit against its own shot diet; it is an identity
   of high-variance perimeter shot selection (first in 3-point-attempt rate and
@@ -157,7 +157,7 @@ one row per team. The bottom line is the Recommendation column: the action
 conditioned on the team's standing-derived window (buyer / bubble / seller, from
 `R/12_standing.R`) and its cap tier. The rest of the row is the diagnosis behind
 that action: an offense-diagnosis label (generation-short / balanced /
-generation-rich), the generation and making percentiles, the finishing
+generation-rich), the generation and making league ranks (of 15, 1 = best), the finishing
 trajectory, the cap-context tier, and the descriptive identity summary. The
 offense diagnosis is generation-and-making-driven and is descriptive only; it is
 not itself an instruction. Acquire feasibility is conditioned on the cap inside
@@ -178,7 +178,7 @@ Headline read (the framework's sharpest disagreement with consensus): ATL's read
 is hold, a bubble judgment call the diagnosis backs rather than a buy. A
 record-and-eye read of the team that leaves the most points on the
 floor in the league would say buy a finisher. The framework says the looks are
-100th-percentile and the losses are finishing, which a deadline acquisition of
+1st of 15 and the losses are finishing, which a deadline acquisition of
 shot creation does not fix. The open risk, stated honestly: ATL's shot-making
 trajectory is declining (interval spans zero), so this hold is a bet on
 generation, not a bet that the making trend reverts up. If making is a personnel
@@ -188,7 +188,7 @@ headline bet and is presented as a bet, not a certainty.
 Balanced offenses, split by window (so the softest diagnosis is not a hedge): four
 teams diagnose balanced (mid generation), and the window is what separates their
 reads. IND is a buyer and the one balanced offense told to adjust: it is
-overperforming its process (making 86th percentile on 36th-percentile generation),
+overperforming its process (making 3rd of 15 on 10th-of-15 generation),
 an argument to consolidate rather than overpay. TOR is a balanced offense on the
 bubble, so its read is a hold-and-reassess judgment around the World Cup break, not
 a splash. PDX and LAS are balanced offenses too, but the standing layer reads them

@@ -392,19 +392,25 @@ build_identity_summary <- function(team_blups, icc_path = "output/icc_table.csv"
 #' @param standing tibble, from load_standing() (team, window, ...
 #'   R/12_standing.R) -- conditions recommendation only, never the diagnosis
 #' @return tibble, one row per team: team, identity_summary,
-#'   generation_pctile, making_pctile, generation_tier, making_tier,
+#'   generation_rank, making_rank, generation_tier, making_tier,
 #'   trajectory, interval_spans_zero, trajectory_display, cap_context,
 #'   below_floor, lever_raw, lever, window, recommendation -- sorted by lever
 #'   (acquire, adjust, hold) then team
 build_deadline_read <- function(team_blups, team_generation_making, team_trajectories, cap_context, standing) {
+  # Team-level rank is the published unit, not a percentile: with 15 teams a
+  # percentile ("7th percentile") reads as false precision, so generation and
+  # making are shown as league rank of 15, 1 = best (highest generation / highest
+  # making). The generation_tier / making_tier below (ntile(x, 3)) still drive the
+  # diagnosis and recommendation and are unchanged; rank is display only, and the
+  # two agree by construction (rank 1-5 = tier 3, 6-10 = tier 2, 11-15 = tier 1).
   base <- team_generation_making %>%
     mutate(
-      generation_pctile = round(percent_rank(shot_generation_per100) * 100),
-      making_pctile = round(percent_rank(shot_making_per100) * 100),
+      generation_rank = rank(-shot_generation_per100, ties.method = "min"),
+      making_rank = rank(-shot_making_per100, ties.method = "min"),
       generation_tier = ntile(shot_generation_per100, 3),
       making_tier = ntile(shot_making_per100, 3)
     ) %>%
-    select(team, generation_pctile, making_pctile, generation_tier, making_tier)
+    select(team, generation_rank, making_rank, generation_tier, making_tier)
 
   making_residual_traj <- team_trajectories %>%
     filter(metric == "shot_making_residual") %>%
@@ -463,7 +469,7 @@ build_deadline_read <- function(team_blups, team_generation_making, team_traject
     ) %>%
     ungroup() %>%
     select(
-      team, identity_summary, generation_pctile, making_pctile,
+      team, identity_summary, generation_rank, making_rank,
       generation_tier, making_tier, trajectory, interval_spans_zero,
       trajectory_display, cap_context, below_floor, lever_raw, lever,
       diagnosis, window, recommendation
@@ -501,8 +507,10 @@ render_deadline_read_md <- function(deadline_read) {
     ""
   )
 
+  n_teams <- nrow(deadline_read)
+
   table_header <- c(
-    "| Team | Recommendation | Window | Cap | Offense diagnosis | Gen %ile | Making %ile | Trajectory | Identity |",
+    "| Team | Recommendation | Window | Cap | Offense diagnosis | Gen rank | Making rank | Trajectory | Identity |",
     "|---|---|---|---|---|---|---|---|---|"
   )
 
@@ -514,8 +522,8 @@ render_deadline_read_md <- function(deadline_read) {
         " | ", window,
         " | ", cap_context,
         " | ", diagnosis,
-        " | ", generation_pctile,
-        " | ", making_pctile,
+        " | ", generation_rank,
+        " | ", making_rank,
         " | ", trajectory_display,
         " | ", identity_summary, " |"
       )
@@ -523,6 +531,14 @@ render_deadline_read_md <- function(deadline_read) {
     pull(row)
 
   footnotes <- c(
+    "",
+    paste0(
+      "Gen rank and Making rank are the team's league rank of ", n_teams,
+      " (1 = best): Gen rank 1 is the most and best looks created (highest shot",
+      " generation), Making rank 1 is the best finishing relative to shot quality",
+      " (highest shot making). Rank is the published team-level unit, not a",
+      " percentile, since a percentile across ", n_teams, " teams is false precision."
+    ),
     "",
     paste(
       "* interval spans zero: the per-team trajectory label is directional,",

@@ -1,8 +1,8 @@
 # WNBA 2026 Offensive Generation Gap: Volume + Mix Decomposition
 
-Generated: 2026-07-28 13:53:58 UTC
+Generated: 2026-07-29 18:08:10 UTC
 
-Each team's generation gap versus the league (generation = volume x mix quality: FGA per 100 possessions, times expected points per shot given shot diet) is split into a VOLUME gap ((team FGA/100 minus league FGA/100) times league mix quality) and a MIX gap (team FGA/100 times the difference between the team's and the league's mix quality), the second attributed by zone with a centered-pps contribution. The two components sum to the team's total generation gap, which reconciles with the team's shot_generation_per100 standing (generation and making percentile shown per team, computed in R/11 via percent_rank of shot_generation_per100 / shot_making_per100, both from 07_expected_points.R). primary_driver names which component (volume, mix, or both when each individually exceeds 0.75 per 100 possessions) accounts for the gap.
+Each team's generation gap versus the league (generation = volume x mix quality: FGA per 100 possessions, times expected points per shot given shot diet) is split into a VOLUME gap ((team FGA/100 minus league FGA/100) times league mix quality) and a MIX gap (team FGA/100 times the difference between the team's and the league's mix quality), the second attributed by zone with a centered-pps contribution. The two components sum to the team's total generation gap, which reconciles with the team's shot_generation_per100 standing (generation and making shown per team as league rank of 15, 1 = best, from shot_generation_per100 / shot_making_per100, both from 07_expected_points.R). primary_driver names which component (volume, mix, or both when each individually exceeds 0.75 per 100 possessions) accounts for the gap.
 
 fit_read is window-conditioned (standing/window layer, R/12_standing.R): window (buyer/bubble/seller, from each team's win-loss record AND scoring margin per game, equally weighted) sets the RECOMMENDATION here; the diagnostic decomposition above it (volume_gap, mix_gap_total, primary_driver, identity_driven) stays record-independent and unchanged by window.
 
@@ -10,7 +10,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## ATL
 
-- Generation percentile: 100 (making percentile: 0)
+- Generation rank: 1 of 15 (making rank: 15 of 15; 1 = best)
 - Window: bubble
 - Primary driver: both
 - Volume gap (per 100 poss): 3.46
@@ -24,7 +24,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## CHI
 
-- Generation percentile: 79 (making percentile: 21)
+- Generation rank: 4 of 15 (making rank: 12 of 15; 1 = best)
 - Window: seller
 - Primary driver: mix
 - Volume gap (per 100 poss): -0.72
@@ -37,7 +37,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## CON
 
-- Generation percentile: 57 (making percentile: 14)
+- Generation rank: 7 of 15 (making rank: 13 of 15; 1 = best)
 - Window: seller
 - Primary driver: volume
 - Volume gap (per 100 poss): 0.64
@@ -48,7 +48,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## DAL
 
-- Generation percentile: 93 (making percentile: 71)
+- Generation rank: 2 of 15 (making rank: 5 of 15; 1 = best)
 - Window: buyer
 - Primary driver: both
 - Volume gap (per 100 poss): 6.31
@@ -62,7 +62,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## GSV
 
-- Generation percentile: 71 (making percentile: 50)
+- Generation rank: 5 of 15 (making rank: 8 of 15; 1 = best)
 - Window: buyer
 - Primary driver: both
 - Volume gap (per 100 poss): 4.22
@@ -76,7 +76,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## IND
 
-- Generation percentile: 36 (making percentile: 86)
+- Generation rank: 10 of 15 (making rank: 3 of 15; 1 = best)
 - Window: buyer
 - Primary driver: volume
 - Volume gap (per 100 poss): -1.64
@@ -87,7 +87,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## LAS
 
-- Generation percentile: 43 (making percentile: 64)
+- Generation rank: 9 of 15 (making rank: 6 of 15; 1 = best)
 - Window: seller
 - Primary driver: volume
 - Volume gap (per 100 poss): -1.52
@@ -98,7 +98,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## LVA
 
-- Generation percentile: 7 (making percentile: 100)
+- Generation rank: 14 of 15 (making rank: 1 of 15; 1 = best)
 - Window: buyer
 - Primary driver: mix
 - Volume gap (per 100 poss): 0.30
@@ -112,7 +112,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## MIN
 
-- Generation percentile: 86 (making percentile: 93)
+- Generation rank: 3 of 15 (making rank: 2 of 15; 1 = best)
 - Window: buyer
 - Primary driver: volume
 - Volume gap (per 100 poss): 2.44
@@ -123,7 +123,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## NYL
 
-- Generation percentile: 14 (making percentile: 79)
+- Generation rank: 13 of 15 (making rank: 4 of 15; 1 = best)
 - Window: bubble
 - Primary driver: both
 - Volume gap (per 100 poss): -3.47
@@ -137,7 +137,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## PDX
 
-- Generation percentile: 64 (making percentile: 43)
+- Generation rank: 6 of 15 (making rank: 9 of 15; 1 = best)
 - Window: seller
 - Primary driver: mix
 - Volume gap (per 100 poss): -0.40
@@ -151,7 +151,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## PHX
 
-- Generation percentile: 21 (making percentile: 36)
+- Generation rank: 12 of 15 (making rank: 10 of 15; 1 = best)
 - Window: seller
 - Primary driver: both
 - Volume gap (per 100 poss): -2.19
@@ -165,7 +165,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## SEA
 
-- Generation percentile: 29 (making percentile: 29)
+- Generation rank: 11 of 15 (making rank: 11 of 15; 1 = best)
 - Window: seller
 - Primary driver: both
 - Volume gap (per 100 poss): -0.95
@@ -179,7 +179,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## TOR
 
-- Generation percentile: 50 (making percentile: 57)
+- Generation rank: 8 of 15 (making rank: 7 of 15; 1 = best)
 - Window: bubble
 - Primary driver: volume
 - Volume gap (per 100 poss): -1.17
@@ -190,7 +190,7 @@ fit_read shares its recommendation vocabulary (amplify / adjust / gap-fill / rea
 
 ## WAS
 
-- Generation percentile: 0 (making percentile: 7)
+- Generation rank: 15 of 15 (making rank: 14 of 15; 1 = best)
 - Window: bubble
 - Primary driver: both
 - Volume gap (per 100 poss): -5.25
