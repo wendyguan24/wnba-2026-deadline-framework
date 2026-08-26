@@ -1,0 +1,263 @@
+WNBA 2026 Data Source Comparison
+=================================
+CDN source (shufinskiy/nba_data) vs wehoop (sportsdataverse)
+
+Generated: 2026-08-26
+
+This document compares the three data feeds used by this project's original
+pipeline (cdn PBP, shotdetail, nbastats v2) against the data available through
+the wehoop R package. wehoop draws from two distinct backends: ESPN public APIs
+and the WNBA Stats API (stats.wnba.com).
+
+
+============================================================================
+1. SHOT LOCATION DATA
+============================================================================
+
+Source                    | Coordinates            | Distance      | Zone Classification
+--------------------------|------------------------|---------------|--------------------
+CDN (wnba_cdnnba_2026)   | (none in PBP)          | (none)        | area/areaDetail/descriptor
+shotdetail                | LOC_X, LOC_Y           | SHOT_DISTANCE | SHOT_ZONE_BASIC, SHOT_ZONE_AREA, SHOT_ZONE_RANGE
+wehoop ESPN PBP           | coordinate_x, coord_y  | (none)        | type_text (free text)
+wehoop Stats API shots    | x_legacy, y_legacy     | shot_distance | action_type, sub_type (free text)
+wehoop shot zones         | x_legacy, y_legacy     | shot_distance | shot_zone (5 zones: corner_3, above_the_break_3, restricted_area, in_the_paint_non_ra, mid_range)
+
+NOTES:
+- ESPN PBP coordinates are on a 25x47 half-court scale; Stats API uses legacy
+  NBA units (x: -250 to 250, y: -50 to 420). Neither matches the CDN shotdetail
+  LOC_X/LOC_Y directly (same legacy coordinate space as Stats API x_legacy/y_legacy).
+- CDN shotdetail SHOT_ZONE_BASIC has more granular zones (e.g., "Left Corner 3",
+  "Right Corner 3", "Above the Break 3", "In The Paint (Non-RA)", "Mid-Range",
+  "Restricted Area", "Backcourt") vs wehoop's 5-zone simplification.
+- wehoop's shot_zones() function derives zones from coordinates using the same
+  algorithm as pbpstats. You can replicate CDN zone granularity by using the raw
+  x_legacy/y_legacy coordinates.
+- Bottom line: wehoop has EQUIVALENT shot location coverage. You get coordinates
+  + distance + zone classification from both sources.
+
+
+============================================================================
+2. PLAY-BY-PLAY DATA
+============================================================================
+
+CDN PBP (wnba_cdnnba_2026)         | wehoop ESPN PBP          | wehoop Stats API PBP (V3)
+------------------------------------|--------------------------|---------------------------
+gameId                              | game_id                  | game_id
+period                              | period_number            | period
+clock (ISO-8601 PT09M57.00S)        | clock_minutes/seconds    | clock
+actionType                          | type_text                | action_type
+subType                             | text                     | sub_type
+descriptor                          | --                       | description
+area / areaDetail                   | --                       | --
+shotResult                          | scoring_play (bool)      | shot_result
+teamTricode                         | team_id                  | team_id / team_tricode
+personId                            | participants_*_athlete   | person_id / player_name
+x / y (? not in cdn PBP)            | coordinate_x/y           | x_legacy / y_legacy
+qualifiers (array)                   | --                       | --
+  is_fastbreak                      | --                       | --
+  is_fromturnover                   | --                       | --
+  is_2ndchance                      | --                       | --
+  is_pointsinthepaint               | --                       | --
+orderNumber                         | sequence_number          | order_number
+scoreHome / scoreAway               | home_score / away_score  | score_home / score_away
+possession                          | --                       | (via possessions loader)
+
+UNIQUE TO CDN:
+- area / areaDetail / descriptor: shot-classification taxonomy
+  ("Restricted Area" / "In The Paint" / "pullup" / "driving" etc.)
+  This is the "shot-creation profile" (per project vocabulary) data.
+  wehoop Stats API has action_type/sub_type which partially overlaps
+  (e.g., "Driving Layup", "Pullup Jump Shot") but lacks the hierarchical
+  area/areaDetail structure.
+- qualifiers array: is_fastbreak, is_fromturnover, is_2ndchance,
+  is_pointsinthepaint parsed from per-play qualifier tags.
+
+UNIQUE TO wehoop ESPN PBP:
+- coordinate_x, coordinate_y: court location per play (25x47 scale)
+- shooting_play (bool), scoring_play (bool)
+- wallclock (event timestamp)
+
+UNIQUE TO wehoop Stats API PBP (V3):
+- on-court lineup tracking: home_player1-5, away_player1-5 (10 player IDs
+  on court at each moment, forward-filled through substitutions)
+- shot_value (2 or 3)
+- shot_distance
+- x_legacy, y_legacy
+- location ("h" / "v" for home/visitor attribution)
+- event_type numeric codes (1=Made, 2=Miss, 3=FT, 4=Reb, 5=TOV, etc.)
+
+
+============================================================================
+3. POSSESSION-LEVEL DATA
+============================================================================
+
+CDN source: NOT AVAILABLE. The original project built possessions from
+  the V2 PBP via R/03_possessions.R (our own parser).
+
+wehoop Stats API possessions (load_wnba_stats_possessions):
+  - game_id, period, possession_number
+  - offense_team_id, defense_team_id
+  - start/end_order_index, start/end_seconds_remaining
+  - points, is_second_chance, possession_start_type, count_as_possession
+  - fg2a/fg2m, fg3a/fg3m, fta/ftm, oreb/dreb, tov
+  - off_player_1 through off_player_5 (5-man offense lineup)
+  - def_player_1 through def_player_5 (5-man defense lineup)
+
+wehoop wnba_possession_lineups() (live API, per-game):
+  - Same columns as above, built from V3 PBP on the fly
+  - Includes second_chance flag
+
+This is a MAJOR UPGRADE. The CDN source had no pre-built possession data
+and no 5-man lineup tracking. wehoop provides both.
+
+
+============================================================================
+4. HUSTLE / TRACKING DATA
+============================================================================
+
+CDN source: NOT AVAILABLE.
+
+wehoop (WNBA Stats API, league-wide):
+  wnba_leaguehustlestatsplayer():
+    CONTESTED_SHOTS, CONTESTED_SHOTS_2PT, CONTESTED_SHOTS_3PT
+    DEFLECTIONS, CHARGES_DRAWN, SCREEN_ASSISTS, SCREEN_AST_PTS
+    OFF/DEF_LOOSE_BALLS_RECOVERED, LOOSE_BALLS_RECOVERED
+    OFF/DEF_BOXOUTS, BOX_OUTS, BOX_OUT_PLAYER_TEAM_REBS
+
+  wnba_leaguehustlestatsteam():
+    Same categories at team level
+
+  wnba_boxscoreplayertrackv3() (per-game):
+    DIST (distance run), ORBC, DRBC, RBC
+    TCHS (touches), SAST (secondary assists), FTAST
+    PASS (passes), CFGM/CFGA/CFG_PCT (contested FG)
+    UFGM/UFGA/UFG_PCT (uncontested FG)
+    DFGM/DFGA/DFG_PCT (defended FG)
+
+This is ENTIRELY NEW data not in the CDN source.
+
+
+============================================================================
+5. LEAGUEDASH CUBES (ADVANCED STATS)
+============================================================================
+
+CDN nbastats v2: Used only for reconciliation in this project (row-count
+  verification). Not used for features.
+
+wehoop Stats API leaguedash (24 tables):
+  player_bio              - height, weight, age, draft info, country, college
+  player_stats_base       - GP, MIN, FGM/A, 3PM/A, FTM/A, REB, AST, STL, BLK, TOV, PTS
+  player_stats_advanced   - OFF_RATING, DEF_RATING, NET_RATING, AST_PCT, AST_TO,
+                            AST_RATIO, OREB_PCT, DREB_PCT, REB_PCT, EFG_PCT,
+                            TS_PCT, USG_PCT, PACE, PIE, POSS
+  player_stats_usage      - USG_PCT, PCT_FGM, PCT_FGA, PCT_3PM, PCT_FTM, etc.
+  player_stats_scoring    - PCT_PTS_2PT, PCT_PTS_2PT_MR, PCT_PTS_3PT,
+                            PCT_PTS_FB, PCT_PTS_FT, PCT_PTS_OFF_TOV,
+                            PCT_PTS_PAINT, PCT_AST_2PM, PCT_UAST_2PM, etc.
+  player_stats_defense    - DEF_WS (defensive win shares -- when available)
+  player_stats_misc       - PTS_OFF_TOV, 2ND_CHANCE_PTS, FB_PTS, PITP,
+                            OPP_PTS_OFF_TOV, OPP_2ND_CHANCE_PTS, etc.
+  team_stats_base         - team-level box score aggregates
+  team_stats_advanced     - team OFF/DEF/NET RATING, PACE, PIE
+  team_stats_fourfactors  - EFG_PCT, FTA_RATE, TM_TOV_PCT, OREB_PCT
+  lineups_base            - 5-man lineup combination stats
+  lineups_advanced        - lineup OFF/DEF/NET RATING
+  standings               - W, L, W_PCT, HOME/ROAD records
+
+This is a MAJOR UPGRADE vs the CDN source. Advanced stats, four factors,
+lineup combination stats, and scoring breakdowns were not available in
+the original pipeline.
+
+
+============================================================================
+6. RAPM (Regularized Adjusted Plus-Minus)
+============================================================================
+
+CDN source: NOT AVAILABLE.
+
+wehoop wnba_rapm():
+  Takes a possessions frame (from wnba_possession_lineups) and fits a
+  ridge-regression RAPM model. Output per player:
+    player_id, o_rapm, d_rapm, rapm, off_poss, def_poss
+
+  Per-100-possession units. Deterministic CV (no RNG seed needed).
+  Requires glmnet + Matrix packages.
+
+This is ENTIRELY NEW analytical capability.
+
+
+============================================================================
+7. ADDITIONAL wehoop DATA NOT IN CDN
+============================================================================
+
+- ESPN game rosters: per-game starter flag, DNP status, ejection
+- ESPN player core: bio (height, weight, position, college, draft info)
+- Team crosswalk: ESPN <-> WNBA Stats <-> Fox ID mapping
+- ESPN standings: playoff seed, games behind, streaks, win pct
+- Coaches: load_wnba_stats_coaches()
+- Scoreboard / live scores: espn_wnba_scoreboard()
+- Transactions: espn_wnba_transactions() (trades, signings, waivers)
+
+
+============================================================================
+8. CDN DATA NOT IN wehoop
+============================================================================
+
+The CDN source (shufinskiy/nba_data) has these columns that have no exact
+equivalent in wehoop:
+
+a) area / areaDetail / descriptor taxonomy:
+   This is the 3-level hierarchical shot classification from the NBA/WNBA
+   CDN feed. Examples:
+     area="Restricted Area", areaDetail="", descriptor="driving"
+     area="In The Paint", areaDetail="Left Side", descriptor="pullup"
+     area="Mid-Range", areaDetail="Left Side(L)", descriptor="fadeaway"
+   wehoop's Stats API shots have action_type + sub_type which overlap
+   partially (e.g., "Driving Layup Shot" captures "driving" + "Layup")
+   but lack the explicit area/areaDetail structure.
+
+   IMPACT: For the "shot-creation profile" features used by this project,
+   the CDN descriptor column (pullup/driving/stepback/etc.) is the key
+   input. wehoop's action_type + sub_type can replicate most of this with
+   string parsing, but mapping is not 1:1.
+
+b) PBP qualifier tags (is_fastbreak, is_fromturnover, is_2ndchance,
+   is_pointsinthepaint):
+   These are parsed from the cdn qualifiers JSON array. wehoop Stats API
+   possessions have is_second_chance and possession_start_type, but the
+   per-play fastbreak/transition tags are not available per event.
+
+   IMPACT: Low. The project uses 2nd-chance at possession level (available
+   in wehoop) and does not currently use fastbreak/transition per play.
+
+c) nbastats v2 specific columns (reconciliation-only):
+   FG_PCT, FG3_PCT, FT_PCT in the exact column format. wehoop leaguedash
+   cubes have the same data in a different column naming convention.
+
+   IMPACT: None for analysis. Column renaming handles the mapping.
+
+
+============================================================================
+9. RECOMMENDATION
+============================================================================
+
+Run within this project (not a separate project). Rationale:
+- The wehoop data maps directly to the existing pipeline's needs
+- Player IDs (personId / person_id) are the same WNBA Stats IDs
+- Team IDs from wehoop Stats API match the original pipeline
+- The ESPN data adds new dimensions (bio, rosters) that enrich existing
+  analysis without requiring a new framework
+
+Workflow:
+1. Run R/15_wehoop_download.R locally to pull all bulk data
+2. Run R/16_wehoop_live_api.R locally for hustle stats + possessions
+3. Use data/wehoop/ CSVs alongside existing data/raw/ and data/processed/
+4. The team crosswalk CSV maps ESPN team IDs to WNBA Stats team IDs
+
+The biggest analytical upgrades from wehoop are:
+1. Full-season up-to-date data (not frozen at midseason game 182)
+2. Hustle stats (contested shots, deflections, loose balls)
+3. Pre-built possession data with 5-man lineups
+4. RAPM capability
+5. Advanced stats cubes (usage, scoring breakdown, four factors)
+6. Player tracking boxscores (distance, touches, passes)
