@@ -1114,3 +1114,49 @@ Three refinements built:
   in DAL/GSV/MIN/TOR marked `context`, each list keeping 3-4 `target` rows. Contract bands are
   now filled for 10 of 11 (Taylor/Gustafson/Johnson from Spotrac 2026-07-25; only the
   backfilled Barker is blank). STILL pending: Barker's band, the provisional movability review.
+
+## Aug 26-27 -- wehoop full-season analysis pipeline (scripts 15-24)
+
+**Context shift:** the trade deadline has passed. The CDN source is frozen at 182 games
+(midseason). The wehoop R package (sportsdataverse) gives access to the full season via
+ESPN and WNBA Stats API data. The framing shifts from "deadline lever" to "playoff
+readiness."
+
+- [x] R/15_wehoop_download.R -- bulk downloader for full-season data via wehoop (ESPN PBP,
+      box scores, rosters, schedule, standings, player core/stats; Stats API shots,
+      possessions, game logs, PBP V3, 14 leaguedash tables, team crosswalk)
+- [x] R/16_wehoop_live_api.R -- live API pulls: hustle stats, possession lineups with
+      5v5, shot zones, RAPM (user runs locally, requires internet + wehoop)
+- [x] output/data_source_comparison.txt -- 9-section column-level comparison of CDN vs
+      wehoop data (shot location, PBP, possessions, hustle/tracking, leaguedash cubes,
+      RAPM, additional data, CDN-unique, recommendation)
+- [x] R/17_wehoop_scaffold.R -- team crosswalk/ID resolution, data validation, manifest
+- [x] R/18_wehoop_standings.R -- full-season standings with contender/in/out tiers,
+      standing_score blend, midseason rank_change comparison
+- [x] R/19_wehoop_team_features.R -- team-game feature table from wehoop (pace, zone
+      shares, shot-creation profiles, rate stats, context shares)
+- [x] R/20_wehoop_advanced_team.R -- four factors, ratings, hustle profiles with z-scored
+      ranks, strength/weakness identification (new layer, no CDN equivalent)
+- [x] R/21_wehoop_player_value.R -- player value screen with Game Score, RAPM, hustle
+      tiers, box-vs-RAPM disagreement flagging (upgrades R/13)
+- [x] R/22_wehoop_expected_points.R -- stratified expected-points baseline from full-season
+      shots, generation/making decomposition (wehoop analogue of R/07)
+- [x] R/23_wehoop_models.R -- schedule-adjusted identity models + trajectory on full-season
+      wehoop features (same lme4 machinery as R/06, no garbage-time pass)
+- [x] R/24_wehoop_playoff_read.R -- full-season playoff-readiness synthesis with defense
+      profile and RAPM-informed depth (replaces deadline lever calls with readiness
+      classification: complete / one piece away / trending right / trending wrong /
+      in but vulnerable / out)
+
+Run order: 17 -> {18, 19, 20, 22} in any order -> 21 -> 23 -> 24
+(or strictly linear: 17, 18, 19, 20, 22, 21, 23, 24)
+
+**Next session should:**
+- User runs R/15_wehoop_download.R and R/16_wehoop_live_api.R locally to populate
+  data/wehoop/ with full-season CSVs
+- Run the pipeline (17 through 24) on the actual data and debug any column-name
+  mismatches or join issues against real wehoop output
+- Run analytics-reviewer on model outputs (script 23) and gm-agent on the playoff-read
+  table (script 24)
+- Consider follow-up scripts: lineup combination analysis (leaguedash_lineups_*.csv),
+  generation-gap decomposition (11_generation_gap analogue), graphics
