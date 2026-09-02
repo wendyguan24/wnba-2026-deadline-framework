@@ -83,15 +83,26 @@ build_team_lookup <- function(crosswalk) {
   lookup
 }
 
-#' Build team lookup from ESPN + leaguedash data when the crosswalk CSV is
+#' Build team lookup from leaguedash + ESPN data when the crosswalk CSV is
 #' unavailable (the wnba_team_crosswalk endpoint is unreliable).
 #'
-#' Uses leaguedash_team_stats_base.csv for Stats API team_id + abbreviation,
-#' and espn_team_box.csv for ESPN team_id. Matches them on abbreviation.
+#' Derives tricodes from team_name via a hardcoded map of the 15 WNBA teams.
+#' ESPN IDs are matched from espn_team_box.csv when available.
 #'
 #' @return tibble: team_id, espn_id, tricode, team_name
 build_team_lookup_fallback <- function() {
-  message("  Building team lookup from ESPN + leaguedash data (crosswalk fallback)")
+  message("  Building team lookup from leaguedash + ESPN data (crosswalk fallback)")
+
+  name_to_tricode <- c(
+    "Atlanta Dream" = "ATL", "Chicago Sky" = "CHI",
+    "Connecticut Sun" = "CON", "Dallas Wings" = "DAL",
+    "Golden State Valkyries" = "GSV", "Indiana Fever" = "IND",
+    "Los Angeles Sparks" = "LAS", "Las Vegas Aces" = "LVA",
+    "Minnesota Lynx" = "MIN", "New York Liberty" = "NYL",
+    "Portland" = "PDX", "Phoenix Mercury" = "PHX",
+    "Seattle Storm" = "SEA", "Toronto" = "TOR",
+    "Washington Mystics" = "WAS"
+  )
 
   ld_path <- file.path(DATA_DIR, "leaguedash_team_stats_base.csv")
   if (!file.exists(ld_path)) {
@@ -100,44 +111,64 @@ build_team_lookup_fallback <- function() {
   ld <- readr::read_csv(ld_path, show_col_types = FALSE)
   names(ld) <- tolower(names(ld))
 
-  id_col <- intersect(c("team_id"), names(ld))
-  abbr_col <- intersect(c("team_abbreviation", "team_abbr"), names(ld))
-  name_col <- intersect(c("team_name"), names(ld))
-
-  if (length(id_col) == 0 || length(abbr_col) == 0) {
-    stop("leaguedash_team_stats_base.csv missing team_id or team_abbreviation columns")
+  if (!"team_id" %in% names(ld) || !"team_name" %in% names(ld)) {
+    stop("leaguedash_team_stats_base.csv missing team_id or team_name columns. ",
+         "Found: ", paste(names(ld), collapse = ", "))
   }
 
   stats_teams <- ld %>%
-    transmute(
-      team_id = as.character(.data[[id_col[1]]]),
-      tricode = toupper(.data[[abbr_col[1]]]),
-      team_name = if (length(name_col) > 0) .data[[name_col[1]]] else NA_character_
-    ) %>%
+    transmute(team_id = as.character(team_id), team_name) %>%
     distinct()
+
+  stats_teams$tricode <- vapply(stats_teams$team_name, function(nm) {
+    hit <- name_to_tricode[nm]
+    if (!is.na(hit)) return(hit)
+    partial <- grep(nm, names(name_to_tricode), fixed = TRUE, value = TRUE)
+    if (length(partial) == 1) return(name_to_tricode[partial])
+    partial2 <- names(name_to_tricode)[vapply(names(name_to_tricode), function(k) {
+      grepl(k, nm, fixed = TRUE)
+    }, logical(1))]
+    if (length(partial2) == 1) return(name_to_tricode[partial2])
+    NA_character_
+  }, character(1))
+
+  unresolved <- stats_teams %>% filter(is.na(tricode))
+  if (nrow(unresolved) > 0) {
+    message("  WARN: could not resolve tricode for: ",
+            paste(unresolved$team_name, collapse = ", "))
+  }
 
   espn_path <- file.path(DATA_DIR, "espn_team_box.csv")
   if (file.exists(espn_path)) {
     espn <- readr::read_csv(espn_path, show_col_types = FALSE)
     names(espn) <- tolower(names(espn))
-    espn_abbr_col <- intersect(c("team_abbreviation", "team_short_display_name",
-                                  "team_abbrev"), names(espn))
+    espn_name_col <- intersect(c("team_display_name", "team_name",
+                                  "team_location"), names(espn))
     espn_id_col <- intersect(c("team_id"), names(espn))
-    if (length(espn_abbr_col) > 0 && length(espn_id_col) > 0) {
+    if (length(espn_name_col) > 0 && length(espn_id_col) > 0) {
       espn_teams <- espn %>%
-        transmute(
-          espn_id = as.character(.data[[espn_id_col[1]]]),
-          espn_tricode = toupper(.data[[espn_abbr_col[1]]])
-        ) %>%
-        distinct()
+        transmute(espn_id = as.character(.data[[espn_id_col[1]]]),
+                  espn_name = .data[[espn_name_col[1]]]) %>%
+        distinct(espn_name, .keep_all = TRUE)
+      espn_teams$espn_tricode <- vapply(espn_teams$espn_name, function(nm) {
+        hit <- name_to_tricode[nm]
+        if (!is.na(hit)) return(hit)
+        partial <- names(name_to_tricode)[vapply(names(name_to_tricode), function(k) {
+          grepl(k, nm, fixed = TRUE) || grepl(nm, k, fixed = TRUE)
+        }, logical(1))]
+        if (length(partial) >= 1) return(name_to_tricode[partial[1]])
+        NA_character_
+      }, character(1))
+      espn_small <- espn_teams %>%
+        filter(!is.na(espn_tricode)) %>%
+        select(espn_id, tricode = espn_tricode) %>%
+        distinct(tricode, .keep_all = TRUE)
       stats_teams <- stats_teams %>%
-        left_join(espn_teams, by = c("tricode" = "espn_tricode"))
+        left_join(espn_small, by = "tricode")
     } else {
-      message("  WARN: espn_team_box.csv missing expected columns, ESPN IDs set to NA")
       stats_teams$espn_id <- NA_character_
     }
   } else {
-    message("  WARN: espn_team_box.csv not found, ESPN IDs set to NA")
     stats_teams$espn_id <- NA_character_
   }
 
