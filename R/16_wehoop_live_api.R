@@ -90,34 +90,10 @@ message(sprintf("Processing %d games for season %d\n", length(game_ids), SEASON)
 # =========================================================================
 if (do_hustle) {
   message("=== Hustle Stats (league-wide) ===\n")
-
-  # A1. Player hustle stats
-  message("Fetching player hustle stats...")
-  hustle_player <- tryCatch(
-    wnba_leaguehustlestatsplayer(league_id = "10", season = as.character(SEASON))$HustleStatsPlayer,
-    error = function(e) {
-      message("  WARN: Player hustle stats failed: ", conditionMessage(e))
-      NULL
-    }
-  )
-  if (!is.null(hustle_player) && nrow(hustle_player) > 0) {
-    readr::write_csv(hustle_player, file.path(DEST_DIR, "hustle_player.csv"))
-    message(sprintf("  hustle_player: %d rows", nrow(hustle_player)))
-  }
-
-  # A2. Team hustle stats
-  message("Fetching team hustle stats...")
-  hustle_team <- tryCatch(
-    wnba_leaguehustlestatsteam(league_id = "10", season = as.character(SEASON))$HustleStatsTeam,
-    error = function(e) {
-      message("  WARN: Team hustle stats failed: ", conditionMessage(e))
-      NULL
-    }
-  )
-  if (!is.null(hustle_team) && nrow(hustle_team) > 0) {
-    readr::write_csv(hustle_team, file.path(DEST_DIR, "hustle_team.csv"))
-    message(sprintf("  hustle_team: %d rows", nrow(hustle_team)))
-  }
+  message("  NOTE: wnba_leaguehustlestatsplayer() and wnba_leaguehustlestatsteam()")
+  message("  were deprecated in wehoop 3.0.0 and are now defunct.")
+  message("  Hustle stats are no longer available via this endpoint.")
+  message("  Scripts 20 and 21 will run without hustle data (hustle dimensions skipped).")
 }
 
 

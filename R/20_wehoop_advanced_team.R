@@ -36,7 +36,9 @@ HUSTLE_METRICS <- c(
   contested_shots_pg = TRUE, deflections_pg = TRUE, loose_balls_pg = TRUE,
   screen_assists_pg = TRUE, box_outs_pg = TRUE
 )
-ALL_METRICS <- c(RATING_METRICS, FOUR_FACTOR_METRICS, HUSTLE_METRICS)
+ALL_METRICS_WITH_HUSTLE <- c(RATING_METRICS, FOUR_FACTOR_METRICS, HUSTLE_METRICS)
+ALL_METRICS_NO_HUSTLE   <- c(RATING_METRICS, FOUR_FACTOR_METRICS)
+ALL_METRICS <- ALL_METRICS_WITH_HUSTLE
 
 #' Read a csv and lowercase its names so official-stats columns
 #' (TEAM_ID, OFF_RATING) line up with live/ columns already snake_case.
@@ -58,7 +60,6 @@ read_lower <- function(path, required = TRUE) {
 build_team_table <- function(advanced, fourfactors, hustle, team_lookup) {
   advanced <- advanced %>% mutate(team_id = as.character(team_id))
   fourfactors <- fourfactors %>% mutate(team_id = as.character(team_id))
-  hustle <- hustle %>% mutate(team_id = as.character(team_id))
   lookup <- team_lookup %>% mutate(team_id = as.character(team_id)) %>%
     select(team_id, tricode, team_name) %>% distinct()
 
@@ -76,30 +77,35 @@ build_team_table <- function(advanced, fourfactors, hustle, team_lookup) {
          paste(missing_ff, collapse = ", "))
   }
 
-  hustle_needed <- c("team_id", "contested_shots", "deflections",
-                      "loose_balls_recovered", "screen_assists", "box_outs", "gp")
-  missing_hustle <- setdiff(hustle_needed, names(hustle))
-  if (length(missing_hustle) > 0) {
-    stop("build_team_table(): hustle_team.csv missing columns: ",
-         paste(missing_hustle, collapse = ", "))
-  }
-
   adv_small <- advanced %>% select(all_of(adv_cols))
   ff_small  <- fourfactors %>% select(all_of(ff_cols))
-  hustle_rates <- hustle %>%
-    transmute(
-      team_id,
-      contested_shots_pg = contested_shots / gp,
-      deflections_pg = deflections / gp,
-      loose_balls_pg = loose_balls_recovered / gp,
-      screen_assists_pg = screen_assists / gp,
-      box_outs_pg = box_outs / gp
-    )
 
   tab <- adv_small %>%
-    left_join(ff_small, by = "team_id") %>%
-    left_join(hustle_rates, by = "team_id") %>%
-    left_join(lookup, by = "team_id")
+    left_join(ff_small, by = "team_id")
+
+  if (!is.null(hustle)) {
+    hustle <- hustle %>% mutate(team_id = as.character(team_id))
+    hustle_needed <- c("team_id", "contested_shots", "deflections",
+                        "loose_balls_recovered", "screen_assists", "box_outs", "gp")
+    missing_hustle <- setdiff(hustle_needed, names(hustle))
+    if (length(missing_hustle) > 0) {
+      message("  WARN: hustle_team.csv missing columns: ",
+              paste(missing_hustle, collapse = ", "), " -- hustle dimensions skipped")
+    } else {
+      hustle_rates <- hustle %>%
+        transmute(
+          team_id,
+          contested_shots_pg = contested_shots / gp,
+          deflections_pg = deflections / gp,
+          loose_balls_pg = loose_balls_recovered / gp,
+          screen_assists_pg = screen_assists / gp,
+          box_outs_pg = box_outs / gp
+        )
+      tab <- tab %>% left_join(hustle_rates, by = "team_id")
+    }
+  }
+
+  tab <- tab %>% left_join(lookup, by = "team_id")
 
   unresolved <- tab %>% filter(is.na(tricode)) %>% pull(team_id)
   if (length(unresolved) > 0) {
@@ -164,6 +170,8 @@ fmt_num <- function(x, digits = 1) formatC(x, format = "f", digits = digits)
 #' factors, hustle profile, each with interpretive notes.
 write_team_md <- function(df, path) {
   df <- df %>% arrange(rank_net_rating)
+  has_hustle <- "contested_shots_pg" %in% names(df) && !all(is.na(df$contested_shots_pg))
+  n_dims <- length(ALL_METRICS)
 
   ratings_tab <- df %>%
     transmute(tricode, off_rating = fmt_num(off_rating),
@@ -177,13 +185,6 @@ write_team_md <- function(df, path) {
     transmute(tricode, efg_pct = fmt_num(efg_pct, 3), fta_rate = fmt_num(fta_rate, 3),
               tm_tov_pct = fmt_num(tm_tov_pct, 3), oreb_pct = fmt_num(oreb_pct, 3),
               primary_factor)
-
-  hustle_tab <- df %>%
-    transmute(tricode, contested_shots_pg = fmt_num(contested_shots_pg),
-              deflections_pg = fmt_num(deflections_pg),
-              loose_balls_pg = fmt_num(loose_balls_pg),
-              screen_assists_pg = fmt_num(screen_assists_pg),
-              box_outs_pg = fmt_num(box_outs_pg))
 
   sw_tab <- df %>% select(tricode, strength_1, strength_2, weakness_1, weakness_2)
 
@@ -211,26 +212,44 @@ write_team_md <- function(df, path) {
     "",
     paste0("| ", paste(names(ff_tab), collapse = " | "), " |"),
     paste0("| ", paste(rep("---", ncol(ff_tab)), collapse = " | "), " |"),
-    apply(ff_tab, 1, function(r) paste0("| ", paste(r, collapse = " | "), " |")),
-    "",
-    "## Hustle profile",
-    "",
-    "Per-game rates from hustle_team.csv: contested shots, deflections, loose",
-    "balls recovered, screen assists, box outs. These are activity-level, not",
-    "outcome, stats -- useful for reading effort and role fit, not efficiency.",
-    "",
-    paste0("| ", paste(names(hustle_tab), collapse = " | "), " |"),
-    paste0("| ", paste(rep("---", ncol(hustle_tab)), collapse = " | "), " |"),
-    apply(hustle_tab, 1, function(r) paste0("| ", paste(r, collapse = " | "), " |")),
-    "",
+    apply(ff_tab, 1, function(r) paste0("| ", paste(r, collapse = " | "), " |"))
+  )
+
+  if (has_hustle) {
+    hustle_tab <- df %>%
+      transmute(tricode, contested_shots_pg = fmt_num(contested_shots_pg),
+                deflections_pg = fmt_num(deflections_pg),
+                loose_balls_pg = fmt_num(loose_balls_pg),
+                screen_assists_pg = fmt_num(screen_assists_pg),
+                box_outs_pg = fmt_num(box_outs_pg))
+    lines <- c(lines, "",
+      "## Hustle profile",
+      "",
+      "Per-game rates from hustle_team.csv: contested shots, deflections, loose",
+      "balls recovered, screen assists, box outs. These are activity-level, not",
+      "outcome, stats -- useful for reading effort and role fit, not efficiency.",
+      "",
+      paste0("| ", paste(names(hustle_tab), collapse = " | "), " |"),
+      paste0("| ", paste(rep("---", ncol(hustle_tab)), collapse = " | "), " |"),
+      apply(hustle_tab, 1, function(r) paste0("| ", paste(r, collapse = " | "), " |"))
+    )
+  } else {
+    lines <- c(lines, "",
+      "## Hustle profile",
+      "",
+      "Not available: hustle endpoints deprecated in wehoop 3.0.0."
+    )
+  }
+
+  lines <- c(lines, "",
     "## Strengths and weaknesses",
     "",
-    "Two highest and two lowest z-scored dimensions per team, across ratings,",
-    "four factors, and hustle rates (14 dimensions total). Lower-is-better",
+    sprintf("Two highest and two lowest z-scored dimensions per team, across %d", n_dims),
+    sprintf("dimensions (ratings%s four factors%s). Lower-is-better",
+            if (has_hustle) "," else " and",
+            if (has_hustle) ", and hustle rates" else ""),
     "metrics (DEF_RATING, TM_TOV_PCT) are sign-flipped so positive always",
-    "means better. A team whose weaknesses cluster in hustle dimensions reads",
-    "differently for playoff readiness than one whose weaknesses are on",
-    "efficiency (EFG_PCT, TS_PCT-adjacent) or turnover control.",
+    "means better.",
     "",
     paste0("| ", paste(names(sw_tab), collapse = " | "), " |"),
     paste0("| ", paste(rep("---", ncol(sw_tab)), collapse = " | "), " |"),
@@ -252,10 +271,17 @@ main <- function() {
   message("=== Loading team cubes ===")
   advanced    <- read_lower(file.path(DATA_DIR, "leaguedash_team_stats_advanced.csv"))
   fourfactors <- read_lower(file.path(DATA_DIR, "leaguedash_team_stats_fourfactors.csv"))
-  hustle      <- read_lower(file.path(LIVE_DIR, "hustle_team.csv"))
+  hustle      <- read_lower(file.path(LIVE_DIR, "hustle_team.csv"), required = FALSE)
   base_box    <- read_lower(file.path(DATA_DIR, "leaguedash_team_stats_base.csv"), required = FALSE)
 
-  message("=== Joining and computing hustle rates ===")
+  has_hustle <- !is.null(hustle)
+  ALL_METRICS <<- if (has_hustle) ALL_METRICS_WITH_HUSTLE else ALL_METRICS_NO_HUSTLE
+  if (!has_hustle) {
+    message("  NOTE: hustle_team.csv not available (endpoint deprecated in wehoop 3.0.0)")
+    message("  Proceeding with ratings + four factors only (9 dimensions instead of 14)")
+  }
+
+  message("=== Joining and computing rates ===")
   tab <- build_team_table(advanced, fourfactors, hustle, team_lookup)
   message(sprintf("  %d teams in profile", nrow(tab)))
 
