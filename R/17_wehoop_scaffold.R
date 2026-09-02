@@ -79,22 +79,88 @@ build_team_lookup <- function(crosswalk) {
     ) %>%
     distinct()
 
-  missing_tricodes <- setdiff(PROJECT_TRICODES, lookup$tricode)
-  extra_tricodes    <- setdiff(lookup$tricode, PROJECT_TRICODES)
-  if (length(missing_tricodes) > 0) {
-    message(
-      "  WARN: team_crosswalk.csv is missing expected tricodes: ",
-      paste(missing_tricodes, collapse = ", ")
-    )
+  validate_lookup_tricodes(lookup)
+  lookup
+}
+
+#' Build team lookup from ESPN + leaguedash data when the crosswalk CSV is
+#' unavailable (the wnba_team_crosswalk endpoint is unreliable).
+#'
+#' Uses leaguedash_team_stats_base.csv for Stats API team_id + abbreviation,
+#' and espn_team_box.csv for ESPN team_id. Matches them on abbreviation.
+#'
+#' @return tibble: team_id, espn_id, tricode, team_name
+build_team_lookup_fallback <- function() {
+  message("  Building team lookup from ESPN + leaguedash data (crosswalk fallback)")
+
+  ld_path <- file.path(DATA_DIR, "leaguedash_team_stats_base.csv")
+  if (!file.exists(ld_path)) {
+    stop("Cannot build fallback lookup: leaguedash_team_stats_base.csv not found")
   }
-  if (length(extra_tricodes) > 0) {
-    message(
-      "  WARN: team_crosswalk.csv has unexpected tricodes not in the project's 15: ",
-      paste(extra_tricodes, collapse = ", ")
-    )
+  ld <- readr::read_csv(ld_path, show_col_types = FALSE)
+  names(ld) <- tolower(names(ld))
+
+  id_col <- intersect(c("team_id"), names(ld))
+  abbr_col <- intersect(c("team_abbreviation", "team_abbr"), names(ld))
+  name_col <- intersect(c("team_name"), names(ld))
+
+  if (length(id_col) == 0 || length(abbr_col) == 0) {
+    stop("leaguedash_team_stats_base.csv missing team_id or team_abbreviation columns")
   }
 
+  stats_teams <- ld %>%
+    transmute(
+      team_id = as.character(.data[[id_col[1]]]),
+      tricode = toupper(.data[[abbr_col[1]]]),
+      team_name = if (length(name_col) > 0) .data[[name_col[1]]] else NA_character_
+    ) %>%
+    distinct()
+
+  espn_path <- file.path(DATA_DIR, "espn_team_box.csv")
+  if (file.exists(espn_path)) {
+    espn <- readr::read_csv(espn_path, show_col_types = FALSE)
+    names(espn) <- tolower(names(espn))
+    espn_abbr_col <- intersect(c("team_abbreviation", "team_short_display_name",
+                                  "team_abbrev"), names(espn))
+    espn_id_col <- intersect(c("team_id"), names(espn))
+    if (length(espn_abbr_col) > 0 && length(espn_id_col) > 0) {
+      espn_teams <- espn %>%
+        transmute(
+          espn_id = as.character(.data[[espn_id_col[1]]]),
+          espn_tricode = toupper(.data[[espn_abbr_col[1]]])
+        ) %>%
+        distinct()
+      stats_teams <- stats_teams %>%
+        left_join(espn_teams, by = c("tricode" = "espn_tricode"))
+    } else {
+      message("  WARN: espn_team_box.csv missing expected columns, ESPN IDs set to NA")
+      stats_teams$espn_id <- NA_character_
+    }
+  } else {
+    message("  WARN: espn_team_box.csv not found, ESPN IDs set to NA")
+    stats_teams$espn_id <- NA_character_
+  }
+
+  if (!"espn_id" %in% names(stats_teams)) {
+    stats_teams$espn_id <- NA_character_
+  }
+
+  lookup <- stats_teams %>% select(team_id, espn_id, tricode, team_name)
+  validate_lookup_tricodes(lookup)
   lookup
+}
+
+validate_lookup_tricodes <- function(lookup) {
+  missing_tricodes <- setdiff(PROJECT_TRICODES, lookup$tricode)
+  extra_tricodes   <- setdiff(lookup$tricode, PROJECT_TRICODES)
+  if (length(missing_tricodes) > 0) {
+    message("  WARN: lookup missing expected tricodes: ",
+            paste(missing_tricodes, collapse = ", "))
+  }
+  if (length(extra_tricodes) > 0) {
+    message("  WARN: lookup has unexpected tricodes not in the project's 15: ",
+            paste(extra_tricodes, collapse = ", "))
+  }
 }
 
 #' Check a CSV exists and has at least one row. Returns a one-row manifest
@@ -203,14 +269,13 @@ main <- function() {
 
   message("=== Team crosswalk ===")
   xwalk_path <- file.path(DATA_DIR, "team_crosswalk.csv")
-  if (!file.exists(xwalk_path)) {
-    stop(sprintf(
-      "team_crosswalk.csv not found at %s. Run 15_wehoop_download.R first.",
-      xwalk_path
-    ))
+  if (file.exists(xwalk_path)) {
+    crosswalk <- readr::read_csv(xwalk_path, show_col_types = FALSE)
+    team_lookup <- build_team_lookup(crosswalk)
+  } else {
+    message("  team_crosswalk.csv not found (API endpoint unreliable)")
+    team_lookup <- build_team_lookup_fallback()
   }
-  crosswalk <- readr::read_csv(xwalk_path, show_col_types = FALSE)
-  team_lookup <- build_team_lookup(crosswalk)
 
   message(sprintf("  built team_lookup: %d teams", nrow(team_lookup)))
   print(team_lookup)
@@ -238,10 +303,15 @@ main <- function() {
   message("\n=== Spot-checking data files ===")
   spot_manifest <- spot_check_files()
 
-  xwalk_manifest <- tibble(
-    filename = "team_crosswalk.csv", path = xwalk_path,
-    exists = TRUE, rows = nrow(crosswalk), cols = ncol(crosswalk)
-  )
+  xwalk_exists <- file.exists(xwalk_path)
+  xwalk_manifest <- if (xwalk_exists) {
+    xw <- readr::read_csv(xwalk_path, show_col_types = FALSE)
+    tibble(filename = "team_crosswalk.csv", path = xwalk_path,
+           exists = TRUE, rows = nrow(xw), cols = ncol(xw))
+  } else {
+    tibble(filename = "team_crosswalk.csv", path = xwalk_path,
+           exists = FALSE, rows = NA_integer_, cols = NA_integer_)
+  }
 
   manifest <- bind_rows(xwalk_manifest, schedule_manifest, spot_manifest) %>%
     distinct(filename, .keep_all = TRUE)
