@@ -1,0 +1,227 @@
+player_id,player_name,team_id,team_abbreviation,age,player_height,player_height_inches,player_weight,college,country,draft_year,draft_round,draft_number,gp,pts,reb,ast,net_rating,oreb_pct,dreb_pct,usg_pct,ts_pct,ast_pct,season,league_id,season_type,per_mode
+1628932,A'ja Wilson,1611661319,LVA,30,6-4,76,195,South Carolina,USA,2018,1,1,31,814,304,96,12.7,0.067,0.24,0.323,0.62,0.165,2026,10,Regular Season,Totals
+1642290,Aaliyah Edwards,1611661323,CON,24,6-3,75,206,Connecticut,Canada,2024,1,6,21,202,84,18,-10.8,0.068,0.144,0.217,0.587,0.088,2026,10,Regular Season,Totals
+1642801,Aaliyah Nye,1611661330,ATL,23,6-0,72,NA,Alabama,USA,2025,2,13,15,5,0,2,-18.8,0,0,0.113,0.417,0.1,2026,10,Regular Season,Totals
+1642786,Aicha Coulibaly,1611661329,CHI,24,6-0,72,NA,Texas A&M,Mali,2025,2,22,23,117,59,14,9.2,0.039,0.15,0.161,0.547,0.064,2026,10,Regular Season,Totals
+1629501,Alanna Smith,1611661321,DAL,29,6-4,76,177,Stanford,Australia,2019,1,8,26,146,101,27,-5.7,0.069,0.172,0.171,0.501,0.099,2026,10,Regular Season,Totals
+1643525,Alex Fowler,1611661313,NYL,25,6-2,74,NA,Portland,Australia,Undrafted,Undrafted,Undrafted,2,12,0,1,-20,0,0,0.194,0.551,0.056,2026,10,Regular Season,Totals
+1642775,Alex Wilson,1611661322,WAS,32,5-9,69,164,None,Australia,Undrafted,Undrafted,Undrafted,4,12,7,3,-19.3,0.076,0.03,0.126,0.368,0.1,2026,10,Regular Season,Totals
+1643644,Alicia Florez,1611661322,WAS,22,5-9,69,166,None,Spain,Undrafted,Undrafted,Undrafted,23,83,38,56,-7.1,0.027,0.091,0.179,0.384,0.295,2026,10,Regular Season,Totals
+1642293,Alissa Pili,1611661320,LAS,25,5-11,71,235,Utah,USA,2024,1,8,3,4,6,2,-21.6,0.103,0.188,0.094,0.5,0.167,2026,10,Regular Season,Totals
+1641648,Aliyah Boston,1611661325,IND,24,6-5,77,217,South Carolina,USA,2023,1,1,30,509,253,91,8.7,0.073,0.251,0.253,0.622,0.184,2026,10,Regular Season,Totals
+1628277,Allisha Gray,1611661330,ATL,31,6-0,72,167,South Carolina,USA,2017,1,4,32,606,100,75,8.7,0.02,0.082,0.221,0.572,0.12,2026,10,Regular Season,Totals
+202252,Alysha Clark,1611661321,DAL,39,5-11,71,167,Middle Tennessee,USA,2010,2,17,21,43,25,10,1.7,0.025,0.104,0.109,0.528,0.073,2026,10,Regular Season,Totals
+203826,Alyssa Thomas,1611661317,PHX,34,6-2,74,203,Maryland,USA,2014,1,4,33,489,243,271,-3.4,0.049,0.178,0.219,0.561,0.416,2026,10,Regular Season,Totals
+1629539,Amy Okonkwo,1611661330,ATL,29,6-2,74,NA,Texas Christian,USA,Undrafted,Undrafted,Undrafted,1,1,1,0,8.3,0,0.333,0.667,0.266,0,2026,10,Regular Season,Totals
+1642797,Anastasiia Olairi Kosu,1611661324,MIN,21,6-1,73,200,None,Russia,2025,2,15,27,108,59,19,16.5,0.132,0.077,0.163,0.559,0.089,2026,10,Regular Season,Totals
+1642800,Aneesah Morrow,1611661332,TOR,23,6-1,73,178,Louisiana State,USA,2025,1,7,24,269,198,37,-13.7,0.1,0.273,0.234,0.494,0.121,2026,10,Regular Season,Totals
+1642291,Angel Reese,1611661330,ATL,24,6-4,76,165,Louisiana State,USA,2024,1,7,31,491,369,76,7.3,0.15,0.243,0.247,0.508,0.135,2026,10,Regular Season,Totals
+1643455,Angela Dugalic,1611661322,WAS,24,6-4,76,199,UCLA,USA,2026,1,9,28,93,79,21,-12.7,0.062,0.222,0.167,0.489,0.13,2026,10,Regular Season,Totals
+1630993,Anneli Maley,1611661313,NYL,27,6-1,73,NA,None,Australia,Undrafted,Undrafted,Undrafted,6,6,8,0,7.7,0.069,0.08,0.092,0.255,0,2026,10,Regular Season,Totals
+1643489,Antonia Delaere,1611661324,MIN,32,5-11,71,155,None,Belgium,Undrafted,Undrafted,Undrafted,35,107,26,39,10.6,0.017,0.044,0.097,0.632,0.125,2026,10,Regular Season,Totals
+1628878,Ariel Atkins,1611661320,LAS,30,5-10,70,167,Texas-Austin,USA,2018,1,7,30,277,88,89,-3,0.028,0.082,0.168,0.499,0.153,2026,10,Regular Season,Totals
+1629481,Arike Ogunbowale,1611661321,DAL,29,5-8,68,165,Notre Dame,USA,2019,1,5,34,498,104,107,1.2,0.029,0.077,0.223,0.53,0.161,2026,10,Regular Season,Totals
+1643437,Ashlon Jackson,1611661323,CON,22,6-0,72,170,Duke,USA,2026,2,23,7,10,6,6,-25.7,0,0.075,0.097,0.388,0.154,2026,10,Regular Season,Totals
+1641695,Ashten Prechtel,1611661331,GSV,25,6-5,77,NA,Stanford,USA,2023,3,34,2,8,4,2,14.5,0.095,0.105,0.161,0.633,0.105,2026,10,Regular Season,Totals
+1642826,Aubrey Griffin,1611661313,NYL,24,6-1,73,160,Connecticut,NA,2025,3,37,4,2,1,0,-5,0,0.071,0.087,1,0,2026,10,Regular Season,Totals
+1643443,Awa Fam,1611661328,SEA,20,6-4,76,NA,None,Spain,2026,1,3,29,295,166,57,-5.5,0.068,0.128,0.164,0.552,0.108,2026,10,Regular Season,Totals
+1630386,Awak Kuier,1611661321,DAL,24,6-6,78,168,None,Finland,2021,1,2,31,172,93,26,5.9,0.046,0.142,0.156,0.584,0.076,2026,10,Regular Season,Totals
+1642793,Aziaha James,1611661321,DAL,23,5-10,70,NA,North Carolina State,USA,2025,1,12,34,206,82,41,4.8,0.047,0.157,0.248,0.469,0.169,2026,10,Regular Season,Totals
+1628922,Azura Stevens,1611661329,CHI,30,6-6,78,180,Connecticut,USA,2018,1,6,25,276,167,58,-6.2,0.059,0.217,0.219,0.497,0.149,2026,10,Regular Season,Totals
+1643425,Azzi Fudd,1611661321,DAL,23,5-11,71,NA,Connecticut,USA,2026,1,1,30,393,52,55,6.9,0.017,0.039,0.176,0.558,0.084,2026,10,Regular Season,Totals
+204335,Betnijah Laney-Hamilton,1611661322,WAS,32,6-0,72,166,Rutgers,USA,2015,2,17,18,86,34,28,4.5,0.011,0.1,0.161,0.509,0.143,2026,10,Regular Season,Totals
+1627668,Breanna Stewart,1611661313,NYL,31,6-4,76,170,Connecticut,USA,2016,1,1,33,702,276,105,4.4,0.053,0.204,0.271,0.575,0.172,2026,10,Regular Season,Totals
+1642788,Bree Hall,1611661325,IND,23,6-1,73,161,South Carolina,USA,2025,2,20,2,5,1,0,-26.9,0,0.111,0.179,0.5,0,2026,10,Regular Season,Totals
+1629488,Brianna Turner,1611661319,LVA,30,6-3,75,175,Notre Dame,USA,2019,1,11,31,56,70,7,-2.5,0.053,0.12,0.068,0.624,0.025,2026,10,Regular Season,Totals
+1629524,Bridget Carleton,1611661327,PDX,29,6-2,74,190,Iowa State,Canada,2019,2,21,32,469,140,68,-3.6,0.023,0.125,0.196,0.575,0.114,2026,10,Regular Season,Totals
+1628280,Brionna Jones,1611661330,ATL,30,6-3,75,215,Maryland,USA,2017,1,8,8,74,49,17,2,0.102,0.235,0.184,0.614,0.189,2026,10,Regular Season,Totals
+203398,Brittney Griner,1611661323,CON,35,6-9,81,219,Baylor,USA,2013,1,1,17,231,97,45,-4.6,0.071,0.153,0.229,0.569,0.195,2026,10,Regular Season,Totals
+1628279,Brittney Sykes,1611661332,TOR,32,5-11,71,152,Syracuse,USA,2017,1,7,15,301,57,52,-2.3,0.032,0.092,0.277,0.55,0.202,2026,10,Regular Season,Totals
+1642286,Caitlin Clark,1611661325,IND,24,6-0,72,157,Iowa,USA,2024,1,1,29,628,114,238,5.7,0.01,0.121,0.309,0.603,0.435,2026,10,Regular Season,Totals
+1642287,Cameron Brink,1611661320,LAS,24,6-4,76,170,Stanford,USA,2024,1,2,24,218,116,30,-1.6,0.085,0.18,0.229,0.602,0.115,2026,10,Regular Season,Totals
+1642304,Carla Leite,1611661327,PDX,22,5-9,69,151,None,France,2024,1,9,30,466,67,187,-2.1,0.028,0.063,0.275,0.597,0.413,2026,10,Regular Season,Totals
+1643467,Cassandre Prosper,1611661322,WAS,21,6-3,75,182,Notre Dame,Canada,2026,2,19,28,69,36,13,-7.4,0.065,0.038,0.151,0.35,0.065,2026,10,Regular Season,Totals
+1628508,Cecilia Zandalasini,1611661331,GSV,30,6-2,74,175,None,Italy,Undrafted,Undrafted,Undrafted,29,245,58,49,6.7,0.016,0.096,0.228,0.528,0.163,2026,10,Regular Season,Totals
+1643462,Chance Gray,1611661320,LAS,22,5-9,69,NA,Ohio State,USA,2026,2,24,29,80,35,28,-18.3,0.028,0.082,0.128,0.527,0.154,2026,10,Regular Season,Totals
+1643449,Charlisse Leger-Walker,1611661323,CON,24,5-10,70,190,UCLA,New Zealand,2026,2,18,31,199,64,106,-8.9,0.008,0.091,0.16,0.46,0.229,2026,10,Regular Season,Totals
+203833,Chelsea Gray,1611661319,LVA,33,5-11,71,170,Duke,USA,2014,1,11,33,414,106,233,7.4,0.008,0.087,0.178,0.585,0.296,2026,10,Regular Season,Totals
+1630150,Chennedy Carter,1611661319,LVA,27,5-9,69,143,Texas A&M,USA,2020,1,4,13,159,23,17,5.1,0.046,0.057,0.26,0.684,0.136,2026,10,Regular Season,Totals
+204323,Cheyenne Parker-Tyus,1611661319,LVA,33,6-4,76,193,Middle Tennessee,USA,2015,1,5,23,113,57,14,-3.2,0.068,0.164,0.189,0.601,0.091,2026,10,Regular Season,Totals
+1631064,Chloe Bibby,1611661324,MIN,28,6-2,74,191,Maryland,Australia,Undrafted,Undrafted,Undrafted,4,22,2,6,-1,0,0.043,0.176,0.527,0.158,2026,10,Regular Season,Totals
+1643424,Costanza Verona,1611661321,DAL,27,5-6,66,NA,None,Italy,Undrafted,Undrafted,Undrafted,1,4,0,2,-33.3,0,0,0.154,1,1,2026,10,Regular Season,Totals
+1643430,Cotie McMahon,1611661322,WAS,22,6-0,72,203,Mississippi,USA,2026,1,11,30,204,89,60,-3.4,0.025,0.111,0.166,0.484,0.172,2026,10,Regular Season,Totals
+202664,Courtney Vandersloot,1611661329,CHI,37,5-8,68,137,Gonzaga,USA,2011,1,3,17,151,47,82,-5.3,0.023,0.116,0.204,0.547,0.34,2026,10,Regular Season,Totals
+1627675,Courtney Williams,1611661324,MIN,32,5-8,68,147,South Florida,USA,2016,1,8,35,513,181,149,11.1,0.029,0.14,0.22,0.518,0.207,2026,10,Regular Season,Totals
+203024,Damiris Dantas,1611661325,IND,33,6-4,76,203,None,Brazil,2012,1,12,12,40,18,4,-6.9,0.041,0.159,0.175,0.556,0.063,2026,10,Regular Season,Totals
+1630389,Dana Evans,1611661319,LVA,28,5-6,66,145,Louisville,USA,2021,2,13,10,34,18,20,-24.1,0,0.122,0.176,0.322,0.18,2026,10,Regular Season,Totals
+1643440,Darianna Littlepage-Buggs,1611661322,WAS,22,6-1,73,159,Baylor,USA,2026,2,30,1,0,0,0,0,0,0,0,0,0,2026,10,Regular Season,Totals
+201886,DeWanna Bonner,1611661317,PHX,38,6-4,76,140,Auburn,USA,2009,1,5,35,358,210,54,-3.5,0.029,0.196,0.172,0.515,0.095,2026,10,Regular Season,Totals
+204324,Dearica Hamby,1611661320,LAS,32,6-3,75,189,Wake Forest,USA,2015,1,6,32,488,238,79,-4.2,0.072,0.186,0.205,0.613,0.14,2026,10,Regular Season,Totals
+1630096,DiJonai Carrington,1611661329,CHI,28,5-11,71,175,Baylor,USA,2021,2,20,7,78,20,4,-6.5,0.017,0.148,0.287,0.517,0.056,2026,10,Regular Season,Totals
+1641649,Diamond Miller,1611661323,CON,25,6-1,73,178,Maryland,USA,2023,1,2,31,294,78,42,-10.2,0.018,0.102,0.207,0.495,0.1,2026,10,Regular Season,Totals
+1642798,Dominique Malonga,1611661328,SEA,20,6-6,78,NA,None,France,2025,1,2,26,453,227,41,-3.8,0.095,0.224,0.289,0.567,0.11,2026,10,Regular Season,Totals
+1641657,Dorka Juhasz,1611661324,MIN,26,6-5,77,190,Connecticut,Hungary,2023,2,16,13,52,34,21,-8.6,0.024,0.146,0.13,0.484,0.156,2026,10,Regular Season,Totals
+1643490,Eliska Joklova,1611661324,MIN,24,6-0,72,162,None,Czech Republic,Undrafted,Undrafted,Undrafted,18,36,21,19,9.9,0.076,0.13,0.176,0.558,0.26,2026,10,Regular Season,Totals
+204322,Elizabeth Williams,1611661329,CHI,33,6-3,75,200,Duke,United Kingdom,2015,1,4,34,178,125,51,-1.9,0.072,0.132,0.16,0.461,0.141,2026,10,Regular Season,Totals
+1629581,Emese Hof,1611661324,MIN,30,6-3,75,219,Miami,Netherlands,Undrafted,Undrafted,Undrafted,3,7,5,2,-35,0.095,0.111,0.216,0.509,0.167,2026,10,Regular Season,Totals
+1631083,Emily Engstler,1611661327,PDX,26,6-1,73,184,Louisville,USA,2022,1,4,33,298,174,68,-6.4,0.049,0.176,0.178,0.551,0.138,2026,10,Regular Season,Totals
+1628242,Emma Cannon,1611661320,LAS,37,6-2,74,190,Florida Southern,USA,Undrafted,Undrafted,Undrafted,12,48,11,5,3,0.049,0.08,0.191,0.799,0.104,2026,10,Regular Season,Totals
+1643488,Emma Cechova,1611661324,MIN,22,6-4,76,180,None,Czech Republic,Undrafted,Undrafted,Undrafted,3,25,11,0,-10.7,0.08,0.132,0.19,0.64,0,2026,10,Regular Season,Totals
+204365,Erica Wheeler,1611661320,LAS,35,5-7,67,143,Rutgers,USA,Undrafted,Undrafted,Undrafted,32,302,63,173,-2,0.01,0.063,0.172,0.495,0.269,2026,10,Regular Season,Totals
+1629496,Ezi Magbegor,1611661328,SEA,27,6-6,78,181,None,Australia,2019,1,12,9,49,34,16,-4.7,0.031,0.173,0.168,0.453,0.158,2026,10,Regular Season,Totals
+1643428,Flau'jae Johnson,1611661328,SEA,22,5-10,70,NA,Louisiana State,USA,2026,1,8,34,467,167,98,-2.3,0.036,0.131,0.246,0.498,0.166,2026,10,Regular Season,Totals
+1643494,Frieda Buhner,1611661327,PDX,22,6-2,74,175,None,Germany,2026,2,17,30,190,67,23,-7.5,0.053,0.104,0.18,0.575,0.082,2026,10,Regular Season,Totals
+1628931,Gabby Williams,1611661331,GSV,29,5-11,71,172,Connecticut,USA,2018,1,4,31,454,100,67,7,0.027,0.105,0.279,0.522,0.172,2026,10,Regular Season,Totals
+1643447,Gabriela Jaquez,1611661329,CHI,22,6-0,72,NA,UCLA,USA,2026,1,5,30,212,93,28,-5.8,0.034,0.12,0.168,0.523,0.077,2026,10,Regular Season,Totals
+1642781,Georgia Amoore,1611661322,WAS,25,5-6,66,155,Kentucky,Australia,2025,1,6,32,187,38,115,-1.7,0.01,0.043,0.156,0.48,0.256,2026,10,Regular Season,Totals
+1643429,Gianna Kneepkens,1611661323,CON,23,5-11,71,174,UCLA,USA,2026,1,15,23,70,24,10,-14.2,0.058,0.084,0.151,0.548,0.1,2026,10,Regular Season,Totals
+1643453,Grace VanSlooten,1611661325,IND,22,6-3,75,NA,Michigan State,USA,2026,3,39,15,25,10,4,-23.8,0.014,0.118,0.108,0.805,0.098,2026,10,Regular Season,Totals
+1642817,Hailey Van Lith,1611661323,CON,24,5-9,69,157,TCU,USA,2025,1,11,13,83,13,24,-13.7,0.01,0.062,0.179,0.585,0.226,2026,10,Regular Season,Totals
+1641650,Haley Jones,1611661321,DAL,25,6-1,73,202,Stanford,USA,2023,1,6,6,26,11,5,-11.4,0.041,0.155,0.2,0.634,0.135,2026,10,Regular Season,Totals
+1629566,Han Xu,1611661313,NYL,26,6-11,83,203,None,China,2019,2,14,34,206,84,25,5,0.052,0.119,0.16,0.634,0.088,2026,10,Regular Season,Totals
+1641683,Holly Winterburn,1611661327,PDX,25,5-11,71,NA,Oregon,United Kingdom,Undrafted,Undrafted,Undrafted,20,49,17,37,-24.9,0.018,0.088,0.179,0.427,0.346,2026,10,Regular Season,Totals
+1643469,Indya Nivar,1611661330,ATL,22,5-10,70,NA,North Carolina,USA,2026,2,28,20,17,17,7,11.2,0.05,0.213,0.168,0.358,0.175,2026,10,Regular Season,Totals
+204330,Isabelle Harrison,1611661332,TOR,32,6-5,77,193,Tennessee,USA,2015,1,12,21,252,120,34,-9.6,0.077,0.172,0.233,0.565,0.127,2026,10,Regular Season,Totals
+1642302,Isobel Borlase,1611661330,ATL,21,5-11,71,NA,None,Australia,2024,2,20,32,142,48,30,-0.3,0.024,0.109,0.162,0.516,0.116,2026,10,Regular Season,Totals
+1642808,JJ Quinerly,1611661321,DAL,23,5-8,68,NA,West Virginia,USA,2025,3,27,2,2,1,2,-23.7,0,0.083,0.107,0.333,0.25,2026,10,Regular Season,Totals
+1629498,Jackie Young,1611661319,LVA,28,6-0,72,165,Notre Dame,USA,2019,1,1,33,605,151,221,10.7,0.026,0.114,0.233,0.607,0.321,2026,10,Regular Season,Totals
+1642292,Jacy Sheldon,1611661329,CHI,25,5-10,70,140,Ohio State,USA,2024,1,5,34,233,44,56,1.2,0.018,0.04,0.134,0.577,0.114,2026,10,Regular Season,Totals
+1631141,Jade Melbourne,1611661328,SEA,23,5-10,70,145,None,Australia,2022,3,33,34,313,67,134,-6.1,0.017,0.06,0.17,0.574,0.267,2026,10,Regular Season,Totals
+1642767,Janelle Salaun,1611661331,GSV,24,6-2,74,NA,None,France,Undrafted,Undrafted,Undrafted,32,420,120,35,8.2,0.043,0.133,0.226,0.598,0.087,2026,10,Regular Season,Totals
+1642320,Jaylyn Sherrod,1611661330,ATL,24,5-7,67,147,Colorado,USA,Undrafted,Undrafted,Undrafted,8,19,5,8,14.2,0,0.119,0.202,0.448,0.222,2026,10,Regular Season,Totals
+1629491,Jessica Shepard,1611661321,DAL,29,6-4,76,175,Notre Dame,USA,2019,2,16,33,469,375,171,3.9,0.095,0.268,0.181,0.616,0.248,2026,10,Regular Season,Totals
+204319,Jewell Loyd,1611661319,LVA,32,5-11,71,175,Notre Dame,USA,2015,1,1,32,251,74,46,4.6,0.019,0.067,0.14,0.505,0.075,2026,10,Regular Season,Totals
+1630148,Jihyun Park,1611661320,LAS,26,6-1,73,NA,None,South Korea,Undrafted,Undrafted,Undrafted,27,68,29,14,-5.3,0.038,0.079,0.122,0.504,0.084,2026,10,Regular Season,Totals
+1627673,Jonquel Jones,1611661313,NYL,32,6-6,78,215,George Washington,Bahamas,2016,1,6,33,481,301,94,2,0.077,0.244,0.202,0.632,0.163,2026,10,Regular Season,Totals
+1643527,Jordan Harrison,1611661327,PDX,22,5-6,66,132,West Virginia,USA,Undrafted,Undrafted,Undrafted,7,39,15,26,-10,0.04,0.138,0.197,0.56,0.406,2026,10,Regular Season,Totals
+1641651,Jordan Horston,1611661328,SEA,25,6-2,74,165,Tennessee,USA,2023,1,9,30,145,104,39,-1.5,0.047,0.143,0.161,0.454,0.118,2026,10,Regular Season,Totals
+1628886,Jordin Canada,1611661330,ATL,31,5-6,66,135,UCLA,USA,2018,1,5,32,369,120,243,7.9,0.023,0.106,0.172,0.543,0.358,2026,10,Regular Season,Totals
+1643505,Jovana Nogic,1611661317,PHX,28,6-0,72,NA,Providence,Serbia,Undrafted,Undrafted,Undrafted,16,166,17,26,0.9,0.022,0.033,0.214,0.612,0.147,2026,10,Regular Season,Totals
+1630115,Joyner Holmes,1611661328,SEA,28,6-3,75,210,University of Texas at Austin,USA,2020,2,19,1,2,5,1,-4.4,0.05,0.211,0.176,0.25,0.143,2026,10,Regular Season,Totals
+1627700,Julie Allemand,1611661332,TOR,30,5-10,70,152,None,Belgium,2016,3,33,26,172,81,149,-6.1,0.007,0.101,0.094,0.714,0.285,2026,10,Regular Season,Totals
+1642210,Julie Vanloo,1611661313,NYL,33,5-8,68,NA,None,Belgium,Undrafted,Undrafted,Undrafted,5,29,10,27,18.1,0.015,0.085,0.159,0.773,0.443,2026,10,Regular Season,Totals
+1642794,Juste Jocyte,1611661331,GSV,20,6-0,72,NA,None,Lithuania,2025,1,5,10,26,5,7,9.3,0,0.079,0.243,0.454,0.184,2026,10,Regular Season,Totals
+1643495,Justine Pissott,1611661319,LVA,22,6-4,76,175,Vanderbilt,USA,2026,2,25,6,36,8,4,-25,0,0.118,0.216,0.545,0.089,2026,10,Regular Season,Totals
+1627674,Kahleah Copper,1611661317,PHX,31,6-1,73,165,Rutgers,USA,2016,1,7,34,699,119,66,-4.8,0.017,0.096,0.283,0.55,0.114,2026,10,Regular Season,Totals
+1630097,Kaila Charles,1611661331,GSV,28,6-1,73,168,Maryland,USA,2020,2,23,33,203,147,45,12.9,0.084,0.143,0.158,0.498,0.109,2026,10,Regular Season,Totals
+1642822,Kaitlyn Chen,1611661331,GSV,24,5-9,69,NA,Connecticut,USA,2025,3,30,33,231,38,67,5.1,0.026,0.056,0.207,0.613,0.259,2026,10,Regular Season,Totals
+1630154,Kamiah Smalls,1611661327,PDX,28,5-10,70,161,James Madison,USA,2020,3,28,2,15,0,6,-30.6,0,0,0.197,0.718,0.4,2026,10,Regular Season,Totals
+1642289,Kamilla Cardoso,1611661329,CHI,25,6-7,79,215,South Carolina,Brazil,2024,1,3,33,480,284,81,-3.3,0.102,0.219,0.224,0.609,0.165,2026,10,Regular Season,Totals
+1628317,Karlie Samuelson,1611661327,PDX,31,6-0,72,159,Stanford,USA,Undrafted,Undrafted,Undrafted,21,99,27,19,-9,0.035,0.06,0.115,0.648,0.095,2026,10,Regular Season,Totals
+1642324,Kate Martin,1611661320,LAS,26,6-0,72,172,Iowa,USA,2024,2,18,15,36,14,5,-5.9,0.029,0.112,0.141,0.493,0.063,2026,10,Regular Season,Totals
+1629478,Katie Lou Samuelson,1611661328,SEA,29,6-3,75,163,Connecticut,USA,2019,1,4,27,122,57,20,-14.9,0.021,0.118,0.118,0.581,0.078,2026,10,Regular Season,Totals
+203405,Kayla Alexander,1611661332,TOR,35,6-4,76,186,Syracuse,Canada,2013,1,8,4,9,11,2,-40.2,0.093,0.206,0.133,0.514,0.095,2026,10,Regular Season,Totals
+203825,Kayla McBride,1611661324,MIN,34,5-11,71,179,Notre Dame,USA,2014,1,3,35,643,112,74,11.2,0.019,0.08,0.204,0.635,0.096,2026,10,Regular Season,Totals
+203866,Kayla Thornton,1611661331,GSV,33,6-1,73,190,Texas-El Paso,USA,Undrafted,Undrafted,Undrafted,33,281,165,25,11.6,0.054,0.151,0.156,0.534,0.05,2026,10,Regular Season,Totals
+1628909,Kelsey Mitchell,1611661325,IND,30,5-8,68,153,Ohio State,USA,2018,1,2,33,803,56,90,9.3,0.016,0.037,0.263,0.639,0.141,2026,10,Regular Season,Totals
+1628276,Kelsey Plum,1611661317,PHX,31,5-8,68,145,Washington,USA,2017,1,1,16,356,35,90,-1.5,0.006,0.066,0.273,0.658,0.327,2026,10,Regular Season,Totals
+1629568,Kennedy Burke,1611661323,CON,29,6-1,73,199,UCLA,USA,2019,2,22,30,251,98,45,-6,0.041,0.099,0.167,0.52,0.103,2026,10,Regular Season,Totals
+1628915,Kia Nurse,1611661332,TOR,30,6-0,72,195,Connecticut,Canada,2018,1,10,32,153,32,27,-13.3,0.018,0.062,0.167,0.53,0.118,2026,10,Regular Season,Totals
+204329,Kiah Stokes,1611661331,GSV,33,6-3,75,191,Connecticut,USA,2015,1,11,32,127,171,40,5.1,0.046,0.19,0.089,0.518,0.09,2026,10,Regular Season,Totals
+1630461,Kiana Williams,1611661320,LAS,27,5-8,68,140,Stanford,USA,2021,2,18,20,80,7,25,-7.9,0.004,0.026,0.159,0.497,0.164,2026,10,Regular Season,Totals
+1631006,Kierstan Bell,1611661319,LVA,26,6-1,73,176,Florida Gulf Coast,USA,2022,1,11,23,47,37,16,-6.9,0.038,0.105,0.131,0.352,0.087,2026,10,Regular Season,Totals
+1642792,Kiki Iriafen,1611661322,WAS,22,6-3,75,202,Southern California,USA,2025,1,4,29,435,266,50,3,0.108,0.209,0.237,0.548,0.117,2026,10,Regular Season,Totals
+1643445,Kiki Rice,1611661332,TOR,22,5-11,71,166,UCLA,USA,2026,1,6,17,191,68,47,-2,0.044,0.124,0.176,0.612,0.177,2026,10,Regular Season,Totals
+1642768,Kyara Linskens,1611661317,PHX,29,6-4,76,NA,None,Belgium,Undrafted,Undrafted,Undrafted,18,55,44,12,-13.2,0.063,0.166,0.165,0.44,0.126,2026,10,Regular Season,Totals
+1641656,Laeticia Amihere,1611661331,GSV,25,6-3,75,185,South Carolina,Canada,2023,1,8,29,91,95,31,10.9,0.117,0.181,0.155,0.474,0.147,2026,10,Regular Season,Totals
+1643420,Laura Juskaite,1611661332,TOR,28,6-4,76,188,None,Lithuania,Undrafted,Undrafted,Undrafted,33,332,129,52,-3,0.044,0.121,0.187,0.576,0.1,2026,10,Regular Season,Totals
+1643461,Laura Ziegler,1611661320,LAS,24,6-2,74,NA,Louisville,USA,Undrafted,Undrafted,Undrafted,3,8,4,3,-12.3,0.026,0.091,0.117,0.429,0.136,2026,10,Regular Season,Totals
+1643427,Lauren Betts,1611661322,WAS,22,6-7,79,NA,UCLA,USA,2026,1,4,32,205,136,30,-3.6,0.071,0.177,0.164,0.589,0.109,2026,10,Regular Season,Totals
+1642303,Leila Lacan,1611661323,CON,22,5-11,71,NA,None,France,2024,1,10,22,267,45,97,-7.8,0.02,0.052,0.212,0.506,0.271,2026,10,Regular Season,Totals
+1630142,Leonie Fiebich,1611661313,NYL,26,6-4,76,NA,None,Germany,2020,2,22,14,140,36,26,7.8,0.045,0.047,0.151,0.622,0.104,2026,10,Regular Season,Totals
+1631118,Lexi Held,1611661317,PHX,26,5-10,70,138,DePaul,USA,Undrafted,Undrafted,Undrafted,33,154,39,44,-5.6,0.026,0.053,0.159,0.488,0.147,2026,10,Regular Season,Totals
+1628882,Lexie Brown,1611661328,SEA,31,5-9,69,162,Duke,USA,2018,1,9,10,38,13,11,-15,0.007,0.084,0.112,0.663,0.138,2026,10,Regular Season,Totals
+1631086,Lexie Hull,1611661325,IND,26,6-2,74,155,Stanford,USA,2022,1,6,33,181,104,25,9.2,0.053,0.113,0.12,0.567,0.053,2026,10,Regular Season,Totals
+1629574,Li Yueru,1611661321,DAL,27,6-7,79,NA,None,China,2019,3,35,25,86,70,12,2.5,0.086,0.177,0.143,0.533,0.059,2026,10,Regular Season,Totals
+1642820,Liatu King,1611661324,MIN,24,5-11,71,178,Notre Dame,USA,2025,3,28,8,24,23,0,-8.5,0.116,0.195,0.145,0.588,0,2026,10,Regular Season,Totals
+1642802,Lucy Olsen,1611661322,WAS,23,5-10,70,141,Iowa,USA,2025,2,23,17,52,11,18,4,0.008,0.07,0.178,0.56,0.228,2026,10,Regular Season,Totals
+1630143,Luisa Geiselsoder,1611661327,PDX,26,6-4,76,204,None,Germany,2020,2,21,21,94,55,27,-2.4,0.029,0.142,0.159,0.441,0.123,2026,10,Regular Season,Totals
+1642307,Mackenzie Holmes,1611661328,SEA,25,6-3,75,NA,Indiana,USA,2024,3,26,22,63,69,12,-14.2,0.084,0.2,0.106,0.662,0.109,2026,10,Regular Season,Totals
+1641652,Maddy Siegrist,1611661321,DAL,26,6-2,74,175,Villanova,USA,2023,1,3,31,190,85,25,6.2,0.059,0.146,0.167,0.584,0.086,2026,10,Regular Season,Totals
+1642818,Maddy Westbeld,1611661329,CHI,24,6-3,75,NA,Notre Dame,USA,2025,2,16,3,3,4,2,-17.6,0.05,0.071,0.097,0.25,0.143,2026,10,Regular Season,Totals
+1643431,Madina Okot,1611661330,ATL,21,6-6,78,NA,South Carolina,Kenya,2026,1,13,31,172,104,6,-8.1,0.121,0.275,0.257,0.631,0.049,2026,10,Regular Season,Totals
+1642769,Mai Yamamoto,1611661319,LVA,26,5-5,65,NA,None,Japan,Undrafted,Undrafted,Undrafted,4,22,1,8,-23.2,0,0.023,0.18,0.688,0.348,2026,10,Regular Season,Totals
+1642815,Makayla Timpson,1611661325,IND,23,6-2,74,177,Florida State,USA,2025,2,19,32,139,137,16,10.8,0.095,0.163,0.101,0.628,0.039,2026,10,Regular Season,Totals
+1629576,Maria Conde,1611661332,TOR,29,6-3,75,168,Florida State,Spain,2019,3,27,32,289,149,82,-8.8,0.038,0.139,0.167,0.5,0.145,2026,10,Regular Season,Totals
+1630108,Mariella Fasoula,1611661332,TOR,28,6-4,76,209,Vanderbilt,Greece,Undrafted,Undrafted,Undrafted,3,4,3,1,-10.2,0.056,0.133,0.179,0.4,0.111,2026,10,Regular Season,Totals
+1629497,Marina Mabrey,1611661332,TOR,29,6-1,73,186,Notre Dame,USA,2019,2,19,31,645,104,115,-9.5,0.02,0.097,0.294,0.604,0.236,2026,10,Regular Season,Totals
+1630469,Marine Fauthoux,1611661313,NYL,25,5-9,69,NA,None,France,2021,3,29,13,56,31,31,3.6,0.026,0.135,0.146,0.538,0.223,2026,10,Regular Season,Totals
+1629546,Marine Johannes,1611661313,NYL,31,5-10,70,134,None,France,Undrafted,Undrafted,Undrafted,31,280,68,76,5,0.021,0.08,0.19,0.584,0.183,2026,10,Regular Season,Totals
+1643438,Marta Suarez,1611661317,PHX,24,6-3,75,NA,TCU,Spain,2026,2,16,13,44,15,6,-14.9,0.051,0.089,0.173,0.551,0.097,2026,10,Regular Season,Totals
+1630471,Maya Caldwell,1611661324,MIN,27,5-11,71,159,Georgia,USA,2021,3,33,35,145,78,38,7.7,0.063,0.098,0.147,0.497,0.109,2026,10,Regular Season,Totals
+1629484,Megan DiLeo,1611661327,PDX,29,6-4,76,208,Iowa,USA,2019,2,17,31,398,125,31,-4.7,0.054,0.12,0.192,0.633,0.076,2026,10,Regular Season,Totals
+1628920,Mercedes Russell,1611661325,IND,31,6-6,78,195,Tennessee,USA,2018,2,22,1,0,0,0,-150,0,0,0,0,0,2026,10,Regular Season,Totals
+1630446,Michaela Onyenwere,1611661322,WAS,27,6-0,72,202,UCLA,USA,2021,1,6,28,260,86,47,5,0.068,0.05,0.158,0.585,0.106,2026,10,Regular Season,Totals
+1631039,Miela Sowah,1611661331,GSV,26,5-10,70,148,Duke,Australia,Undrafted,Undrafted,Undrafted,2,0,0,0,-95.2,0,0,0.125,0,0,2026,10,Regular Season,Totals
+1642777,Monique Akoa Makani,1611661320,LAS,25,5-11,71,NA,None,Cameroon,Undrafted,Undrafted,Undrafted,21,188,41,51,-5.7,0.007,0.084,0.193,0.571,0.188,2026,10,Regular Season,Totals
+1628881,Monique Billings,1611661325,IND,30,6-4,76,190,UCLA,USA,2018,2,15,32,244,166,37,7,0.097,0.158,0.141,0.62,0.078,2026,10,Regular Season,Totals
+1628899,Myisha Hines-Allen,1611661325,IND,31,6-2,74,200,Louisville,USA,2018,2,19,29,111,88,44,8.5,0.041,0.171,0.144,0.533,0.157,2026,10,Regular Season,Totals
+1631019,NaLyssa Smith,1611661319,LVA,26,6-4,76,185,Baylor,USA,2022,1,2,33,396,206,32,5.2,0.086,0.173,0.182,0.644,0.062,2026,10,Regular Season,Totals
+1643686,Nadia Fingall,1611661331,GSV,28,6-4,76,NA,Stanford,USA,Undrafted,Undrafted,Undrafted,5,5,1,1,-29.7,0.1,0,0.067,1.25,0.25,2026,10,Regular Season,Totals
+1629483,Napheesa Collier,1611661324,MIN,29,6-1,73,182,Connecticut,USA,2019,1,6,8,153,60,27,16.7,0.057,0.212,0.257,0.621,0.166,2026,10,Regular Season,Totals
+204333,Natasha Cloud,1611661329,CHI,34,5-10,70,160,St. Joseph's (PA),USA,2015,2,15,33,338,106,166,-3,0.009,0.101,0.16,0.599,0.273,2026,10,Regular Season,Totals
+203827,Natasha Howard,1611661324,MIN,34,6-2,74,171,Florida State,USA,2014,1,5,35,531,271,116,14.6,0.121,0.15,0.214,0.624,0.17,2026,10,Regular Season,Totals
+1630442,Natasha Mack,1611661317,PHX,28,6-4,76,182,Oklahoma State,USA,2021,2,16,27,225,184,35,-0.6,0.114,0.207,0.142,0.651,0.106,2026,10,Regular Season,Totals
+1629567,Natisha Hiedeman,1611661328,SEA,29,5-8,68,132,Marquette,USA,2019,2,18,35,546,94,167,-4,0.008,0.08,0.227,0.566,0.271,2026,10,Regular Season,Totals
+1631044,Naz Hillmon,1611661330,ATL,26,6-2,74,190,Michigan,USA,2022,2,15,31,284,134,46,7.8,0.047,0.116,0.13,0.585,0.077,2026,10,Regular Season,Totals
+1643479,Ndjakalenga Mwenentanda,1611661331,GSV,22,6-2,74,NA,Vanderbilt,USA,Undrafted,Undrafted,Undrafted,5,0,2,2,9.1,0.091,0.111,0.053,0,0.182,2026,10,Regular Season,Totals
+1643448,Nell Angloma,1611661323,CON,20,6-1,73,NA,None,France,2026,1,12,27,99,39,15,-4.3,0.057,0.098,0.183,0.495,0.093,2026,10,Regular Season,Totals
+1628269,Nia Coffey,1611661324,MIN,31,6-1,73,177,Northwestern,USA,2017,1,5,35,231,162,67,8.4,0.041,0.155,0.122,0.551,0.112,2026,10,Regular Season,Totals
+1631263,Nikolina Milic,1611661332,TOR,32,6-3,75,181,None,Bosnia and Herzegovina,Undrafted,Undrafted,Undrafted,7,21,9,3,-14.8,0.031,0.111,0.177,0.506,0.081,2026,10,Regular Season,Totals
+203014,Nneka Ogwumike,1611661320,LAS,36,6-2,74,190,Stanford,USA,2012,1,1,31,531,272,95,-5.9,0.06,0.243,0.219,0.604,0.162,2026,10,Regular Season,Totals
+1643493,Noemie Brochant,1611661317,PHX,26,5-11,71,NA,None,France,Undrafted,Undrafted,Undrafted,34,206,70,60,-3.7,0.02,0.077,0.12,0.581,0.121,2026,10,Regular Season,Totals
+1642296,Nyadiew Puoch,1611661327,PDX,22,6-3,75,167,None,Australia,2024,1,12,32,128,55,21,-6.6,0.043,0.062,0.122,0.449,0.056,2026,10,Regular Season,Totals
+1631055,Nyara Sabally,1611661332,TOR,26,6-5,77,214,Oregon,Germany,2022,1,5,24,295,126,41,-6.9,0.078,0.147,0.21,0.612,0.129,2026,10,Regular Season,Totals
+203824,Odyssey Sims,1611661321,DAL,34,5-8,68,155,Baylor,USA,2014,1,2,25,135,26,55,0,0.003,0.065,0.178,0.503,0.22,2026,10,Regular Season,Totals
+1643426,Olivia Miles,1611661324,MIN,23,5-10,70,168,TCU,USA,2026,1,2,33,653,154,201,13.5,0.022,0.127,0.261,0.61,0.295,2026,10,Regular Season,Totals
+1631135,Olivia Nelson-Ododa,1611661323,CON,25,6-5,77,179,Connecticut,USA,2022,2,19,27,263,163,50,-3.7,0.077,0.219,0.192,0.605,0.145,2026,10,Regular Season,Totals
+1643706,Ornella Bankole,1611661332,TOR,28,5-11,71,NA,None,France,Undrafted,Undrafted,Undrafted,3,2,2,0,0,0.053,0.059,0.105,0.347,0,2026,10,Regular Season,Totals
+1642784,Paige Bueckers,1611661321,DAL,24,6-0,72,NA,Connecticut,USA,2025,1,1,32,646,130,187,4.7,0.019,0.108,0.244,0.602,0.283,2026,10,Regular Season,Totals
+1631136,Pauline Astier,1611661313,NYL,24,5-11,71,NA,None,France,Undrafted,Undrafted,Undrafted,34,323,84,117,6.2,0.025,0.082,0.164,0.651,0.23,2026,10,Regular Season,Totals
+1630138,Peyton Williams,1611661317,PHX,28,6-3,75,NA,Kansas State,USA,Undrafted,Undrafted,Undrafted,1,0,0,2,-8.3,0,0,0.077,0,0.5,2026,10,Regular Season,Totals
+1643487,Quionche Carter,1611661317,PHX,25,6-1,73,NA,Florida Gulf Coast,USA,Undrafted,Undrafted,Undrafted,13,15,9,7,-10.7,0.033,0.076,0.142,0.3,0.152,2026,10,Regular Season,Totals
+1627671,Rachel Banham,1611661329,CHI,33,5-10,70,181,Minnesota,USA,2016,1,4,30,141,33,34,-1.6,0.007,0.073,0.173,0.507,0.155,2026,10,Regular Season,Totals
+1630996,Rae Burrell,1611661320,LAS,26,6-2,74,168,Tennessee,USA,2022,1,9,32,432,75,78,-7.3,0.022,0.064,0.208,0.575,0.13,2026,10,Regular Season,Totals
+1643441,Raegan Beers,1611661323,CON,23,6-4,76,244,Oklahoma,USA,Undrafted,Undrafted,Undrafted,25,88,72,20,-4.5,0.103,0.18,0.153,0.547,0.116,2026,10,Regular Season,Totals
+1630384,Raquel Carrera,1611661313,NYL,24,6-3,75,NA,None,Spain,2021,2,15,19,31,21,7,14,0.075,0.124,0.11,0.666,0.095,2026,10,Regular Season,Totals
+1643433,Raven Johnson,1611661325,IND,23,5-8,68,167,South Carolina,USA,2026,1,10,30,105,59,41,0.1,0.051,0.117,0.163,0.48,0.187,2026,10,Regular Season,Totals
+1642796,Rayah Marshall,1611661323,CON,22,6-4,76,NA,Southern California,USA,2025,2,25,1,0,1,0,-143.3,0.143,0,0.4,0,0,2026,10,Regular Season,Totals
+204296,Rebecca Allen,1611661313,NYL,33,6-2,74,162,None,Australia,Undrafted,Undrafted,Undrafted,19,90,40,13,-1.8,0.043,0.089,0.123,0.53,0.055,2026,10,Regular Season,Totals
+203822,Rebekah Gardner,1611661313,NYL,36,6-1,73,130,UCLA,USA,Undrafted,Undrafted,Undrafted,32,166,81,40,1.8,0.068,0.093,0.143,0.568,0.131,2026,10,Regular Season,Totals
+1631009,Rhyne Howard,1611661330,ATL,26,6-2,74,175,Kentucky,USA,2022,1,1,31,540,119,112,4.9,0.021,0.102,0.194,0.563,0.171,2026,10,Regular Season,Totals
+1642288,Rickea Jackson,1611661329,CHI,25,6-2,74,175,Tennessee,USA,2024,1,4,4,72,19,8,-7.2,0.031,0.111,0.284,0.517,0.143,2026,10,Regular Season,Totals
+1643450,Rori Harmon,1611661322,WAS,23,5-6,66,146,Texas,USA,2026,3,34,10,10,8,11,-10,0,0.114,0.152,0.425,0.297,2026,10,Regular Season,Totals
+1629477,Sabrina Ionescu,1611661313,NYL,28,5-11,71,165,Oregon,USA,2020,1,1,22,348,88,100,-1.5,0.028,0.11,0.228,0.567,0.239,2026,10,Regular Season,Totals
+1628244,Sami Whitcomb,1611661317,PHX,38,5-10,70,149,Washington,Australia,Undrafted,Undrafted,Undrafted,12,51,21,20,-8.6,0.017,0.108,0.149,0.475,0.168,2026,10,Regular Season,Totals
+1642790,Sania Feagin,1611661327,PDX,23,6-3,75,NA,South Carolina,USA,2025,2,21,3,0,1,2,-30.8,0,0.091,0.032,0,0.25,2026,10,Regular Season,Totals
+1642809,Saniya Rivers,1611661323,CON,23,6-1,73,159,North Carolina State,USA,2025,1,8,27,182,59,85,-12.5,0.016,0.087,0.187,0.402,0.23,2026,10,Regular Season,Totals
+1642782,Sarah Ashlee Barker,1611661327,PDX,24,6-0,72,173,Alabama,USA,2025,1,9,26,278,117,62,-4.4,0.035,0.152,0.188,0.603,0.168,2026,10,Regular Season,Totals
+1630149,Satou Sabally,1611661313,NYL,28,6-4,76,175,Oregon,Germany,2020,1,2,13,135,36,25,4.9,0.024,0.128,0.248,0.609,0.198,2026,10,Regular Season,Totals
+1643458,Saylor Poffenbarger,1611661329,CHI,23,6-2,74,189,Maryland,NA,Undrafted,Undrafted,Undrafted,5,0,6,1,-7.1,0.038,0.25,0.065,0,0.059,2026,10,Regular Season,Totals
+1643436,Serah Williams,1611661327,PDX,22,6-4,76,185,Connecticut,Canada,2026,3,33,29,127,71,16,-3.1,0.076,0.146,0.16,0.598,0.072,2026,10,Regular Season,Totals
+1631022,Shakira Austin,1611661322,WAS,26,6-5,77,200,Mississippi,USA,2022,1,3,31,506,297,81,1.3,0.068,0.242,0.252,0.549,0.171,2026,10,Regular Season,Totals
+1628278,Shatori Walker-Kimbrough,1611661330,ATL,31,5-9,69,140,Maryland,USA,2017,1,6,8,6,2,2,-33,0,0.125,0.152,0.51,0.182,2026,10,Regular Season,Totals
+1643470,Shay Ciezki,1611661317,PHX,22,5-7,67,NA,Indiana,USA,Undrafted,Undrafted,Undrafted,2,3,1,1,93.6,0,0.1,0.08,0.75,0.143,2026,10,Regular Season,Totals
+1631021,Sika Kone,1611661330,ATL,24,6-3,75,180,None,Mali,2022,3,29,27,48,30,6,0.4,0.092,0.131,0.189,0.418,0.065,2026,10,Regular Season,Totals
+203400,Skylar Diggins,1611661329,CHI,36,5-9,69,140,Notre Dame,USA,2013,1,3,19,269,60,93,-7,0.022,0.083,0.223,0.515,0.289,2026,10,Regular Season,Totals
+1642785,Sonia Citron,1611661322,WAS,22,6-1,73,175,Notre Dame,USA,2025,1,3,29,497,112,109,1.2,0.026,0.089,0.211,0.611,0.201,2026,10,Regular Season,Totals
+1629482,Sophie Cunningham,1611661325,IND,29,6-1,73,156,Missouri,USA,2019,2,13,32,287,73,40,7.2,0.012,0.087,0.133,0.689,0.078,2026,10,Regular Season,Totals
+203828,Stefanie Dolson,1611661328,SEA,34,6-5,77,235,Connecticut,USA,2014,1,6,35,126,84,40,-8.4,0.04,0.105,0.102,0.623,0.118,2026,10,Regular Season,Totals
+203855,Stephanie Talbot,1611661319,LVA,32,6-2,74,192,None,Australia,2014,3,33,34,114,87,36,-2,0.053,0.098,0.105,0.502,0.088,2026,10,Regular Season,Totals
+1630134,Sug Sutton,1611661321,DAL,27,5-8,68,140,Texas-Austin,USA,2020,3,36,19,71,17,44,-10.1,0.009,0.075,0.17,0.52,0.319,2026,10,Regular Season,Totals
+1642321,Sydney Taylor,1611661329,CHI,25,5-9,69,NA,Louisville,USA,Undrafted,Undrafted,Undrafted,28,412,44,47,5.1,0.018,0.057,0.277,0.586,0.145,2026,10,Regular Season,Totals
+1643444,Ta'Niya Latson,1611661319,LVA,22,5-8,68,NA,South Carolina,USA,2026,2,20,14,47,15,7,-16.7,0.046,0.122,0.221,0.635,0.156,2026,10,Regular Season,Totals
+1643473,Taina Mair,1611661328,SEA,22,5-9,69,NA,Duke,USA,2026,1,14,5,7,2,3,-44.4,0.043,0.063,0.234,0.394,0.375,2026,10,Regular Season,Totals
+1642814,Taylor Thierry,1611661328,SEA,23,6-1,73,NA,Ohio State,USA,2025,3,36,10,13,14,3,-1.7,0.129,0.074,0.088,0.547,0.097,2026,10,Regular Season,Totals
+1642804,Te-Hina Paopao,1611661330,ATL,23,5-9,69,NA,South Carolina,NA,2025,2,18,24,93,22,38,-9,0.009,0.067,0.152,0.482,0.211,2026,10,Regular Season,Totals
+1629479,Teaira McCowan,1611661324,MIN,29,6-8,80,239,Mississippi State,USA,2019,1,3,10,14,24,3,30.1,0.075,0.253,0.135,0.429,0.059,2026,10,Regular Season,Totals
+1643506,Teja Oblak,1611661327,PDX,35,5-8,68,149,None,Slovenia,Undrafted,Undrafted,Undrafted,25,154,41,75,-7.1,0.044,0.083,0.262,0.546,0.401,2026,10,Regular Season,Totals
+1627701,Temi Fagbenle,1611661332,TOR,33,6-5,77,180,Harvard,United Kingdom,2016,3,35,16,74,53,16,-12.2,0.074,0.139,0.149,0.52,0.105,2026,10,Regular Season,Totals
+1643457,Teonni Key,1611661332,TOR,23,6-4,76,170,Kentucky,USA,2026,2,22,29,45,43,10,-14.4,0.081,0.1,0.111,0.461,0.069,2026,10,Regular Season,Totals
+203026,Tiffany Hayes,1611661331,GSV,36,5-10,70,155,Connecticut,USA,2012,2,14,31,259,50,77,9,0.022,0.084,0.218,0.588,0.275,2026,10,Regular Season,Totals
+1643647,Tima Pouye,1611661332,TOR,27,5-10,70,NA,None,France,Undrafted,Undrafted,Undrafted,19,60,16,22,-12.8,0.034,0.06,0.181,0.477,0.198,2026,10,Regular Season,Totals
+1643439,Tonie Morgan,1611661320,LAS,22,NA,NA,NA,Kentucky,USA,2026,3,32,1,3,1,1,7.1,0.111,0,0.235,0.75,0.25,2026,10,Regular Season,Totals
+1630112,Tyasha Harris,1611661325,IND,28,5-10,70,164,South Carolina,USA,2020,1,7,28,115,30,61,11.8,0.009,0.068,0.137,0.53,0.218,2026,10,Regular Season,Totals
+204468,Valeriane Ayayi,1611661317,PHX,32,6-1,73,NA,None,France,Undrafted,Undrafted,Undrafted,29,193,82,36,-3.8,0.041,0.13,0.179,0.588,0.124,2026,10,Regular Season,Totals
+1631007,Veronica Burton,1611661331,GSV,26,5-9,69,155,Northwestern,USA,2022,1,7,33,407,115,183,12,0.038,0.086,0.193,0.563,0.333,2026,10,Regular Season,Totals
+1641660,Zia Cooke,1611661328,SEA,25,5-9,69,163,South Carolina,USA,2023,1,10,35,262,60,31,-5.3,0.032,0.08,0.256,0.48,0.113,2026,10,Regular Season,Totals
