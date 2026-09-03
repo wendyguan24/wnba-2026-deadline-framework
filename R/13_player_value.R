@@ -23,8 +23,11 @@
 #     is a scope statement, not a footnote.
 #   - It is a half-season rate. Published as tiers with a directional caveat, never
 #     a defensible #7-vs-#12 ordering. Eligibility floors keep tiny samples out.
-#   - "Value over replacement" here is in Game-Score points, NOT wins. No wins
-#     conversion is claimed.
+#   - The per-player prod_score is an ORDINAL box-score production index in
+#     Game-Score points above a replacement baseline. It is NOT a
+#     value-over-replacement or wins-above-replacement statistic: no wins
+#     conversion is claimed, and only the coarse production TIER is published,
+#     never the prod_score number itself.
 #
 # Method:
 #   1. Per-player box aggregates over the half-season (exclude personId 0 / team
@@ -44,7 +47,8 @@
 #   6. Replacement = minutes-weighted mean GmSc/40 of BELOW-eligibility players
 #      (freely-available-talent analogue), NOT a percentile of the rotation pool.
 #      20th-percentile-of-eligible kept as a printed sensitivity only.
-#   7. VOR = (GmSc/40 - replacement_rate) * (minutes / 40).
+#   7. prod_score = (GmSc/40 - replacement_rate) * (minutes / 40) -- an ordinal
+#      box-score production index in Game-Score points, NOT a wins metric.
 #   8. Production tiers = quartiles of GmSc/40 among eligible players.
 #   9. Split-half (odd/even team-games) reliability diagnostic on GmSc/40, printed;
 #      formal integration into R/10_framework_evaluation.R is a follow-up.
@@ -273,7 +277,7 @@ repl_sens_20 <- tab %>% filter(eligible) %>% pull(gs_rate) %>%
 
 tab <- tab %>%
   mutate(replacement_rate = replacement_rate,
-         vor = (gs_rate - replacement_rate) * exposure_40)
+         prod_score = (gs_rate - replacement_rate) * exposure_40)
 
 # production tiers among eligible players (quartiles of rate); coarse by design
 elig_rates <- tab %>% filter(eligible) %>% pull(gs_rate)
@@ -358,8 +362,8 @@ out <- tab %>%
             game_score = round(game_score, 1),
             gs_rate = round(gs_rate, 3), rate_unit,
             replacement_rate = round(replacement_rate, 3),
-            vor = round(vor, 2), eligible, production_tier) %>%
-  arrange(desc(vor))
+            prod_score = round(prod_score, 2), eligible, production_tier) %>%
+  arrange(desc(prod_score))
 
 write_csv(out, proj_path("output", "player_value.csv"))
 
@@ -377,6 +381,6 @@ cat("split-half reliability of GmSc/40 per-40 rate (eligible, assists included):
 cat("tier counts:\n"); print(table(out$production_tier))
 cat("\n=== top 15 eligible by production (GmSc/40); tiers are the published unit ===\n")
 out %>% filter(eligible) %>% slice_head(n = 15) %>%
-  select(playerName, team, games, minutes, gs_rate, vor, production_tier) %>%
+  select(playerName, team, games, minutes, gs_rate, prod_score, production_tier) %>%
   as.data.frame() %>% print(row.names = FALSE)
 cat("\nWrote output/player_value.csv (reproducibility exhibit; publish tiers, not the leaderboard).\n")

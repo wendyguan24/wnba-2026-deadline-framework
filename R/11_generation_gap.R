@@ -91,7 +91,7 @@
 #            area, teamTricode, gameId),
 #          data/processed/team_generation_making.rds (team, fga, poss_count,
 #            shot_generation_per100, shot_making_per100 -- the official
-#            generation/making percentile source and the volume-component
+#            generation/making rank source and the volume-component
 #            basis, kept consistent with the rest of the framework),
 #          data/processed/team_blups.rds (metric, team, adjusted_value --
 #            identity BLUPs for the identity-driven z-score check),
@@ -502,7 +502,11 @@ buyer_branch_text <- function(generation_pctile, making_pctile, making_trajector
 #' @return character, the bubble fit-read text
 bubble_branch_text <- function(making_trajectory, making_interval_spans_zero) {
   traj_caveat <- if (isTRUE(making_interval_spans_zero)) " (trajectory directional)" else ""
+  # A directional lean is only asserted when the interval does NOT span zero;
+  # a zero-spanning trend is indistinguishable from flat and defaults to "hold"
+  # (accepted gm fix, 2026-07-26, matching R/08_deadline_read.R's bubble branch).
   verb <- case_when(
+    isTRUE(making_interval_spans_zero) ~ "hold",
     identical(making_trajectory, "improving") ~ "lean buy",
     identical(making_trajectory, "declining") ~ "lean hold or sell",
     TRUE ~ "hold"
@@ -591,8 +595,9 @@ build_generation_gap <- function(pbp_events, team_generation_making, team_blups,
 
   # generation_pctile and making_pctile are computed HERE, in R/11, via
   # percent_rank of shot_generation_per100 / shot_making_per100 (both from
-  # 07_expected_points.R). generation_pctile is the official per-100-
-  # possessions generation standing, carried for the fit_read call;
+  # 07_expected_points.R), and kept as the internal per-100-possessions
+  # generation/making standing carried for the fit_read branch thresholds
+  # (the DISPLAYED unit is league rank of 15, added alongside; see below);
   # total_gap (volume_gap + mix_gap_total) is this script's zone-approximated
   # version of the same quantity and is asserted to reconcile with it (see
   # decompose_team_generation_gap()). making_pctile is shown beside
@@ -600,12 +605,19 @@ build_generation_gap <- function(pbp_events, team_generation_making, team_blups,
   # also used directly in fit_read's paper-tiger check (making_pctile >= 67),
   # not only as descriptive context; the offense-only decomposition above it
   # is unaffected.
+  # generation_pctile / making_pctile stay as the internal signal the fit_read
+  # branch thresholds key on (<= 33 bottom tertile, >= 67 top tertile). The
+  # DISPLAYED team-level unit is league rank of 15 (1 = best), not a percentile,
+  # since a percentile across 15 teams is false precision; rank and the tertile
+  # thresholds agree by construction (rank 1-5 <-> pctile >= 67, 11-15 <-> <= 33).
   pctile_table <- team_generation_making %>%
     mutate(
       generation_pctile = round(percent_rank(shot_generation_per100) * 100),
-      making_pctile = round(percent_rank(shot_making_per100) * 100)
+      making_pctile = round(percent_rank(shot_making_per100) * 100),
+      generation_rank = rank(-shot_generation_per100, ties.method = "min"),
+      making_rank = rank(-shot_making_per100, ties.method = "min")
     ) %>%
-    select(team, generation_pctile, making_pctile)
+    select(team, generation_pctile, making_pctile, generation_rank, making_rank)
 
   full_table <- zone_table %>%
     left_join(team_level %>% select(team, volume_gap, mix_gap_total, total_gap, primary_driver),
@@ -619,7 +631,7 @@ build_generation_gap <- function(pbp_events, team_generation_making, team_blups,
   gap_table_out <- full_table %>%
     left_join(fit_reads, by = "team") %>%
     select(
-      team, generation_pctile, making_pctile, window, volume_gap, mix_gap_total,
+      team, generation_rank, making_rank, window, volume_gap, mix_gap_total,
       total_gap, primary_driver, fit_read, zone, mix_contribution, type, identity_driven
     ) %>%
     arrange(team, zone)
@@ -649,9 +661,9 @@ render_generation_gap_md <- function(gap_table, fit_reads) {
       "quality), the second attributed by zone with a centered-pps",
       "contribution. The two components sum to the team's total generation",
       "gap, which reconciles with the team's shot_generation_per100",
-      "standing (generation and making percentile shown per team, computed",
-      "in R/11 via percent_rank of shot_generation_per100 /",
-      "shot_making_per100, both from 07_expected_points.R). primary_driver",
+      "standing (generation and making shown per team as league rank of 15,",
+      "1 = best, from shot_generation_per100 / shot_making_per100, both from",
+      "07_expected_points.R). primary_driver",
       "names which component (volume, mix, or both when each individually",
       "exceeds 0.75 per 100 possessions) accounts for the gap."
     ),
@@ -681,8 +693,8 @@ render_generation_gap_md <- function(gap_table, fit_reads) {
 
   team_blocks <- map(team_order, function(tm) {
     team_rows <- gap_table %>% filter(team == tm)
-    gen_pctile <- unique(team_rows$generation_pctile)
-    making_pctile <- unique(team_rows$making_pctile)
+    gen_rank <- unique(team_rows$generation_rank)
+    making_rank <- unique(team_rows$making_rank)
     window <- unique(team_rows$window)
     primary_driver <- unique(team_rows$primary_driver)
     volume_gap <- unique(team_rows$volume_gap)
@@ -691,7 +703,7 @@ render_generation_gap_md <- function(gap_table, fit_reads) {
     fit_read <- fit_reads %>% filter(team == tm) %>% pull(fit_read)
 
     gap_summary_lines <- c(
-      paste0("- Generation percentile: ", gen_pctile, " (making percentile: ", making_pctile, ")"),
+      paste0("- Generation rank: ", gen_rank, " of 15 (making rank: ", making_rank, " of 15; 1 = best)"),
       paste0("- Window: ", window),
       paste0("- Primary driver: ", primary_driver),
       paste0("- Volume gap (per 100 poss): ", sprintf("%.2f", volume_gap)),

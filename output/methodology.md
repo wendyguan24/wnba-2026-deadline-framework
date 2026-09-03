@@ -274,11 +274,15 @@ automatic acquire. Bottom-tertile generation otherwise reads "gap-fill," naming 
 possession creation (when `primary_driver` is volume or both) or the top non-identity
 negative mix zone; top-tertile generation reads "amplify" (extend the edge, add on-style
 depth); mid-tertile reads "adjust" (offense is not the primary lever). A bubble team no
-longer wraps the buyer-branch read: it gets a trajectory-resolved "judgment" call (lean buy
-if making is improving, lean hold-or-sell if declining, otherwise hold) that names the
-contested window and the late-August World Cup break, matching R/08's bubble wording
-exactly. `making_pctile` is shown beside `generation_pctile` in the output, and is now also
-a direct input to the paper-tiger check (not only descriptive context), and a "secondary
+longer wraps the buyer-branch read: it gets a trajectory-resolved "judgment" call that names
+the contested window and the late-August World Cup break, matching R/08's bubble wording
+exactly. It asserts a directional lean (lean buy if making is improving, lean hold-or-sell
+if declining) only when the making-trajectory interval does not span zero; when the interval
+spans zero the direction is indistinguishable from flat, so it defaults to hold. The
+team-level generation and making standings are DISPLAYED as league rank of 15 (1 = best),
+not as a percentile (a percentile across 15 teams is false precision); `generation_pctile` /
+`making_pctile` are retained internally as the fit_read branch thresholds and as the
+paper-tiger check input (not only descriptive context), and a "secondary
 tune" line always names the team's top non-identity negative mix zone (even for
 amplify/volume-driven teams), so a real fixable deficit is not hidden just because it is
 not the primary driver. The identity-driven flag itself is unchanged and still shown on

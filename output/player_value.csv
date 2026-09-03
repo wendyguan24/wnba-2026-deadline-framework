@@ -1,4 +1,4 @@
-personId,playerName,team,games,minutes,minutes_method,FGA,poss_used,game_score,gs_rate,rate_unit,replacement_rate,vor,eligible,production_tier
+personId,playerName,team,games,minutes,minutes_method,FGA,poss_used,game_score,gs_rate,rate_unit,replacement_rate,prod_score,eligible,production_tier
 1628932,Wilson,LVA,22,696.6,reconstructed,390,519.9,476.9,27.385,per40min,9.207,316.56,TRUE,top
 1642784,Bueckers,DAL,23,769.8,reconstructed,353,434.5,386.6,20.09,per40min,9.207,209.42,TRUE,top
 1629491,Shepard,DAL,24,788.5,reconstructed,246,331.2,388.8,19.724,per40min,9.207,207.3,TRUE,top

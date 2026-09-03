@@ -690,6 +690,166 @@ blockers the earlier gates missed, plus warnings; Wendy ACCEPTED all and they we
   gates supplement rather than replace human spec-tracing.
 A gm-agent re-gate on the corrected identity_summary column is the remaining follow-up.
 
+**Full three-gate review run (2026-07-26) -- PROPOSED, awaiting Wendy's decision.** Ran all
+three review agents on the current output at Wendy's request: analytics-reviewer on the full
+findings draft, gm-agent on the deadline-read table + framework sections, coach-agent on the
+fit reads + case-study template (the Synergy case studies are still stubs, so coach reviewed
+`output/fit_targets.md` / `deadline_read.md` / `analysis/case_study_template.Rmd` and was told
+to flag the case-study gap rather than penalize the intentional stub). Every framework number
+traced clean (analytics-reviewer reconciled ICCs, trajectory trends, gen/making percentiles,
+split-half, stratification, garbage-time, H2 intervals to source CSVs); all guardrails passed
+(vocabulary, Synergy quarantine, tiers-not-dollars, H1/H2/H3/H-null verbatim, language hygiene).
+The material findings cluster on the findings draft being stale relative to the pipeline, and
+on two action-shaped columns that disagree. Consolidated triage, proposals only:
+
+- **TIER A (>=2 gates independently, high-confidence, pure edits):**
+  - A1 -- Deadline-read action columns disagree; "Lever" reads like the action but is diagnosis
+    (gm #1 + analytics-reviewer #2). PROPOSE ACCEPT: rename Lever -> "Offense diagnosis," make
+    Recommendation the leftmost action column, delete the now-false §5 buyer-seller limitation
+    bullet (R/12 encodes exactly that posture now).
+  - A2 -- Doubled `movability: movability: hand-curate` token + `[target]` tag on uncurated
+    rows (Leite/Johnson/Morrow) (gm #3 + coach). PROPOSE ACCEPT: fix token, drop to `[context]`
+    until curated.
+  - A3 -- "Affordability PENDING" header contradicts populated affordability rows (gm #4 +
+    coach). PROPOSE ACCEPT: delete the PENDING line (bands are filled 10/11).
+  - A4 -- BLUP/`shot_making_residual`/random-slope machinery leaking into reader-facing table
+    footers (coach #7 + gm). PROPOSE ACCEPT: restate as "finishing relative to shot quality" /
+    "directional trend," move the fallback sentence to an appendix, keep the caveat.
+- **TIER B (single-gate, concrete correctness):**
+  - B1 -- Provenance line unrunnable: claims R/01-10 but R/08 needs standing.csv from R/12
+    (analytics-reviewer #1). PROPOSE ACCEPT: state real run set/order (...07, 08, 11, 12, with
+    12 before 08).
+  - B2 -- TOR "25 games" -> 24 (analytics-reviewer #3; 1,630 shots correct, team-games sum to
+    364 only with TOR at 24). PROPOSE ACCEPT.
+  - B3 -- Below-floor over-read as a deadline mandate; CBA remedy is a season payout, not a
+    forced trade (gm #2). PROPOSE ACCEPT: downgrade to "soft nudge," which also clears the PDX
+    "must add vs sell" contradiction.
+  - B4 -- TOR `lean buy` on a zero-spanning trajectory while ATL (also zero-spanning) gets no
+    list (gm #5). PROPOSE ACCEPT: demote TOR to "reassess after the break."
+  - B5 -- `player_value.csv` emits a per-40 value-vs-replacement (9.207) reading like the VOR
+    layer methodology says does not exist (analytics-reviewer #5). PROPOSE ACCEPT: relabel as an
+    ordinal box-score production tier; confirm no such figure reaches findings.
+- **TIER C (coach-usability, accept-after-fix, larger than a token edit):**
+  - C1 -- No position/size column anywhere (coach; single biggest coach gap -- cannot slot a
+    lineup). PROPOSE ACCEPT if time; else DEFER with an explicit "offense-only, no position"
+    caveat on each list.
+  - C2 -- Fit reads stop at shot diet, not fit; label by role (creator/movement/secondary) not
+    bucket; add on-ball/off-ball + duplication clause (coach). PROPOSE ACCEPT (prose).
+  - C3 -- No defensive read for buyer teams (DAL/MIN/IND) with no case study (coach). PROPOSE
+    ACCEPT the minimal version: one "offense-only, get your own defensive read" line per list.
+  - C4 -- Ogwumike is lead `[target]` for DAL+MIN+TOR at once (gm #7 + coach). PROPOSE ACCEPT:
+    cross-reference the thin-market note so no one treats one player as three adds.
+- **TIER D (defer post-deadline):** emit `window_rank` into standing.csv (or header note) so
+  rank-vs-window stops looking contradictory (analytics-reviewer #4); §2 inline directional
+  caveat cross-ref (analytics-reviewer #6); expansion-draft seller-timing lever; per-team
+  roster-spot counts; broader "trajectory non-informative this half" note in §3.
+- **MANDATORY pre-publish (unchanged, both gates):** re-pull cap tiers within 48h -- IND is
+  tier-fragile at $6,654 from capped, one minimum move flips its conditioning; keep the $5.95M
+  floor figure (CBA structural constant, within tiers-not-dollars) on the re-verify list.
+- **Universally accepted / forwardable (no action):** the ATL hold (all three gates); the
+  cap-feasibility conditioning of `acquire` (CBA-current -- "the part I'd trust at the table");
+  the generation-vs-making split; the full reproducible numeric core.
+
+**APPLIED 2026-07-28 (Wendy's decision: "start on tier a and b"). Tier A + Tier B
+accepted and implemented; Tier C + Tier D remain open.** Changes, all reproduced
+through the scripts (full testthat suite green, 60 pass / 0 fail; outputs
+regenerated):
+- A1 (R/08 + findings §5): the deadline-read table's action-verb "Lever" column is
+  renamed "Offense diagnosis" and shows descriptive phrases (generation-short /
+  balanced / generation-rich, new classify_diagnosis()); the Recommendation column
+  is moved to be the leading action column and is the only action column. The
+  acquire/adjust/hold machinery still runs internally (feeds cap conditioning and
+  the recommendation), just no longer displayed as an action. findings §5's stale
+  "the lever encodes no buyer-or-seller posture" limitation bullet is deleted
+  (R/12 window now supplies that posture) and replaced with the window-is-a-proxy
+  limitation; a diagnosis-vs-window reconciliation paragraph added.
+- A2 (R/14): fixed the doubled `movability: movability: hand-curate` token
+  (movability_disp drops the redundant prefix), and a blank/uncurated movability
+  now reads `context`, never `target`, until curated (actionable no longer treats
+  NA movability as gettable). Leite/Morrow/Johnson/Barker correctly drop to context.
+- A3 (R/14): deleted the stale "Affordability is PENDING" header line (bands are
+  curated 10/11); replaced with an accurate "shown where a band is curated" note.
+- A4 (R/08): removed BLUP / shot_making_residual / random-slope machinery from the
+  reader-facing deadline_read.md intro and trajectory footnote; restated as
+  "finishing relative to shot quality" and "directional trend," modeling detail
+  pointed to methodology.md.
+- B1 (findings): provenance line corrected to the real run order (01-09, then 11
+  and 12, then 08; 13 then 14) -- the old "R/01-R/10" was unrunnable (R/08 reads
+  R/12's standing.csv).
+- B2 (findings): Toronto "25 games" corrected to 24 (10-14 in standing.csv;
+  team-games sum to 364 only at 24). 1,630 shots was already correct.
+- B3 (R/08 + findings §5): below-floor downgraded from "pushed to add salary" to a
+  soft nudge (a below-floor team can satisfy the floor by paying the shortfall out
+  over the season; it is not a deadline-forcing mandate). Resolves the PDX
+  "below-floor must add" vs "seller: sell" contradiction.
+- B4 (R/08 + R/11, both bubble branches): a bubble team no longer asserts a
+  directional lean (lean buy / lean hold or sell) when the making-trajectory
+  interval spans zero; it defaults to "hold." TOR drops from `lean buy` to
+  `judgment (hold)` and loses its fit_targets list (now hold-judgment, no list),
+  matching ATL/NYL. WAS keeps its lean (its interval does not span zero). R/08 and
+  R/11 stay verb-for-verb consistent.
+- B5 (R/13 + R/14): the player-value exhibit's `vor` column renamed `prod_score`
+  and reframed as an ordinal box-score production index in Game-Score points, NOT a
+  value-over-replacement / wins metric; production_tier stays the published unit.
+  R/14 updated to consume prod_score. The number does not enter findings.
+
+**APPLIED 2026-07-28 (Wendy's decision: "fix tier c and d"). Tier C + Tier D
+accepted and implemented; outputs regenerated, full testthat suite green (60/0).**
+- C1 (R/14 + candidate_contracts_2026.csv): added a hand-curated `position` column
+  to the candidate reference file (guard/wing/forward/center), the same class as
+  contract_band -- it is NOT in the open PBP, so it is curated + attributed, blank
+  until filled from a roster source (renders `pos: hand-curate`). The reproducible
+  interior-vs-perimeter signal is the rim/mid/three profile already on each line;
+  the doc says to read profile and position together (a stretch big shoots threes).
+  Position VALUES still need Wendy's roster-source curation, exactly as the bands
+  did before she supplied them.
+- C2 (R/14): added a reproducible `creation` profile per candidate (on-ball creator
+  / off-ball finisher / combo) from the assisted share of her made field goals (a
+  shot-creation profile, descriptor-derived, never a play-type claim; thresholds
+  0.40/0.65 stated). It qualifies the advantage line so Plum (on-ball creator) and
+  Taylor/Hiedeman (movement/combo) no longer read as the same "perimeter shooting."
+  Duplication vs incumbents is stated as the coach's own read, not modeled.
+- C3 (R/14): every buy-side list now carries an explicit offense-only defensive
+  disclaimer (no matchup/tracking data in the open PBP; get your own defensive read).
+- C4 (R/14 + findings §5): a candidate who is an actionable `target` on more than
+  one list is flagged inline ("SHARED TARGET (targeted by DAL, MIN): one player,
+  not independent adds"); findings §5 names the Ogwumike DAL+MIN case (TOR dropped
+  off after the B4 demotion, so the shared set is DAL+MIN, not the pre-fix
+  DAL/MIN/TOR).
+- D1 (R/12): standing.csv now emits `window_rank` (the standing_score rank that
+  actually assigns the window) next to `window`, so it no longer looks broken
+  against the win_pct `rank` column (they are different orderings by design).
+- D2 (findings §2): added the inline directional caveat cross-ref (shot making
+  split-half only 0.56, Section 6) to the ATL "finishing result" / LVA
+  "unsustainable" single-season claims.
+- D3 (findings §5): added the expansion-draft seller-timing limitation (a seller
+  may deal a non-core player before the expansion draft; the framework uses it only
+  to mark availability, does not price its effect on the ask).
+- D4 (findings §5): the roster-spot / open-spot assumption is stated, and the
+  offense-only fit-read limitation is now an explicit bullet.
+- D5 (findings §3): added the plain statement that no team's finishing trajectory
+  this half clears "clearly improving," so a trajectory arrow cannot justify a buy
+  and bubble teams with zero-spanning intervals default to hold (the TOR case).
+
+Only the MANDATORY pre-publish cap re-pull remains open from this triage: re-verify
+the cap tiers within 48h of the deadline (IND is tier-fragile at $6,654 from
+capped, one minimum move flips its conditioning) and keep the $5.95M floor figure
+on the re-verify list. Position VALUES in the candidate reference file also await
+Wendy's roster-source curation (the column and rendering are in place).
+
+**Team-level metric unit: percentile -> league rank (2026-07-28, Wendy's request).**
+On a 15-team basis a percentile ("7th percentile") is false precision, so every
+team-level generation/making standing is now DISPLAYED as league rank of 15
+(1 = best): deadline_read.md "Gen rank"/"Making rank" columns and footnote (R/08),
+generation_gap.md per-team "Generation rank: N of 15" line (R/11), and findings.md
+prose (ATL generation 1st of 15 / making 15th of 15, LVA 14th / 1st, GSV 5th / 8th,
+IND making 3rd on 10th-of-15 generation). The internal tier logic is unchanged:
+R/08 still uses ntile(x, 3) tiers and R/11 still keys its fit_read branches on the
+generation_pctile/making_pctile thresholds (kept internal), and rank agrees with
+the tertiles by construction (rank 1-5 = top tertile, 6-10 mid, 11-15 bottom). The
+player-level screen (R/13) keeps production tiers across ~100 players -- percentiles
+there are not the issue; this change is team-level only. Full testthat green (60/0).
+
 ## Data download (session 2, 2026-07-18)
 
 `R/01_download.R` run against commit `773ce292bb2cd9bc6ec98d70de95176607ccbaeb`.
@@ -922,3 +1082,81 @@ built layer (Fable 5). Triage decisions (Wendy):
   the capped-min cap-mechanic citation. Full testthat suite green after all fixes.
 - STILL pending for publish (unchanged): hand-curate contract bands + movability (source +
   as_of_date), Synergy case studies + coach-agent gate, cap/CBA primary-source verification.
+
+**R/14 movability + advantage pass (2026-07-25, post-merge follow-up).** Wendy supplied
+contract data from the Her Hoop Stats WNBA Salary Cap Database (as_of 2026-07-25), covering
+8 of 11 shortlisted candidates (Taylor, Gustafson, Johnson still need a second source).
+Three refinements built:
+- **Cored players are excluded, not just flagged.** movability now gates the POOL:
+  `core` / `untouchable` are dropped before ranking (a cored player cannot be approached),
+  and the shortlist backfills with the next on-style candidate. Plum (LAS, Core tag) drops
+  out; DAL/GSV/MIN/TOR reflow, and one new name (Barker) was auto-appended to the template
+  for curation. `keep` (long-term, not core) and `available` stay in, annotated.
+- **Advantage label** on every recommendation: production tier + primary shot bucket (e.g.
+  "top mid-range scoring", "upper rotation perimeter shooting") -- what the acquiring team
+  gains. New advantage / primary_bucket columns in fit_targets.csv.
+- **Expansion-draft logic in movability**: `available` means not core and not long-term, so
+  a team may deal her for value before the expansion draft rather than lose her for nothing;
+  documented in the md. Affordability is now LIVE where a band is filled (e.g. Copper's max
+  band reads "over-tier" for tight/capped teams; it is flagged, not yet dropped).
+- Template is now self-maintaining (append new backfilled candidates blank, preserve filled
+  rows). New test: cored/untouchable candidates never appear; every row carries an advantage.
+  Full suite green.
+- **HYBRID keep-and-flag (2026-07-25, Wendy's decision, planned Opus / executed Sonnet per
+  /planning-executing).** Replaced the drop-and-backfill of cored players with a hybrid:
+  nothing is excluded from the pool; every best on-style fit is KEPT and flagged, and each
+  list is guaranteed to carry at least N_GETTABLE=3 actionable rows (gettable + affordable),
+  extending past unavailable/over-tier names (cap MAX_LIST=8) rather than dropping them.
+  Each row now carries a `status` of `target` (movability available/keep AND band affordable
+  or unknown) or `context` (core/untouchable, or over-tier band). Rationale: dropping gave a
+  tidy list but hid the reasoning a GM wants to make; the hybrid shows "your best on-style fit
+  is X but she is cored/over-tier" AND the realistic targets. Plum (core, max) now reappears
+  in DAL/GSV/MIN/TOR marked `context`, each list keeping 3-4 `target` rows. Contract bands are
+  now filled for 10 of 11 (Taylor/Gustafson/Johnson from Spotrac 2026-07-25; only the
+  backfilled Barker is blank). STILL pending: Barker's band, the provisional movability review.
+
+## Aug 26-27 -- wehoop full-season analysis pipeline (scripts 15-24)
+
+**Context shift:** the trade deadline has passed. The CDN source is frozen at 182 games
+(midseason). The wehoop R package (sportsdataverse) gives access to the full season via
+ESPN and WNBA Stats API data. The framing shifts from "deadline lever" to "playoff
+readiness."
+
+- [x] R/15_wehoop_download.R -- bulk downloader for full-season data via wehoop (ESPN PBP,
+      box scores, rosters, schedule, standings, player core/stats; Stats API shots,
+      possessions, game logs, PBP V3, 14 leaguedash tables, team crosswalk)
+- [x] R/16_wehoop_live_api.R -- live API pulls: hustle stats, possession lineups with
+      5v5, shot zones, RAPM (user runs locally, requires internet + wehoop)
+- [x] output/data_source_comparison.txt -- 9-section column-level comparison of CDN vs
+      wehoop data (shot location, PBP, possessions, hustle/tracking, leaguedash cubes,
+      RAPM, additional data, CDN-unique, recommendation)
+- [x] R/17_wehoop_scaffold.R -- team crosswalk/ID resolution, data validation, manifest
+- [x] R/18_wehoop_standings.R -- full-season standings with contender/in/out tiers,
+      standing_score blend, midseason rank_change comparison
+- [x] R/19_wehoop_team_features.R -- team-game feature table from wehoop (pace, zone
+      shares, shot-creation profiles, rate stats, context shares)
+- [x] R/20_wehoop_advanced_team.R -- four factors, ratings, hustle profiles with z-scored
+      ranks, strength/weakness identification (new layer, no CDN equivalent)
+- [x] R/21_wehoop_player_value.R -- player value screen with Game Score, RAPM, hustle
+      tiers, box-vs-RAPM disagreement flagging (upgrades R/13)
+- [x] R/22_wehoop_expected_points.R -- stratified expected-points baseline from full-season
+      shots, generation/making decomposition (wehoop analogue of R/07)
+- [x] R/23_wehoop_models.R -- schedule-adjusted identity models + trajectory on full-season
+      wehoop features (same lme4 machinery as R/06, no garbage-time pass)
+- [x] R/24_wehoop_playoff_read.R -- full-season playoff-readiness synthesis with defense
+      profile and RAPM-informed depth (replaces deadline lever calls with readiness
+      classification: complete / one piece away / trending right / trending wrong /
+      in but vulnerable / out)
+
+Run order: 17 -> {18, 19, 20, 22} in any order -> 21 -> 23 -> 24
+(or strictly linear: 17, 18, 19, 20, 22, 21, 23, 24)
+
+**Next session should:**
+- User runs R/15_wehoop_download.R and R/16_wehoop_live_api.R locally to populate
+  data/wehoop/ with full-season CSVs
+- Run the pipeline (17 through 24) on the actual data and debug any column-name
+  mismatches or join issues against real wehoop output
+- Run analytics-reviewer on model outputs (script 23) and gm-agent on the playoff-read
+  table (script 24)
+- Consider follow-up scripts: lineup combination analysis (leaguedash_lineups_*.csv),
+  generation-gap decomposition (11_generation_gap analogue), graphics

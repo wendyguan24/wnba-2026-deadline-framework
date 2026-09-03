@@ -1,0 +1,16 @@
+team,wins,losses,win_pct,point_diff,rank,games_back_from_8th,playoff_position,generation_rank,making_rank,generation_tier,making_tier,trajectory,interval_spans_zero,trajectory_display,identity_summary,def_rating,def_rating_rank,defense_tier,depth_count,depth_label,diagnosis,readiness,flexibility_tier
+DAL,18,9,0.6666666666666666,109,4,-3.5,in,7,4,2,3,improving,TRUE,improving*,"high pullup rate, high mid-range rate",107.4,5,elite defense,0,no positive-RAPM,balanced,one piece away,tight
+GSV,19,8,0.7037037037037037,149,2,-4.5,contender,3,7,3,2,improving,TRUE,improving*,"low pace, low rim rate",101.4,1,elite defense,0,no positive-RAPM,generation-rich,one piece away,capped
+ATL,16,10,0.6153846153846154,106,6,-2,in,1,14,3,1,declining,TRUE,declining*,"high driving rate, high rim rate",105.6,4,elite defense,0,no positive-RAPM,generation-rich,trending wrong,tight
+NYL,15,12,0.5555555555555556,63,7,-0.5,in,9,5,2,3,declining,TRUE,declining*,"high corner-3 rate, high 3PA rate",108.1,9,average defense,0,no positive-RAPM,balanced,trending wrong,tight
+WAS,14,12,0.5384615384615384,-61,8,0,in,8,12,2,1,declining,TRUE,declining*,"high driving rate, low above-break-3 rate",103.2,2,elite defense,0,no positive-RAPM,balanced,trending wrong,room
+IND,17,10,0.6296296296296297,159,5,-2.5,contender,12,2,1,3,improving,FALSE,improving,"high pace, high above-break-3 rate",108,8,average defense,0,no positive-RAPM,generation-short,in but vulnerable,tight
+LVA,18,8,0.6923076923076923,121,3,-4,contender,11,1,1,3,improving,TRUE,improving*,"high pullup rate, low driving rate",107.8,6,average defense,0,no positive-RAPM,generation-short,in but vulnerable,capped
+MIN,22,6,0.7857142857142857,243,1,-7,contender,13,3,1,3,declining,TRUE,declining*,"high mid-range rate, low above-break-3 rate",103.2,2,elite defense,0,no positive-RAPM,generation-short,in but vulnerable,tight
+CHI,9,18,0.3333333333333333,-60,13,5.5,out,4,13,3,1,improving,TRUE,improving*,"high rim rate, high pace",108.3,10,average defense,0,no positive-RAPM,generation-rich,out,capped
+CON,7,20,0.25925925925925924,-191,14,7.5,out,10,15,2,1,improving,TRUE,improving*,"low 3PA rate, low corner-3 rate",107.9,7,average defense,0,no positive-RAPM,balanced,out,tight
+LAS,10,16,0.38461538461538464,-132,11,4,out,6,6,2,2,declining,TRUE,declining*,"high pace, low mid-range rate",112.8,14,weak defense,0,no positive-RAPM,balanced,out,tight
+PDX,11,16,0.4074074074074074,-142,9,3.5,out,5,8,3,2,improving,TRUE,improving*,"low pullup rate, low mid-range rate",112.6,13,weak defense,0,no positive-RAPM,generation-rich,out,room
+PHX,10,18,0.35714285714285715,-100,12,5,out,15,9,1,2,improving,TRUE,improving*,"high corner-3 rate, low rim rate",108.9,12,weak defense,0,no positive-RAPM,generation-short,out,tight
+SEA,6,23,0.20689655172413793,-149,15,9.5,out,14,11,1,1,improving,TRUE,improving*,"low corner-3 rate, high above-break-3 rate",108.8,11,weak defense,0,no positive-RAPM,generation-short,out,tight
+TOR,10,16,0.38461538461538464,-115,10,4,out,2,10,3,2,improving,TRUE,improving*,"high above-break-3 rate, high 3PA rate",115.5,15,weak defense,0,no positive-RAPM,generation-rich,out,tight
