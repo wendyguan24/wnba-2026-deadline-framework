@@ -119,7 +119,7 @@ add_rapm <- function(tab, rapm) {
     stop("add_rapm(): rapm.csv missing columns: ", paste(missing_cols, collapse = ", "))
   }
   rapm_small <- rapm %>%
-    transmute(player_id = .data[[id_col]], o_rapm, d_rapm, rapm,
+    transmute(player_id = as.character(.data[[id_col]]), o_rapm, d_rapm, rapm,
               rapm_poss = off_poss + def_poss)
 
   tab <- tab %>% left_join(rapm_small, by = "player_id")
@@ -154,7 +154,7 @@ add_hustle <- function(tab, hustle) {
   hustle_rates <- hustle %>%
     filter(gp > 0) %>%
     transmute(
-      player_id = .data[[id_col]],
+      player_id = as.character(.data[[id_col]]),
       contested_shots_pg = contested_shots / gp,
       deflections_pg = deflections / gp,
       loose_balls_pg = loose_balls_recovered / gp,
@@ -174,48 +174,43 @@ add_hustle <- function(tab, hustle) {
   tab %>% left_join(hustle_rates %>% select(-hustle_composite), by = "player_id")
 }
 
-#' Attach position from espn_player_core.csv, trying common column names
-#' for both the player id and the position field.
+#' Attach position from espn_player_core.csv. ESPN's athlete_id does not match
+#' the WNBA stats player_id, so the join is on a normalized player name
+#' (lowercased, punctuation stripped) rather than id. Unmatched players get
+#' position NA -- position is a descriptive field in the .md only and is not
+#' used in any downstream computation.
 add_position <- function(tab, espn_core) {
   if (is.null(espn_core)) return(tab %>% mutate(position = NA_character_))
-  id_col  <- first_present(espn_core, c("player_id", "athlete_id"))
-  pos_col <- first_present(espn_core, c("position", "athlete_position_name",
-                                         "position_name", "pos"))
-  if (is.na(id_col) || is.na(pos_col)) {
-    message("  WARN: espn_player_core.csv missing a recognizable id/position column, skipping position")
+  name_col <- first_present(espn_core, c("display_name", "full_name", "player_name"))
+  pos_col  <- first_present(espn_core, c("position_abbreviation", "position_name",
+                                          "position", "pos"))
+  if (is.na(name_col) || is.na(pos_col)) {
+    message("  WARN: espn_player_core.csv missing a recognizable name/position column, skipping position")
     return(tab %>% mutate(position = NA_character_))
   }
+  norm_name <- function(x) gsub("[^a-z]", "", tolower(x))
   core_small <- espn_core %>%
-    transmute(player_id = .data[[id_col]], position = .data[[pos_col]]) %>%
-    distinct(player_id, .keep_all = TRUE)
-  tab %>% left_join(core_small, by = "player_id")
+    transmute(.name_key = norm_name(.data[[name_col]]), position = .data[[pos_col]]) %>%
+    filter(!is.na(.name_key), .name_key != "") %>%
+    distinct(.name_key, .keep_all = TRUE)
+  tab %>%
+    mutate(.name_key = norm_name(player_name)) %>%
+    left_join(core_small, by = ".name_key") %>%
+    select(-.name_key)
 }
 
-#' Attach team tricode. Prefers espn_rosters.csv (current roster, catches
-#' in-season trades); falls back to team_id already on the base stats
-#' table, resolved via team_lookup.
+#' Attach team tricode. The leaguedash player table carries its own
+#' team_abbreviation, which is the reliable source. ESPN rosters key on ESPN
+#' athlete IDs, which do not match the WNBA stats player_id (two different ID
+#' systems, zero overlap), so they are not used. Falls back to
+#' team_id -> team_lookup if team_abbreviation is somehow absent.
 add_team <- function(tab, espn_rosters, team_lookup) {
-  lookup <- team_lookup %>% mutate(team_id = as.character(team_id)) %>%
-    select(team_id, tricode) %>% distinct()
-
-  if (!is.null(espn_rosters)) {
-    id_col   <- first_present(espn_rosters, c("player_id", "athlete_id"))
-    team_col <- first_present(espn_rosters, c("team_id", "team_abbreviation", "team", "tricode"))
-    if (!is.na(id_col) && !is.na(team_col)) {
-      roster_small <- espn_rosters %>%
-        transmute(player_id = .data[[id_col]], roster_team = .data[[team_col]]) %>%
-        distinct(player_id, .keep_all = TRUE)
-      tab <- tab %>% left_join(roster_small, by = "player_id")
-      # roster_team may already be a tricode, or a numeric team_id needing lookup
-      tab <- tab %>%
-        left_join(lookup, by = c("roster_team" = "team_id")) %>%
-        mutate(team = coalesce(tricode, as.character(roster_team))) %>%
-        select(-roster_team, -tricode)
-      return(tab)
-    }
-    message("  WARN: espn_rosters.csv missing a recognizable id/team column, falling back to leaguedash team_id")
+  if ("team_abbreviation" %in% names(tab)) {
+    return(tab %>% mutate(team = toupper(team_abbreviation)))
   }
 
+  lookup <- team_lookup %>% mutate(team_id = as.character(team_id)) %>%
+    select(team_id, tricode) %>% distinct()
   tab %>%
     mutate(team_id = as.character(team_id)) %>%
     left_join(lookup, by = "team_id") %>%

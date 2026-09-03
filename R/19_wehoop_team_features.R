@@ -133,22 +133,53 @@ compute_possession_features <- function(possessions) {
            tov_rate, live_ball_tov_rate, secondchance_share, transition_share)
 }
 
-#' Zone profile shares (RA / paint / mid / corner3 / ATB3) from
-#' live/shot_zones.csv, one row per team-game.
+#' Derive a zone label from x_legacy/y_legacy/shot_distance/shot_value, used
+#' when live/shot_zones.csv is not present (it needs the per-game live pulls
+#' from 16_wehoop_live_api.R, which are optional). Same boundaries as
+#' 22_wehoop_expected_points.R's derive_zone_from_xy(): corner 3 is
+#' abs(x) >= 220 & y <= 87.5, any other 3 is above-the-break, inside 4 ft is
+#' restricted area, inside 14 ft is non-RA paint, else mid-range. This is an
+#' approximation, not the Stats API's own zone classifier.
 #'
-#' @param shot_zones tibble, raw live/shot_zones.csv
+#' @return character vector of raw zone labels matching shot_zones.csv coding
+derive_zone_from_xy <- function(x_legacy, y_legacy, shot_distance, shot_value) {
+  case_when(
+    shot_value == 3 & abs(x_legacy) >= 220 & y_legacy <= 87.5 ~ "corner_3",
+    shot_value == 3 ~ "above_the_break_3",
+    shot_distance <= 4 ~ "restricted_area",
+    shot_distance <= 14 ~ "in_the_paint_non_ra",
+    TRUE ~ "mid_range"
+  )
+}
+
+#' Zone profile shares (RA / paint / mid / corner3 / ATB3), one row per
+#' team-game. Prefers live/shot_zones.csv when supplied; otherwise derives
+#' each shot's zone from stats_shots.csv coordinates.
+#'
+#' @param shots tibble, raw stats_shots.csv
+#' @param shot_zones tibble or NULL, raw live/shot_zones.csv
 #' @return tibble, one row per (game_id, team_id)
-compute_zone_profile <- function(shot_zones) {
-  shot_zones %>%
-    ids_as_character(c("game_id", "team_id")) %>%
+compute_zone_profile <- function(shots, shot_zones = NULL) {
+  if (!is.null(shot_zones)) {
+    zoned <- shot_zones %>%
+      ids_as_character(c("game_id", "team_id")) %>%
+      mutate(zone = shot_zone)
+  } else {
+    message("  NOTE: live/shot_zones.csv not supplied; zones derived from x_legacy/y_legacy in stats_shots.csv")
+    zoned <- shots %>%
+      ids_as_character(c("game_id", "team_id")) %>%
+      mutate(zone = derive_zone_from_xy(x_legacy, y_legacy, shot_distance, shot_value))
+  }
+
+  zoned %>%
     group_by(game_id, team_id) %>%
     summarise(
       n_zone_shots = n(),
-      ra_share = mean(shot_zone == "restricted_area"),
-      paint_share = mean(shot_zone == "in_the_paint_non_ra"),
-      mid_share = mean(shot_zone == "mid_range"),
-      corner3_share = mean(shot_zone == "corner_3"),
-      atb3_share = mean(shot_zone == "above_the_break_3"),
+      ra_share = mean(zone == "restricted_area"),
+      paint_share = mean(zone == "in_the_paint_non_ra"),
+      mid_share = mean(zone == "mid_range"),
+      corner3_share = mean(zone == "corner_3"),
+      atb3_share = mean(zone == "above_the_break_3"),
       .groups = "drop"
     )
 }
@@ -284,7 +315,7 @@ build_team_game_features <- function(shots, shot_zones, possessions, schedule, t
   spine <- build_game_team_spine(schedule) %>% add_game_index()
 
   poss_tbl <- compute_possession_features(possessions)
-  zone_tbl <- compute_zone_profile(shot_zones)
+  zone_tbl <- compute_zone_profile(shots, shot_zones)
   creation_tbl <- compute_shot_creation_profile(shots)
   rate_tbl <- compute_shot_rate_stats(shots)
 
@@ -310,7 +341,16 @@ main <- function() {
   shots <- read_required_csv(file.path(DATA_DIR, "stats_shots.csv"), "R/15_wehoop_download.R")
   possessions <- read_required_csv(file.path(DATA_DIR, "stats_possessions.csv"), "R/15_wehoop_download.R")
   schedule <- read_required_csv(file.path(DATA_DIR, "stats_schedule.csv"), "R/15_wehoop_download.R")
-  shot_zones <- read_required_csv(file.path(LIVE_DIR, "shot_zones.csv"), "R/16_wehoop_live_api.R")
+
+  # shot_zones.csv is optional: it needs the per-game live pulls from
+  # 16_wehoop_live_api.R. When absent, zones are derived from stats_shots.csv
+  # coordinates (see compute_zone_profile / derive_zone_from_xy).
+  shot_zones_path <- file.path(LIVE_DIR, "shot_zones.csv")
+  shot_zones <- if (file.exists(shot_zones_path)) {
+    read_csv(shot_zones_path, show_col_types = FALSE)
+  } else {
+    NULL
+  }
 
   lookup_path <- file.path(DATA_DIR, "team_lookup.rds")
   if (!file.exists(lookup_path)) {

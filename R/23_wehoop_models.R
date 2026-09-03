@@ -52,18 +52,31 @@ TRAJECTORY_METRIC_CANDIDATES <- c(
 #' @param label character, used in the warning message only
 #' @return character vector, candidates that are present in features
 resolve_available_metrics <- function(features, candidates, label) {
-  available <- intersect(candidates, names(features))
-  missing_metrics <- setdiff(candidates, names(features))
-  if (length(missing_metrics) > 0) {
+  present <- intersect(candidates, names(features))
+  not_present <- setdiff(candidates, names(features))
+
+  # A column that is present but entirely NA (e.g. assisted_rate or
+  # transition_share when this data contract does not supply them) or that is
+  # constant cannot be modeled -- lmer fails with "0 (non-NA) cases" or a
+  # degenerate fit. Require a minimum of non-NA cases and non-zero variance.
+  MIN_NONNA <- 20L
+  usable <- present[vapply(present, function(m) {
+    x <- features[[m]]
+    sum(!is.na(x)) >= MIN_NONNA && stats::var(x, na.rm = TRUE) > 0
+  }, logical(1))]
+  dropped_empty <- setdiff(present, usable)
+
+  skipped <- c(not_present, dropped_empty)
+  if (length(skipped) > 0) {
     message(sprintf(
-      "  NOTE: %s metrics not found in features, skipping: %s",
-      label, paste(missing_metrics, collapse = ", ")
+      "  NOTE: %s metrics not usable (missing, all-NA, or constant), skipping: %s",
+      label, paste(skipped, collapse = ", ")
     ))
   }
-  if (length(available) == 0) {
-    stop(sprintf("resolve_available_metrics(): no %s metrics available in features.", label))
+  if (length(usable) == 0) {
+    stop(sprintf("resolve_available_metrics(): no usable %s metrics available in features.", label))
   }
-  available
+  usable
 }
 
 #' Fit a mixed-effects identity model for one style metric:

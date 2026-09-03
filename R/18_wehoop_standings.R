@@ -32,31 +32,40 @@ OUT_DIR  <- file.path("output", "wehoop")
 #' @param team_lookup tibble from data/wehoop/team_lookup.rds
 #' @return tibble: game_id, team, team_pts, opp_pts, win
 build_game_scores <- function(schedule, team_lookup) {
-  needed <- c("game_id", "home_team_id", "away_team_id", "home_team_score", "away_team_score")
-  missing_cols <- setdiff(needed, names(schedule))
-  if (length(missing_cols) > 0) {
+  # wehoop's stats schedule names the score columns home_pts/away_pts; older
+  # exports used home_team_score/away_team_score. Accept either.
+  home_score_col <- intersect(c("home_pts", "home_team_score", "home_score"), names(schedule))
+  away_score_col <- intersect(c("away_pts", "away_team_score", "away_score"), names(schedule))
+  needed_ids <- c("game_id", "home_team_id", "away_team_id")
+  missing_cols <- setdiff(needed_ids, names(schedule))
+  if (length(missing_cols) > 0 || length(home_score_col) == 0 || length(away_score_col) == 0) {
     stop(
-      "build_game_scores(): stats_schedule.csv missing expected columns: ",
-      paste(missing_cols, collapse = ", ")
+      "build_game_scores(): stats_schedule.csv missing expected columns. Need ",
+      "game_id/home_team_id/away_team_id plus a home/away score column ",
+      "(home_pts or home_team_score). Found: ", paste(names(schedule), collapse = ", ")
     )
   }
+  home_score_col <- home_score_col[1]
+  away_score_col <- away_score_col[1]
 
   sched <- schedule %>%
     mutate(
       home_team_id = as.character(home_team_id),
-      away_team_id = as.character(away_team_id)
+      away_team_id = as.character(away_team_id),
+      .home_pts = .data[[home_score_col]],
+      .away_pts = .data[[away_score_col]]
     ) %>%
-    filter(!is.na(home_team_score), !is.na(away_team_score))
+    filter(!is.na(.home_pts), !is.na(.away_pts))
 
   home_rows <- sched %>%
     transmute(
       game_id, team_id = home_team_id,
-      team_pts = home_team_score, opp_pts = away_team_score
+      team_pts = .home_pts, opp_pts = .away_pts
     )
   away_rows <- sched %>%
     transmute(
       game_id, team_id = away_team_id,
-      team_pts = away_team_score, opp_pts = home_team_score
+      team_pts = .away_pts, opp_pts = .home_pts
     )
 
   game_scores <- bind_rows(home_rows, away_rows) %>%

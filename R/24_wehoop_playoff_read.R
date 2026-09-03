@@ -184,7 +184,7 @@ build_trajectory_summary <- function(team_trajectories, teams) {
 #'   DEF_RATING-named column (case-insensitive)
 #' @return tibble, cols team, def_rating, def_rating_rank, defense_tier
 build_defensive_profile <- function(team_advanced_profile) {
-  team_col <- intersect(c("team", "TEAM", "Team"), names(team_advanced_profile))
+  team_col <- intersect(c("team", "tricode", "TEAM", "Team"), names(team_advanced_profile))
   def_col <- names(team_advanced_profile)[toupper(names(team_advanced_profile)) == "DEF_RATING"]
 
   if (length(team_col) == 0 || length(def_col) == 0) {
