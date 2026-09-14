@@ -28,19 +28,23 @@ OUT_DIR <- file.path("output", "wehoop")
 # actually present in team_game_features.rds at runtime (see
 # resolve_available_metrics()) rather than assumed, since the wehoop feature
 # builder may not populate every column every run.
+# live_ball_tov_rate is intentionally NOT a candidate: script 19 sets it
+# byte-identical to tov_rate (the data carries no steal/dead-ball flag to
+# distinguish live-ball turnovers), so modeling it as a separate metric would
+# double-count one signal and assert a distinction the data cannot support. It
+# stays in the feature table as a documented-caveat column but is not fitted.
 IDENTITY_METRIC_CANDIDATES <- c(
   "pace_per40", "fg3a_rate", "assisted_rate", "ra_share", "paint_share",
   "mid_share", "corner3_share", "atb3_share", "driving_share",
   "pullup_share", "cutting_share", "putback_share", "ft_rate", "tov_rate",
-  "secondchance_share", "transition_share", "live_ball_tov_rate"
+  "secondchance_share", "transition_share"
 )
 
 # Trajectory models run on this shortlist only, same discipline as
 # 06_models.R's TRAJECTORY_METRICS: shot_making_residual is joined on from
 # team_game_shot_making.rds before fitting (see main()).
 TRAJECTORY_METRIC_CANDIDATES <- c(
-  "assisted_rate", "shot_making_residual", "transition_share",
-  "live_ball_tov_rate"
+  "assisted_rate", "shot_making_residual", "transition_share"
 )
 
 #' Resolve a candidate metric list down to columns actually present in
@@ -52,31 +56,53 @@ TRAJECTORY_METRIC_CANDIDATES <- c(
 #' @param label character, used in the warning message only
 #' @return character vector, candidates that are present in features
 resolve_available_metrics <- function(features, candidates, label) {
-  present <- intersect(candidates, names(features))
-  not_present <- setdiff(candidates, names(features))
+  n_rows <- nrow(features)
 
   # A column that is present but entirely NA (e.g. assisted_rate or
-  # transition_share when this data contract does not supply them) or that is
-  # constant cannot be modeled -- lmer fails with "0 (non-NA) cases" or a
-  # degenerate fit. Require a minimum of non-NA cases and non-zero variance.
-  MIN_NONNA <- 20L
-  usable <- present[vapply(present, function(m) {
-    x <- features[[m]]
-    sum(!is.na(x)) >= MIN_NONNA && stats::var(x, na.rm = TRUE) > 0
-  }, logical(1))]
-  dropped_empty <- setdiff(present, usable)
+  # transition_share when this data contract does not supply them), constant,
+  # or covered on too few team-games cannot be modeled honestly -- lmer fails
+  # with "0 (non-NA) cases" on the first two, and a metric present on only a
+  # small subsample would produce an ICC/BLUP that looks as authoritative as a
+  # fully covered one. Require non-zero variance and at least MIN_COVERAGE of
+  # rows non-NA.
+  MIN_COVERAGE <- 0.5
 
-  skipped <- c(not_present, dropped_empty)
+  report <- tibble(
+    metric = candidates,
+    present = candidates %in% names(features),
+    coverage = vapply(candidates, function(m) {
+      if (!m %in% names(features)) return(NA_real_)
+      sum(!is.na(features[[m]])) / n_rows
+    }, numeric(1)),
+    variance = vapply(candidates, function(m) {
+      if (!m %in% names(features)) return(NA_real_)
+      stats::var(features[[m]], na.rm = TRUE)
+    }, numeric(1))
+  ) %>%
+    mutate(
+      usable = present & !is.na(coverage) & coverage >= MIN_COVERAGE &
+        !is.na(variance) & variance > 0,
+      reason = case_when(
+        !present ~ "not in features",
+        is.na(variance) | variance == 0 ~ "constant or all-NA",
+        coverage < MIN_COVERAGE ~ sprintf("coverage %.2f below %.2f", coverage, MIN_COVERAGE),
+        TRUE ~ "usable"
+      ),
+      layer = label
+    )
+
+  usable <- report$metric[report$usable]
+  skipped <- report$metric[!report$usable]
   if (length(skipped) > 0) {
     message(sprintf(
-      "  NOTE: %s metrics not usable (missing, all-NA, or constant), skipping: %s",
+      "  NOTE: %s metrics not usable (missing, all-NA, constant, or low-coverage), skipping: %s",
       label, paste(skipped, collapse = ", ")
     ))
   }
   if (length(usable) == 0) {
     stop(sprintf("resolve_available_metrics(): no usable %s metrics available in features.", label))
   }
-  usable
+  list(usable = usable, report = report)
 }
 
 #' Fit a mixed-effects identity model for one style metric:
@@ -311,8 +337,16 @@ main <- function() {
   features <- features %>%
     left_join(select(tg_making, game_id, team, shot_making_residual), by = c("game_id", "team"))
 
-  identity_metrics <- resolve_available_metrics(features, IDENTITY_METRIC_CANDIDATES, "identity")
-  trajectory_metrics <- resolve_available_metrics(features, TRAJECTORY_METRIC_CANDIDATES, "trajectory")
+  identity_res <- resolve_available_metrics(features, IDENTITY_METRIC_CANDIDATES, "identity")
+  trajectory_res <- resolve_available_metrics(features, TRAJECTORY_METRIC_CANDIDATES, "trajectory")
+  identity_metrics <- identity_res$usable
+  trajectory_metrics <- trajectory_res$usable
+
+  # Persist the metric-coverage report so a reader of the outputs can see which
+  # candidate metrics were fitted vs dropped and why, without reading the
+  # console log (analytics-reviewer W5/W6).
+  metric_report <- bind_rows(identity_res$report, trajectory_res$report)
+  write_csv(metric_report, file.path(OUT_DIR, "model_metric_coverage.csv"))
 
   message("=== Fitting identity models (", length(identity_metrics), " metrics) ===")
   identity <- fit_all_identity_models(features, identity_metrics)
@@ -320,8 +354,14 @@ main <- function() {
   message("=== Fitting trajectory models (", length(trajectory_metrics), " metrics) ===")
   trajectory <- fit_all_trajectory_models(features, trajectory_metrics)
 
+  # Round ICC to 3 dp in the published table: the variance components are
+  # estimated on only 15 teams / 15 opponents, so 16-sig-fig precision is false
+  # precision (analytics-reviewer N12). The 0.15 anchor floor in script 24 is a
+  # point-estimate cut with no uncertainty buffer -- see methodology.md.
+  icc_out <- identity$icc_table %>% mutate(icc = round(icc, 3))
+
   saveRDS(identity$blups, file.path(OUT_DIR, "team_blups.rds"))
-  write_csv(identity$icc_table, file.path(OUT_DIR, "icc_table.csv"))
+  write_csv(icc_out, file.path(OUT_DIR, "icc_table.csv"))
   write_csv(identity$rank_deltas, file.path(OUT_DIR, "team_rank_deltas.csv"))
   write_csv(trajectory$team_trajectories, file.path(OUT_DIR, "team_trajectories.csv"))
   write_csv(trajectory$league_trends, file.path(OUT_DIR, "trajectory_league_trends.csv"))

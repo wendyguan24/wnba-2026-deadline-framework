@@ -1,0 +1,20 @@
+metric,present,coverage,variance,usable,reason,layer
+pace_per40,TRUE,1,17.24139748548883,TRUE,usable,identity
+fg3a_rate,TRUE,1,0.00678788889660726,TRUE,usable,identity
+assisted_rate,TRUE,0,NA,FALSE,constant or all-NA,identity
+ra_share,TRUE,1,0.011606516422450447,TRUE,usable,identity
+paint_share,TRUE,1,0.008649918453076435,TRUE,usable,identity
+mid_share,TRUE,1,0.00251464530382103,TRUE,usable,identity
+corner3_share,TRUE,1,0.0016027873798939037,TRUE,usable,identity
+atb3_share,TRUE,1,0.004892065344914113,TRUE,usable,identity
+driving_share,TRUE,1,0.0051941963391318275,TRUE,usable,identity
+pullup_share,TRUE,1,0.0038857516620959143,TRUE,usable,identity
+cutting_share,TRUE,1,0.001180933502685122,TRUE,usable,identity
+putback_share,TRUE,1,4.46603677172485e-4,TRUE,usable,identity
+ft_rate,TRUE,1,0.012793036984883547,TRUE,usable,identity
+tov_rate,TRUE,1,0.0022149734049657075,TRUE,usable,identity
+secondchance_share,TRUE,1,0.001587205387091312,TRUE,usable,identity
+transition_share,TRUE,0,NA,FALSE,constant or all-NA,identity
+assisted_rate,TRUE,0,NA,FALSE,constant or all-NA,trajectory
+shot_making_residual,TRUE,1,170.25246051037908,TRUE,usable,trajectory
+transition_share,TRUE,0,NA,FALSE,constant or all-NA,trajectory

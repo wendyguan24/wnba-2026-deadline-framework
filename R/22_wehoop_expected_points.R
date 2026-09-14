@@ -28,7 +28,7 @@
 #          output/wehoop/team_generation_making.csv -- one row per team:
 #            generation per 100, making per 100, actual per 100
 #          output/wehoop/team_game_shot_making.rds -- one row per team-game
-#            (feeds trajectory in R/23_wehoop_trajectory.R)
+#            (feeds trajectory in R/23_wehoop_models.R)
 
 library(dplyr)
 library(readr)
@@ -261,7 +261,7 @@ poss_counts <- function(possessions, by_game = TRUE) {
 
 #' Compute each team's shot generation (expected PTS/100 given shot diet)
 #' and shot making (actual - expected PTS/100) at the TEAM-GAME grain. This
-#' feeds R/23_wehoop_trajectory.R.
+#' feeds R/23_wehoop_models.R.
 #'
 #' @param shots tibble, prepared shot-level data
 #' @param xpts_table tibble, output of build_xpts_table()

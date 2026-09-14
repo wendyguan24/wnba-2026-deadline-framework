@@ -1151,12 +1151,54 @@ readiness."
 Run order: 17 -> {18, 19, 20, 22} in any order -> 21 -> 23 -> 24
 (or strictly linear: 17, 18, 19, 20, 22, 21, 23, 24)
 
+## Sep 2-3 -- wehoop pipeline run on real data, bug fixes, review gates
+
+- [x] User ran R/15 and R/16 locally; pushed data/wehoop/ CSVs to the branch (raw PBP
+      files excluded; hustle/possessions/RAPM live pulls absent -- see below)
+- [x] Ran the full pipeline (17-24) in the sandbox (R packages installed via Ubuntu apt;
+      CRAN/Posit are egress-blocked) against real data and fixed schema mismatches:
+      18 (home_pts/away_pts), 19 (derive zones from x/y when shot_zones absent),
+      21 (leaguedash team_abbreviation for team; position by normalized name; ESPN
+      athlete_id != WNBA player_id), 23 (skip all-NA/constant metrics), 24 (accept
+      tricode as the team column so defense populates), 17 (crosswalk fallback from
+      leaguedash + name->tricode map). Pipeline runs clean end to end.
+- [x] Hustle confirmed dead: all six wehoop hustle endpoints defunct in v3.0.0 (checked
+      the package source). Handled as cleanly-absent everywhere; no recovery possible in-package.
+
+### Review-gate triage (Sep 3) -- both gates run on real artifacts, all accepted bar one defer
+
+analytics-reviewer (models, scripts 22/23) and gm-agent (playoff read, script 24). Guardrails
+and vocabulary PASS on both. Fixes applied in one revision pass (commit on branch):
+- [x] ACCEPT gm-C1/C2: depth was scored as a structural failure for all 15 teams (RAPM absent),
+      making "complete" unreachable and "one piece away" an artifact. Now depth reads
+      "unavailable" and is excluded from n_weak; readiness decided on generation/defense/
+      trajectory only, disclosed in intro + footnote. Distribution went from
+      {in-but-vulnerable 3, one-piece 2, trending-wrong 3, trending-right 1, out 7} to
+      {complete 5, one piece away 3, out 7}; MIN now reads "one piece away" (generation-short)
+      not a fallback dustbin.
+- [x] ACCEPT gm-M5/analytics-W3: trending labels now require a confident (unstarred) trajectory.
+- [x] ACCEPT gm-H3/H4: added n_structural_weak ("Weak") column so a single-weakness read is
+      distinct from a fallback-caught one.
+- [x] ACCEPT gm-M6: intro now defines contender/in/out and states point diff is not an input.
+- [x] ACCEPT analytics-B1: dropped live_ball_tov_rate (byte-identical to tov_rate) from the
+      model candidate lists; ICC table now 14 metrics.
+- [x] ACCEPT analytics-W5/W6: resolve_available_metrics adds a coverage gate (>=0.5 non-NA) and
+      persists output/wehoop/model_metric_coverage.csv (candidate, coverage, variance, reason).
+- [x] ACCEPT analytics-W2/W4/W8, N11/N12: fixed the trajectory footnote source citation
+      (team_trajectories.csv), disclosed the singular-fit fallback + Wald-z p-value + ICC-floor
+      point-estimate caveat, reworded "relative to shot quality" to "relative to expected points
+      given shot location and creation type", rounded ICC to 3 dp.
+- [x] ACCEPT analytics-N10: fixed R/22 doc pointer (R/23_wehoop_trajectory.R -> R/23_wehoop_models.R).
+- [x] ACCEPT analytics-W7: added methodology.md section 8 (the wehoop reframe and its caveats).
+- [ ] DEFER analytics-N9 (latent only): rank_deltas() raw mean uses na.rm=TRUE while lmer uses
+      complete cases; harmless this run since no modeled metric is partially NA. Revisit if a
+      partially-covered metric is ever fitted.
+
 **Next session should:**
-- User runs R/15_wehoop_download.R and R/16_wehoop_live_api.R locally to populate
-  data/wehoop/ with full-season CSVs
-- Run the pipeline (17 through 24) on the actual data and debug any column-name
-  mismatches or join issues against real wehoop output
-- Run analytics-reviewer on model outputs (script 23) and gm-agent on the playoff-read
-  table (script 24)
-- Consider follow-up scripts: lineup combination analysis (leaguedash_lineups_*.csv),
-  generation-gap decomposition (11_generation_gap analogue), graphics
+- Decide on RAPM: run R/16_wehoop_live_api.R --rapm locally if depth should be a live dimension
+  (slow, ~200 games), then re-run 21 and 24.
+- Consider a wehoop-era findings.md draft (playoff-readiness narrative) written against the
+  hypotheses registry; run coach-agent on any case-study sections.
+- Before merging to main: gitignore data/wehoop/ and git rm --cached the data + regenerable
+  outputs so the deliverable is code-only (raw data regenerates from 15/16).
+- Optional follow-ups: lineup combination analysis (leaguedash_lineups_*.csv), graphics.

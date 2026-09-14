@@ -219,10 +219,18 @@ build_defensive_profile <- function(team_advanced_profile) {
 #' @param teams character vector, all team codes (for the fallback path)
 #' @return tibble, cols team, depth_count, depth_label
 build_depth_profile <- function(player_value, teams) {
-  if (!all(c("team", "rapm") %in% names(player_value))) {
+  # Depth needs RAPM, which comes from the optional per-game live pull
+  # (16_wehoop_live_api.R --rapm). If the rapm column is missing OR present but
+  # entirely NA (RAPM not pulled this run), depth is genuinely unmeasured: label
+  # every team "unavailable" rather than coalescing missing counts to 0, which
+  # would falsely publish "no positive-RAPM player" as a finding for teams that
+  # obviously have good players (gm-agent C2). classify_readiness() then drops
+  # depth from the structural-weakness count when it is unavailable.
+  rapm_measured <- "rapm" %in% names(player_value) && any(!is.na(player_value$rapm))
+  if (!("team" %in% names(player_value)) || !rapm_measured) {
     message(
-      "  WARN: player_value.csv missing team/rapm columns -- ",
-      "depth read set to unavailable for all teams."
+      "  NOTE: RAPM not present in player_value.csv (optional --rapm pull not run) -- ",
+      "depth read is unavailable for all teams and does not enter readiness."
     )
     return(tibble(team = teams, depth_count = NA_integer_, depth_label = "unavailable"))
   }
@@ -232,9 +240,8 @@ build_depth_profile <- function(player_value, teams) {
     group_by(team) %>%
     summarise(depth_count = sum(rapm > 0), .groups = "drop")
 
-  # teams with zero rows in player_value (e.g. no qualifying players) still
-  # get a row, with depth_count 0 -- "no positive-RAPM" is a real label, not
-  # a missing value.
+  # With RAPM measured, a team with zero positive-RAPM players is a real
+  # "no positive-RAPM" finding, distinct from the unavailable case above.
   tibble(team = teams) %>%
     left_join(counts, by = "team") %>%
     mutate(
@@ -288,16 +295,34 @@ build_depth_profile <- function(player_value, teams) {
 #' @param playoff_position character, one of "contender"/"in"/"out"
 #' @param generation_tier integer, ntile(shot_generation_per100, 3), 1=low..3=high
 #' @param trajectory character or NA, shot_making_residual trajectory label
+#' @param interval_spans_zero logical or NA, TRUE when the trajectory CI spans
+#'   zero (directional only). A hard trending label requires a trajectory whose
+#'   interval excludes zero, so the label's confidence never exceeds the input's
+#'   (analytics-reviewer W3, gm-agent M5).
 #' @param defense_tier character, one of "elite defense"/"average defense"/"weak defense"/NA
 #' @param depth_label character, one of "deep"/"adequate"/"thin"/"no positive-RAPM"/"unavailable"
 #' @return character, one of the six readiness labels
-classify_readiness <- function(playoff_position, generation_tier, trajectory, defense_tier, depth_label) {
+classify_readiness <- function(playoff_position, generation_tier, trajectory,
+                               interval_spans_zero, defense_tier, depth_label) {
   gen_ok <- generation_tier >= 2
   def_ok <- isTRUE(defense_tier %in% c("elite defense", "average defense"))
+
+  # Depth only counts toward structural weakness when it was actually measured.
+  # When RAPM was not pulled, depth_label is "unavailable" and is excluded from
+  # n_weak entirely -- otherwise every team carries a phantom weakness and
+  # "complete"/"one piece away" become artifacts of the missing column
+  # (gm-agent C1).
+  depth_measured <- !isTRUE(depth_label == "unavailable")
   depth_ok <- isTRUE(depth_label %in% c("deep", "adequate"))
-  n_weak <- sum(!gen_ok, !def_ok, !depth_ok)
-  traj_declining <- isTRUE(trajectory == "declining")
-  traj_improving <- isTRUE(trajectory == "improving")
+  weaknesses <- c(!gen_ok, !def_ok)
+  if (depth_measured) weaknesses <- c(weaknesses, !depth_ok)
+  n_weak <- sum(weaknesses)
+
+  # A starred trajectory (interval spans zero) is directional only, so it does
+  # not trigger a hard trending label.
+  traj_confident <- isTRUE(!interval_spans_zero)
+  traj_declining <- isTRUE(trajectory == "declining") & traj_confident
+  traj_improving <- isTRUE(trajectory == "improving") & traj_confident
 
   case_when(
     playoff_position == "out" ~ "out",
@@ -360,7 +385,17 @@ build_playoff_read <- function(standings, team_generation_making, team_blups,
     ) %>%
     rowwise() %>%
     mutate(
-      readiness = classify_readiness(playoff_position, generation_tier, trajectory, defense_tier, depth_label)
+      # Count of measured structural weaknesses (generation, defense, and depth
+      # only when depth was measured). Published so a reader can see how many
+      # dimensions drove the label -- distinguishing a one-weakness read from a
+      # fallback-caught multi-weakness one (gm-agent H3/H4).
+      n_structural_weak = sum(
+        !(generation_tier >= 2),
+        !(defense_tier %in% c("elite defense", "average defense")),
+        if (!isTRUE(depth_label == "unavailable")) !(depth_label %in% c("deep", "adequate")) else FALSE
+      ),
+      readiness = classify_readiness(playoff_position, generation_tier, trajectory,
+                                     interval_spans_zero, defense_tier, depth_label)
     ) %>%
     ungroup()
 
@@ -398,10 +433,27 @@ render_playoff_read_md <- function(playoff_read) {
       "new to the full-season view -- see the footnotes for their sourcing",
       "and caveats."
     ),
+    "",
+    paste(
+      "Data limitation this run: RAPM was not pulled (the optional per-game",
+      "live step, 16_wehoop_live_api.R --rapm, was not run), so the Depth",
+      "column reads \"unavailable\" for every team and does NOT enter the",
+      "readiness classification. Readiness here is decided on generation,",
+      "defense, and trajectory only. Weak is the count of measured structural",
+      "weaknesses driving the label (out of the dimensions actually measured),",
+      "shown so a one-weakness read is distinct from a multi-weakness one."
+    ),
+    "",
+    paste(
+      "Playoff Position is from standing_score (script 18, a win-pct and",
+      "point-differential blend), so it can differ from a strict wins-losses",
+      "rank: contender = top-4 by standing_score, in = 5th-8th, out = 9th-15th.",
+      "Point differential itself is not an input to Readiness."
+    ),
     ""
   )
 
-  table_header_cols <- c("Team", "Playoff Position", "Readiness", "Defense", "Depth",
+  table_header_cols <- c("Team", "Playoff Position", "Readiness", "Weak", "Defense", "Depth",
                           "Gen Rank", "Making Rank", "Trajectory", "Identity")
   if (has_cap) table_header_cols <- c(table_header_cols, "Cap")
 
@@ -416,6 +468,7 @@ render_playoff_read_md <- function(playoff_read) {
         "| ", team,
         " | ", playoff_position,
         " | ", readiness,
+        " | ", n_structural_weak,
         " | ", defense_tier,
         " | ", depth_label,
         " | ", generation_rank,
@@ -434,28 +487,39 @@ render_playoff_read_md <- function(playoff_read) {
       "Gen rank and Making rank are the team's league rank of ", n_teams,
       " (1 = best): Gen rank 1 is the most and best looks created (highest",
       " shot generation), Making rank 1 is the best finishing relative to",
-      " shot quality (highest shot making)."
+      " expected points given shot location and creation type (highest shot",
+      " making)."
     ),
     "",
     paste(
       "Readiness classification (first-match-wins precedence, see",
       "classify_readiness() in R/24_wehoop_playoff_read.R): complete = no",
-      "structural weakness across generation, defense, and depth and a",
-      "non-declining trajectory; one piece away = exactly one structural",
-      "weakness and a non-declining trajectory; trending wrong = mid-tier-",
-      "or-above generation with a declining trajectory; trending right =",
-      "mid-tier generation with an improving trajectory; in but vulnerable",
-      "= holding a playoff spot with a structural concern (or the",
-      "conservative default when no other category fits); out = outside",
-      "the playoff field regardless of the other dimensions."
+      "measured structural weakness (generation, defense, and depth when",
+      "measured) and a non-declining trajectory; one piece away = exactly one",
+      "measured structural weakness and a non-declining trajectory; trending",
+      "wrong = mid-tier-or-above generation with a confident declining",
+      "trajectory; trending right = mid-tier generation with a confident",
+      "improving trajectory; in but vulnerable = holding a playoff spot with a",
+      "structural concern, or the conservative default when no other category",
+      "fits (the Weak column shows how many weaknesses drove the label, so a",
+      "fallback-caught row can be told from a genuine single-weakness read);",
+      "out = outside the playoff field regardless of the other dimensions. A",
+      "trending label requires a trajectory whose interval excludes zero: a",
+      "starred (*) trajectory is directional only and does not trigger one."
     ),
     "",
     paste(
       "* interval spans zero: the per-team trajectory label is directional,",
       "not a standalone claim. Trajectory shown is the shot_making_residual",
-      "trend (finishing relative to shot quality, rising or falling), the",
-      "same headline trajectory metric used in the deadline read. Source:",
-      "output/wehoop/trajectory_league_trends.csv."
+      "trend (finishing relative to expected points given shot location and",
+      "creation type, rising or falling). Per-team labels come from",
+      "output/wehoop/team_trajectories.csv; the league-wide fixed effect",
+      "(shot_making_residual trend +0.18, p=0.02) is in",
+      "output/wehoop/trajectory_league_trends.csv and was fit via the",
+      "singular-fit fallback (random intercepts plus a per-team OLS slope of",
+      "residuals), so the per-team intervals are an approximation that can",
+      "understate uncertainty, and the p-value is a Wald-z approximation. No",
+      "garbage-time or split-half sensitivity pass is run in this pipeline."
     ),
     "",
     paste(
@@ -468,10 +532,14 @@ render_playoff_read_md <- function(playoff_read) {
     paste(
       "Depth is a count of players with positive full-season RAPM from",
       "output/wehoop/player_value.csv (script 21): 5+ deep, 3-4 adequate,",
-      "1-2 thin, 0 no positive-RAPM player. RAPM at the individual-season",
-      "level carries real uncertainty, particularly for low-minute players --",
-      "treat depth_count as a coarse signal, not a precise player count, and",
-      "do not publish it as a ranking of individual players."
+      "1-2 thin, 0 no positive-RAPM player, and \"unavailable\" when RAPM was",
+      "not pulled at all. RAPM comes from the optional per-game live step",
+      "(16_wehoop_live_api.R --rapm); it was NOT run this time, so every team",
+      "reads \"unavailable\" and depth did not enter the readiness call. This is",
+      "a missing input, not a finding: it does not mean a team lacks",
+      "above-replacement players. When RAPM is present, treat depth_count as a",
+      "coarse signal, not a precise player count, and do not publish it as a",
+      "ranking of individual players."
     ),
     "",
     paste(

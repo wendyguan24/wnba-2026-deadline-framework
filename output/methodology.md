@@ -305,3 +305,55 @@ correlate across halves, tracking the ICC ordering), alternative-stratification 
 (zone-only preserves generation and making ranks, Spearman 0.98 and 1.00), and the
 garbage-time disposition (flag not exclude, 3.9 percent, nulls survive exclusion). Detail in
 `output/framework_evaluation.md` and `output/trajectory_sensitivity.md`.
+
+## 8. The wehoop full-season reframe (scripts 15-24)
+
+The trade deadline has passed and the CDN source that scripts 01-14 read is frozen at 182
+games (midseason). The wehoop R package (sportsdataverse) reaches the full season through
+ESPN and WNBA Stats API data (202 games this run), so scripts 15-24 rebuild the analysis on
+that source. The question shifts from the deadline lever (acquire / adjust / hold) to playoff
+readiness (complete / one piece away / trending right / trending wrong / in but vulnerable /
+out, in `output/wehoop/playoff_read.md`). The modeling machinery is unchanged from sections
+3a-3d; what differs is the data contract and its gaps, documented here so every wehoop claim
+traces to a disclosed caveat.
+
+What this source does not supply, and how each is handled rather than faked:
+
+- Hustle stats (contested shots, deflections, loose balls, screen assists, box-outs) are gone.
+  All six wehoop hustle endpoints are defunct as of wehoop 3.0.0 (the underlying stats.wnba.com
+  feed stopped returning data), so the hustle dimensions are absent: script 20 runs on 9
+  dimensions (ratings and four factors) instead of 14, and script 21 leaves the hustle columns
+  NA. Nothing is imputed.
+- RAPM is an optional per-game live pull (`16_wehoop_live_api.R --rapm`) that was not run this
+  time. Depth in the playoff read therefore reads "unavailable" for every team and is excluded
+  from the readiness classification entirely, rather than being scored as a weakness or
+  published as a "no positive-RAPM" finding. A missing input is labeled as missing.
+- Shots cannot be linked to possessions (the wehoop shots table carries no possession_number),
+  so every shot is coded context "halfcourt" and the stratified expected-points baseline
+  (script 22) collapses to zone-by-shot-creation strata without a halfcourt/transition split.
+  This is a coarser grain than R/07, not a different method, and it is still a stratified
+  baseline, never a trained shot-quality model.
+- assisted_rate and transition_share have no supporting column in this data contract and are
+  entirely NA; script 23 drops any candidate metric that is absent, all-NA, constant, or
+  covered on under half the team-games before fitting, and records every candidate with its
+  coverage and drop reason in `output/wehoop/model_metric_coverage.csv`. live_ball_tov_rate is
+  a documented-caveat copy of tov_rate (no steal or dead-ball flag exists to separate live-ball
+  turnovers) and is deliberately not modeled as a separate metric, to avoid double-counting one
+  signal.
+
+Confidence caveats a reader of the wehoop outputs should carry:
+
+- No garbage-time or split-half sensitivity pass is run in this pipeline (both were
+  deadline-specific pre-registered checks tied to the open-PBP source). The identity and
+  trajectory specs otherwise match R/06.
+- The one significant trajectory finding (shot_making_residual, league trend about +0.18,
+  p about 0.02) was fit through the singular-fit fallback (random intercepts plus a per-team
+  OLS slope of residuals), so the per-team intervals are an approximation that can understate
+  uncertainty and the p-value is a Wald-z approximation. A trending readiness label requires a
+  trajectory whose interval excludes zero; a starred trajectory is directional only and does
+  not trigger one.
+- The 0.15 ICC anchor floor (section 3b) is applied to point estimates with no uncertainty
+  buffer, and the variance components are estimated on only 15 teams and 15 opponents, so
+  boundary membership is fragile (cutting_share 0.147 and paint_share 0.144 fall just below the
+  floor while pace_per40 0.191 and corner3_share 0.195 sit just above). ICCs are reported to 3
+  decimal places in `output/wehoop/icc_table.csv` to avoid implying false precision.
