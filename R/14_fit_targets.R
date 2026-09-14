@@ -52,6 +52,8 @@ proj_path <- function(...) {
 }
 
 N_SHORTLIST <- 5   # candidates per buy-side team
+N_GETTABLE  <- 3   # minimum actionable (gettable + affordable) targets per list
+MAX_LIST    <- 8   # hard cap on list length
 
 # ---- load --------------------------------------------------------------------
 pv       <- read_csv(proj_path("output", "player_value.csv"), show_col_types = FALSE)
@@ -93,15 +95,83 @@ team_profile   <- coarse_profile(pbp %>% filter(!is.na(teamTricode)), "teamTrico
   rename(team = teamTricode)
 
 # ------------------------------------------------------------------------------
+# creation profile: on-ball creator vs off-ball finisher (a SHOT-CREATION
+# PROFILE, descriptor-derived from the open PBP -- never a play-type claim).
+# The share of a player's made field goals that were ASSISTED separates a player
+# who scores off others' creation (high assisted share -> off-ball / movement /
+# catch-and-shoot) from one who creates her own (low assisted share -> on-ball
+# creator). This is what tells a coach whether "perimeter shooting" means a lead
+# ball-handler who needs the ball or a movement shooter who plays off one, and it
+# is the signal the staff uses to judge duplication against its own creators
+# (the duplication read itself is the coach's, against the incumbent roster --
+# not modeled here). Thresholds are a stated judgment call at 0.40 / 0.65.
+# ------------------------------------------------------------------------------
+creation_profile <- pev %>%
+  filter(actionType %in% c("2pt", "3pt"), shotResult == "Made") %>%
+  group_by(personId) %>%
+  summarise(made_fg = n(),
+            assisted = sum(!is.na(assistPersonId) & assistPersonId != 0),
+            .groups = "drop") %>%
+  mutate(
+    assisted_share = assisted / made_fg,
+    creation = case_when(
+      made_fg < 30            ~ "creation n/a (small sample)",
+      assisted_share >= 0.65  ~ "off-ball finisher",
+      assisted_share <= 0.40  ~ "on-ball creator",
+      TRUE                    ~ "combo creator/finisher"
+    )
+  ) %>%
+  select(personId, creation)
+
+# ------------------------------------------------------------------------------
 # 2. candidate pool: eligible players on seller teams (attainability)
 # ------------------------------------------------------------------------------
 seller_teams <- standing %>% filter(window == "seller") %>% pull(team)
 
+# Contract / movability reference (hand-curated, named candidates only), read early so
+# movability flags the pool before ranking (hybrid keep-and-flag: nothing is dropped
+# from the pool). Movability values:
+#   core        -- franchise-tagged / cannot be approached -> KEPT, flagged not actionable
+#   untouchable -- a long-term building block a team will not move -> KEPT, flagged not actionable
+#   keep        -- not core but in the team's plans -> low availability, still listed
+#   available   -- not core, not long-term: a team may deal her for value before the
+#                  expansion draft rather than lose her for nothing -> listed, actionable
+ref_path <- proj_path("data", "reference", "candidate_contracts_2026.csv")
+if (file.exists(ref_path)) {
+  ref_tbl <- read_csv(ref_path, show_col_types = FALSE, col_types = cols(.default = "c"))
+  if (!"movability" %in% names(ref_tbl)) ref_tbl$movability <- NA_character_
+  # position is hand-curated reference metadata (guard / wing / forward / center),
+  # the same class as contract_band and movability -- it is NOT in the open PBP
+  # (no roster/height field), so it is curated + attributed, never derived. Blank
+  # until curated from a roster source, exactly as the bands were.
+  if (!"position" %in% names(ref_tbl)) ref_tbl$position <- NA_character_
+  contracts <- ref_tbl %>%
+    mutate(personId = as.numeric(personId)) %>%
+    select(personId, contract_band, movability, position, source, as_of_date)
+} else {
+  contracts <- tibble(personId = numeric(), contract_band = character(),
+                      movability = character(), position = character(),
+                      source = character(), as_of_date = character())
+}
+
+bucket_desc <- c(rim = "rim finishing", mid = "mid-range scoring", three = "perimeter shooting")
+
 candidates <- pv %>%
   filter(eligible, team %in% seller_teams) %>%
   left_join(player_profile, by = "personId") %>%
-  select(personId, playerName, current_team = team, production_tier, vor,
-         games, minutes, rim_share, mid_share, three_share)
+  left_join(creation_profile, by = "personId") %>%
+  left_join(contracts %>% select(personId, contract_band, movability, position), by = "personId") %>%
+  mutate(
+    creation = tidyr::replace_na(creation, "creation n/a (small sample)"),
+    primary_bucket = dplyr::case_when(
+      rim_share >= mid_share & rim_share >= three_share ~ "rim",
+      mid_share >= three_share ~ "mid",
+      TRUE ~ "three"),
+    advantage = paste0(production_tier, " ", bucket_desc[primary_bucket])
+  ) %>%
+  select(personId, playerName, current_team = team, production_tier, prod_score,
+         games, minutes, rim_share, mid_share, three_share,
+         primary_bucket, advantage, creation, contract_band, movability, position)
 
 # ------------------------------------------------------------------------------
 # 3. per-team action category from the deadline_read recommendation verb
@@ -120,7 +190,7 @@ classify_action <- function(rec) {
 }
 
 teams <- dread %>%
-  transmute(team, window, recommendation,
+  transmute(team, window, recommendation, flex = cap_context,
             action = classify_action(recommendation)) %>%
   left_join(team_profile, by = "team")
 
@@ -128,13 +198,27 @@ teams <- dread %>%
 gets_list  <- c("amplify", "gap-fill", "buy-judgment", "adjust")
 tier_order <- c(top = 4, `upper rotation` = 3, rotation = 2, fringe = 1)
 
+# acquiring-team flexibility tier from cap_context; only min/depth bands are
+# affordable for capped/tight teams (gate applied only where a band is filled)
+affordable_bands_for <- function(flex) {
+  if (identical(flex, "room")) return(c("min", "mid", "max"))
+  if (identical(flex, "tight")) return(c("min", "mid"))
+  c("min")  # capped
+}
+
 #' Rank the candidate pool for one acquiring team: on-style as a GATE (fit first),
 #' then production tier and value WITHIN the on-style set (value as the within-fit
 #' ranker, not the driver). At coarse rim/mid/three granularity style_match barely
 #' discriminates, so leading with it would surface the single closest-style fringe
 #' player over a top producer who also fits; gating on it and ranking by tier
 #' inside the gate is what "on-style depth that protects the hierarchy" means.
-rank_for_team <- function(t_rim, t_mid, t_three, action) {
+#'
+#' Hybrid keep-and-flag: nothing is excluded from the pool. Core/untouchable and
+#' over-tier candidates stay visible (context) so the best on-style fits are never
+#' hidden, but each returned list is guaranteed at least N_GETTABLE actionable
+#' (gettable + affordable) rows, extending past N_SHORTLIST up to MAX_LIST if the
+#' top N_SHORTLIST on-style names do not clear that bar.
+rank_for_team <- function(t_rim, t_mid, t_three, action, flex) {
   scored <- candidates %>%
     mutate(
       style_match = 1 - 0.5 * (abs(rim_share - t_rim) + abs(mid_share - t_mid) +
@@ -149,78 +233,118 @@ rank_for_team <- function(t_rim, t_mid, t_three, action) {
   }
   # on-style gate: keep the more on-style half of the pool for this team
   gate <- quantile(scored$style_match, 0.5, na.rm = TRUE)
-  scored %>%
+  pool <- scored %>%
     filter(style_match >= gate) %>%
-    arrange(desc(tier_rank), desc(vor), desc(style_match)) %>%
-    slice_head(n = N_SHORTLIST)
+    arrange(desc(tier_rank), desc(prod_score), desc(style_match)) %>%
+    mutate(
+      # A blank (uncurated) movability is NOT actionable: a row is only a `target`
+      # once its availability has been hand-curated to available/keep. This keeps
+      # `target` from ever being asserted on a candidate whose availability is a
+      # TODO (accepted gm + coach review fix, 2026-07-26). Band still gives benefit
+      # of the doubt only where it is genuinely uncurated (NA).
+      actionable = movability %in% c("available", "keep") &
+        (is.na(contract_band) | contract_band %in% affordable_bands_for(flex))
+    )
+
+  top <- head(pool, N_SHORTLIST)
+  if (sum(top$actionable) >= N_GETTABLE) {
+    return(top)
+  }
+  extra <- pool %>%
+    filter(actionable, !personId %in% top$personId) %>%
+    head(N_GETTABLE - sum(top$actionable))
+  bind_rows(top, extra) %>% head(MAX_LIST)
 }
 
 shortlists <- teams %>%
   filter(action %in% gets_list) %>%
   rowwise() %>%
-  mutate(picks = list(rank_for_team(rim_share, mid_share, three_share, action))) %>%
+  mutate(picks = list(rank_for_team(rim_share, mid_share, three_share, action, flex))) %>%
   ungroup()
 
 # ------------------------------------------------------------------------------
-# 4. contract-band template (hand-curated, named candidates only)
+# 4. keep the contract / movability template in sync (named candidates only)
 # ------------------------------------------------------------------------------
-ref_path <- proj_path("data", "reference", "candidate_contracts_2026.csv")
+# The hybrid pool can extend past N_SHORTLIST to reach N_GETTABLE actionable rows,
+# which can surface new names; append them to the template (blank) so they get
+# hand-curated too, preserving already-filled rows.
 shortlisted_ids <- shortlists %>% pull(picks) %>% bind_rows() %>%
   distinct(personId, playerName, current_team)
 
-# Template carries contract_band AND movability (expiring / core / untouchable), both
-# hand-curated with source + as_of_date. Movability screens the attainability gap the
-# gm-agent flagged: a top player on an expansion seller is not actually available.
-if (!file.exists(ref_path)) {
-  shortlisted_ids %>%
+if (file.exists(ref_path)) {
+  existing <- read_csv(ref_path, show_col_types = FALSE, col_types = cols(.default = "c")) %>%
+    mutate(personId = as.numeric(personId))
+  if (!"movability" %in% names(existing)) existing$movability <- NA_character_
+  if (!"position" %in% names(existing)) existing$position <- NA_character_
+  new_rows <- shortlisted_ids %>%
+    filter(!personId %in% existing$personId) %>%
     mutate(contract_band = NA_character_, movability = NA_character_,
-           source = NA_character_, as_of_date = NA_character_) %>%
+           position = NA_character_, source = NA_character_, as_of_date = NA_character_)
+  bind_rows(existing, new_rows) %>%
     arrange(current_team, playerName) %>%
     write_csv(ref_path)
-  contracts <- tibble(personId = numeric(), contract_band = character(),
-                      movability = character(), source = character(),
-                      as_of_date = character())
-  ref_created <- TRUE
+  n_new <- nrow(new_rows)
 } else {
-  ref_cols <- read_csv(ref_path, show_col_types = FALSE)
-  if (!"movability" %in% names(ref_cols)) ref_cols$movability <- NA_character_
-  contracts <- ref_cols %>%
-    select(personId, contract_band, movability, source, as_of_date)
-  ref_created <- FALSE
+  shortlisted_ids %>%
+    mutate(contract_band = NA_character_, movability = NA_character_,
+           position = NA_character_, source = NA_character_, as_of_date = NA_character_) %>%
+    arrange(current_team, playerName) %>%
+    write_csv(ref_path)
+  n_new <- nrow(shortlisted_ids)
 }
 
 # acquiring-team flexibility tier from cap_context; only min/depth bands are
 # affordable for capped/tight teams (gate applied only where a band is filled)
 cap_tier <- dread %>% transmute(team, flex = cap_context)
-affordable_bands_for <- function(flex) {
-  if (identical(flex, "room")) return(c("min", "mid", "max"))
-  if (identical(flex, "tight")) return(c("min", "mid"))
-  c("min")  # capped
-}
 
 # ------------------------------------------------------------------------------
 # 5. assemble long table + markdown
 # ------------------------------------------------------------------------------
 long <- shortlists %>%
   select(team, window, action, recommendation, picks) %>%
-  unnest(picks) %>%
-  left_join(contracts, by = "personId") %>%
+  unnest(picks) %>%          # contract_band + movability + position + creation carried on picks
   left_join(cap_tier, by = "team") %>%
   rowwise() %>%
   mutate(
     affordability = if (is.na(contract_band)) "band: hand-curate"
       else if (contract_band %in% affordable_bands_for(flex)) paste0("affordable (", flex, ")")
       else paste0("over-tier (", flex, " cannot absorb ", contract_band, ")"),
-    movability_disp = if (is.na(movability)) "movability: hand-curate" else movability,
+    movability_disp = if (is.na(movability)) "hand-curate" else movability,
+    position_disp = if (is.na(position)) "pos: hand-curate" else paste0("pos ", position),
     profile = sprintf("rim %.0f / mid %.0f / three %.0f",
-                      100 * rim_share, 100 * mid_share, 100 * three_share)
+                      100 * rim_share, 100 * mid_share, 100 * three_share),
+    status = if_else(actionable, "target", "context")
   ) %>%
   ungroup()
 
+# C4 (accepted review fix, 2026-07-28): flag a candidate who is an actionable
+# `target` on more than one team's list, so a reader never treats one player as
+# several independent adds (the thin-market problem in the flesh -- Ogwumike is
+# the lead target for DAL, MIN, and TOR at once). shared_note lists every team
+# she is a target for; it is empty for single-team targets and for context rows.
+shared <- long %>%
+  filter(status == "target") %>%
+  distinct(personId, team) %>%
+  group_by(personId) %>%
+  summarise(target_team_list = paste(sort(unique(team)), collapse = ", "),
+            n_target_teams = dplyr::n_distinct(team), .groups = "drop")
+
+long <- long %>%
+  left_join(shared, by = "personId") %>%
+  mutate(
+    n_target_teams = tidyr::replace_na(n_target_teams, 0L),
+    shared_note = if_else(
+      status == "target" & n_target_teams > 1,
+      paste0(" -- SHARED TARGET (targeted by ", target_team_list, "): one player, not independent adds"),
+      ""
+    )
+  )
+
 write_csv(
   long %>% select(team, window, action, personId, playerName, current_team,
-                  production_tier, games, minutes, vor, style_match, profile,
-                  contract_band, movability, affordability),
+                  position, production_tier, games, minutes, prod_score, primary_bucket,
+                  advantage, creation, style_match, profile, contract_band, movability,
+                  affordability, actionable, status, n_target_teams),
   proj_path("output", "fit_targets.csv")
 )
 
@@ -235,19 +359,39 @@ md <- c(
   "(the acquiring team's cap tier), then production tier. Offense-scope only.",
   "",
   "Read the following before acting on any row:",
+  "- Each line leads with the ADVANTAGE the player would add (production tier + her",
+  "  primary shot bucket), i.e. what the acquiring team actually gains, qualified by",
+  "  her CREATION PROFILE.",
+  "- CREATION PROFILE (on-ball creator / off-ball finisher / combo) is a shot-creation",
+  "  profile derived from the share of her made field goals that were assisted (a",
+  "  descriptor-derived signal, not a play-type claim). It is what separates a lead",
+  "  ball-handler who needs the ball from a movement shooter who plays off one, so two",
+  "  players with the same `perimeter shooting` advantage can be different adds. Use it",
+  "  to judge DUPLICATION against your own creators; that duplication read is the",
+  "  coaching staff's against its incumbent roster, not modeled here.",
+  "- POSITION (`pos G/W/F/C`) is hand-curated reference metadata, the same class as the",
+  "  contract band: it is NOT in the open play-by-play, so a blank reads `pos:",
+  "  hand-curate` until curated from a roster source. The reproducible interior-vs-",
+  "  perimeter signal in the meantime is the rim / mid / three profile on each line",
+  "  (a stretch big shoots threes, so read profile and position together).",
+  "- Movability (hand-curated, from contract designation + judgment) marks each row",
+  "  `target` (actionable: gettable and affordable) or `context` (kept for visibility,",
+  "  not actionable). `core` and `untouchable` players are KEPT for context, not a",
+  "  `target` -- a cored player cannot be approached, but the best on-style fit is still",
+  "  worth seeing. `keep` means not core but in the team's plans, so low availability;",
+  "  `available` means not core and not long-term, where a team may deal her for value",
+  "  before the expansion draft rather than lose her for nothing. A blank (uncurated)",
+  "  movability reads `context`, never `target`, until it is hand-curated. A list may",
+  "  extend past five names to guarantee at least a few gettable and affordable `target` rows.",
   "- style_match is a COARSE on-style gate (rim / mid / three shares), not a precise",
-  "  ranker. It is used only to keep the more on-style half of the pool; do not read",
-  "  the second decimal, and note it is not the deadline_read identity descriptor.",
-  "- A candidate's shot profile reflects her CURRENT team's system; that it travels",
-  "  to a new offense is an assumption, disclosed not modeled.",
-  "- Affordability is PENDING until the contract bands are hand-curated (v1 ships with",
-  "  them blank). Contract bands and movability are hand-curated, attributed, tiers",
-  "  not dollars.",
-  "- Movability is NOT yet screened: a top-tier player on an expansion or rebuilding",
-  "  seller may not actually be available. Hand-curate the movability flag before use.",
-  "- ASSET COST (what the acquiring team sends out) is entirely out of scope here; the",
-  "  affordability column is salary tier only. A top-tier candidate at a min band still",
-  "  costs real assets.",
+  "  ranker; do not read the second decimal, and it is not the deadline_read descriptor.",
+  "- A candidate's shot profile reflects her CURRENT team's system; that it travels to a",
+  "  new offense is an assumption, disclosed not modeled.",
+  "- Affordability is shown where a contract band has been hand-curated; a blank band",
+  "  reads `band: hand-curate`. Bands and movability are hand-curated, attributed,",
+  "  tiers not dollars.",
+  "- ASSET COST (what the acquiring team sends out) is out of scope; the affordability",
+  "  column is salary tier only. A top-tier candidate at a min band still costs real assets.",
   "- Rim-heavy sellers (centers) may be absent from perimeter teams' on-style lists by",
   "  construction; that is the style gate working, not a data gap.",
   "- Production tiers are the offense-weighted, half-season box screen from R/13; small",
@@ -275,12 +419,20 @@ team_block <- function(row) {
   } else {
     "On-style depth that protects the shot hierarchy:"
   }
+  # C3 (accepted review fix, 2026-07-28): the screen is offense-only. State it on
+  # every buy-side list so no reader mistakes an on-style shot-diet fit for a
+  # full fit -- the open play-by-play has no matchup, tracking, or defender data.
+  def_note <- paste(
+    "Offense-only: this list matches shot diet, not defense. The open play-by-play",
+    "carries no matchup or tracking data, so get your own defensive read",
+    "(switchability, matchup fit, second-unit hold-up) on any name before acting."
+  )
   picks <- long %>% filter(team == row$team) %>%
-    mutate(line = sprintf("- %s (%s, %s, %d g / %d min) -- %s; on-style %.1f; %s; %s",
-                          playerName, current_team, production_tier, games,
-                          round(minutes), profile, style_match, affordability,
-                          movability_disp))
-  c(hdr, "", rec, "", note, "", picks$line, "")
+    mutate(line = sprintf("- %s (%s, %s, %d g / %d min) -- advantage: %s (%s); profile %s; on-style %.1f; %s; movability: %s; [%s]%s",
+                          playerName, current_team, position_disp, games, round(minutes),
+                          advantage, creation, profile, style_match, affordability,
+                          movability_disp, status, shared_note))
+  c(hdr, "", rec, "", note, "", picks$line, "", def_note, "")
 }
 
 ordered_teams <- teams %>% mutate(ord = action_order[action]) %>% arrange(ord, team)
@@ -293,21 +445,26 @@ writeLines(md, proj_path("output", "fit_targets.md"))
 # ------------------------------------------------------------------------------
 # 6. console summary
 # ------------------------------------------------------------------------------
+have_band <- contracts %>% filter(!is.na(contract_band)) %>% pull(personId)
+
 cat("=== R/14 fit-first target reads ===\n")
-cat("seller candidate pool:", nrow(candidates), "eligible players on",
-    length(seller_teams), "seller teams\n")
-cat("teams with a shortlist:",
-    paste(shortlists$team, collapse = ", "), "\n")
-if (ref_created) {
-  cat("WROTE contract template:", ref_path,
-      "(", nrow(shortlisted_ids), "named candidates, bands blank -- hand-curate)\n")
-} else {
-  have_band <- contracts %>% filter(!is.na(contract_band)) %>% pull(personId)
-  missing <- setdiff(shortlisted_ids$personId, have_band)
-  cat("contract template exists;", length(missing), "of", nrow(shortlisted_ids),
-      "shortlisted candidates still need a band\n")
+cat("seller candidate pool (hybrid, nothing excluded):", nrow(candidates),
+    "eligible players on", length(seller_teams), "seller teams\n")
+cat("teams with a shortlist:", paste(shortlists$team, collapse = ", "), "\n")
+status_counts <- long %>% count(status)
+n_target  <- sum(status_counts$n[status_counts$status == "target"])
+n_context <- sum(status_counts$n[status_counts$status == "context"])
+cat("rows across all shortlists:", n_target, "target,", n_context, "context\n")
+by_team <- long %>% group_by(team) %>%
+  summarise(target = sum(status == "target"), context = sum(status == "context"), .groups = "drop")
+cat("target / context per team:\n")
+for (i in seq_len(nrow(by_team))) {
+  cat("  ", by_team$team[i], "--", by_team$target[i], "target,", by_team$context[i], "context\n")
 }
+cat("template:", ref_path, "--", length(setdiff(shortlisted_ids$personId, have_band)),
+    "of", nrow(shortlisted_ids), "shortlisted candidates still need a band",
+    if (n_new > 0) paste0("(", n_new, " newly appended)") else "", "\n")
 cat("\nWrote output/fit_targets.md and output/fit_targets.csv\n")
 cat("\n=== shortlists ===\n")
-long %>% select(team, playerName, current_team, production_tier, style_match, affordability) %>%
+long %>% select(team, playerName, current_team, advantage, affordability, movability_disp, status) %>%
   as.data.frame() %>% print(row.names = FALSE)

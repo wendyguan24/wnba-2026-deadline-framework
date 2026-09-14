@@ -1,0 +1,34 @@
+wehoop data download manifest -- season 2026
+Downloaded (UTC): 2026-09-02 22:48:48 UTC
+wehoop version: 3.0.0
+
+  espn_pbp: 123455 rows x 67 cols
+  espn_player_box: 7284 rows x 57 cols
+  espn_team_box: 604 rows x 59 cols
+  espn_schedule: 333 rows x 77 cols
+  espn_rosters: 209 rows x 36 cols
+  espn_game_rosters: 7284 rows x 22 cols
+  espn_player_core: 235 rows x 36 cols
+  espn_player_stats: 10045 rows x 16 cols
+  espn_team_stats: 675 rows x 16 cols
+  espn_standings: 345 rows x 24 cols
+  stats_shots: 41149 rows x 18 cols
+  stats_possessions: 32265 rows x 34 cols
+  stats_player_game_logs: 4611 rows x 35 cols
+  stats_schedule: 202 rows x 15 cols
+  stats_rosters: 209 rows x 18 cols
+  stats_pbp: 86784 rows x 38 cols
+  leaguedash_player_bio: 226 rows x 27 cols
+  leaguedash_player_stats_base: 226 rows x 71 cols
+  leaguedash_player_stats_advanced: 226 rows x 83 cols
+  leaguedash_player_stats_usage: 226 rows x 57 cols
+  leaguedash_player_stats_scoring: 226 rows x 57 cols
+  leaguedash_player_stats_defense: 226 rows x 47 cols
+  leaguedash_player_stats_misc: 226 rows x 47 cols
+  leaguedash_team_stats_base: 15 rows x 58 cols
+  leaguedash_team_stats_advanced: 15 rows x 50 cols
+  leaguedash_team_stats_defense: 15 rows x 34 cols
+  leaguedash_team_stats_fourfactors: 15 rows x 32 cols
+  leaguedash_lineups_base: 7491 rows x 63 cols
+  leaguedash_lineups_advanced: 7491 rows x 55 cols
+  leaguedash_standings: 15 rows x 94 cols

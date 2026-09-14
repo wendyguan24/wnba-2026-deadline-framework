@@ -59,7 +59,7 @@
 #            -- there are no ties in basketball.
 # Outputs: output/standing.csv (team, wins, losses, win_pct, point_diff,
 #            point_diff_per_game, standing_score, rank, games_back_from_8th,
-#            window); also printed to console.
+#            window_rank, window); also printed to console.
 
 library(tidyverse)
 
@@ -114,7 +114,8 @@ build_game_scores <- function(possessions) {
 #'
 #' @param game_scores tibble, from build_game_scores()
 #' @return tibble, team, wins, losses, win_pct, point_diff,
-#'   point_diff_per_game, standing_score, rank, games_back_from_8th, window
+#'   point_diff_per_game, standing_score, rank, games_back_from_8th,
+#'   window_rank, window
 build_standing <- function(game_scores) {
   standing <- game_scores %>%
     group_by(team) %>%
@@ -155,12 +156,17 @@ build_standing <- function(game_scores) {
         TRUE              ~ "seller"   # out of the race
       )
     ) %>%
-    select(team, window)
+    select(team, window_rank, window)
 
+  # Emit window_rank alongside window so a reader can see the standing_score rank
+  # that actually assigns the window, and does not misread it as broken against
+  # the win_pct `rank` column (they are different orderings by design: `rank` is
+  # win_pct for the playoff-line/games_back computation, window_rank is the
+  # blended standing_score -- accepted analytics-reviewer fix, 2026-07-28).
   standing %>%
     left_join(window_tbl, by = "team") %>%
     select(team, wins, losses, win_pct, point_diff, point_diff_per_game,
-           standing_score, rank, games_back_from_8th, window)
+           standing_score, rank, games_back_from_8th, window_rank, window)
 }
 
 main <- function() {
