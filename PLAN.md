@@ -1,4 +1,4 @@
-# PLAN — WNBA 2026 Offseason Analysis
+# PLAN: WNBA 2026 Offseason Analysis
 
 Successor to the deadline framework. The v1 plan, with its full review-gate triage log,
 is archived at `docs/archive/PLAN_v1_deadline.md`. v1 is tagged `v1-deadline`
@@ -11,9 +11,12 @@ Last updated: 2026-11-23.
 - [x] v1 tagged `v1-deadline`; old PLAN.md and CLAUDE.md archived to `docs/archive/`
 - [x] CLAUDE.md and PLAN.md rewritten for the offseason phase
 - [ ] Offseason question(s) written down (see "Scope", currently OPEN)
+- [x] v1 publish blockers complete (Synergy case studies + §3d structural paragraph, coach-agent gate, cap/CBA verification checklist), confirmed by Wendy 2026-11-23.
 - [ ] Re-pin to full-season data and clear the reconciliation gate (Phase 1)
 
 ## Scope (OPEN, must be settled before Phase 2)
+
+Decision 2026-11-23: build the data pipeline first, settle the question later.
 
 The offseason question is not yet written down. Candidates, to be chosen or replaced by
 Wendy. Pick before building anything new:
@@ -23,7 +26,7 @@ Wendy. Pick before building anything new:
    right? (Cheapest; mostly re-running `R/05` to `R/07` and `R/11`/`R/13` on the new pin.)
 2. **Roster and fit for 2027.** Fit-first target reads (`R/14`) rebuilt on full-season
    player value, conditioned on offseason cap and contract status (free agency,
-   expansion draft effects, expirings). Needs fresh, dated cap data.
+   expirings). Needs fresh, dated cap data.
 3. **Multi-season / aging and development.** Uses wehoop and historical `shufinskiy`
    seasons (`cdnnba` from 2022, `nbastats` from 1997). Separate data layer, so
    reconciliation applies per source.
@@ -33,7 +36,7 @@ Hypotheses for the chosen question go here before results are viewed:
 - H-offseason-1: _TBD_
 - H-null: report what the data does not support.
 
-## Phase 1 — Re-pin and reconcile (first work, independent of the scope choice)
+## Phase 1: Re-pin and reconcile (first work, independent of the scope choice)
 
 - [ ] Read upstream `loading/utils.R` change in commit `46488f0` and confirm
       `R/01_download.R` loaders still work (or adapt, noting the change)
@@ -45,10 +48,10 @@ Hypotheses for the chosen question go here before results are viewed:
       (v1 values: 89,735 / 23,163 / 74,224 rows, 182 games) and record the new numbers here
 - [ ] Re-run `R/01` to `R/04`; possession points must equal final score in every
       team-game; confirm the technical-FT fix still holds on the new games
-- [ ] Check Toronto and any expansion-team edge cases (v1 noted shotdetail omissions)
+- [ ] Toronto has no shotdetail rows (v1 finding); `is_home` comes from shotdetail HTM/VTM. Confirm home/away comes from cdn or the games table instead, and check Toronto playoff games if any.
 - [ ] Write `output/offseason/reconciliation_report.md` and show it before proceeding
 
-## Phase 2 — Features and models on the full season (after Phase 1 and scope)
+## Phase 2: Features and models on the full season (after Phase 1 and scope)
 
 - [ ] Decide which of `R/05` to `R/07`, `R/11`, `R/13`, `R/14` the chosen question needs
 - [ ] Keep regular season and playoffs separate populations (CLAUDE.md rule)
@@ -58,7 +61,7 @@ Hypotheses for the chosen question go here before results are viewed:
 - [ ] Any new EDA that changes the plan is noted here, not absorbed silently
 - [ ] `analytics-reviewer` on model results; log triage below
 
-## Phase 3 — Write-up
+## Phase 3: Write-up
 
 - [ ] Draft in `output/offseason/`; reproducibility check (every number from the scripts)
 - [ ] `analytics-reviewer` on the full draft; `gm-agent` / `coach-agent` if it contains
@@ -72,6 +75,8 @@ Hypotheses for the chosen question go here before results are viewed:
       README still describes the deadline framework.
 - [ ] Move deadline-only reference material (cap CSVs, amendments) under
       `docs/archive/` or keep in place with a note, decide at rename time
+- [ ] Push tag v1-deadline (proxy refused it from the cloud session; run `git push origin v1-deadline` locally or tag 4b78e2e in the GitHub UI)
+- [ ] Update .claude/agents/*.md for offseason scope (after scope set)
 - [ ] Data refresh: before final write-up, check `shufinskiy/nba_data` for commits newer
       than the pin
 

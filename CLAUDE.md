@@ -1,6 +1,6 @@
-# CLAUDE.md — WNBA 2026 Analysis (offseason phase)
+# CLAUDE.md: WNBA 2026 Analysis (offseason phase)
 
-This repo began as the WNBA 2026 Trade Deadline Framework (published, tagged
+This repo began as the WNBA 2026 Trade Deadline Framework (v1 at commit `4b78e2e`, tag
 `v1-deadline`). It is now the home for the **2026 offseason analysis**, built on the
 full 2026 season (regular season + playoffs) from `shufinskiy/nba_data`, with wehoop as
 a possible second source. The repo has not been renamed yet; see PLAN.md.
@@ -10,7 +10,8 @@ the standing rules and orientation only.
 
 ## What carries over from v1 and what does not
 
-- **Archived, read-only record of v1:** `docs/archive/PLAN_v1_deadline.md`,
+- **Archived, read-only record of v1** (recoverable at commit `4b78e2e`, tag `v1-deadline`,
+  local only until pushed by Wendy): `docs/archive/PLAN_v1_deadline.md`,
   `docs/archive/CLAUDE_v1_deadline.md`, plus `HANDOFF_wnba_deadline_framework.md`,
   `AMENDMENT_01_...md`, `AMENDMENT_02_...md` in the root. Consult them for why v1 code is
   the way it is. They no longer govern scope, schedule or deliverables.
@@ -20,8 +21,17 @@ the standing rules and orientation only.
 - **Deadline-specific, leave alone unless the offseason question needs it:** `R/08`
   deadline read, `R/12` standing/window tiers, `data/reference/cap_context_2026.csv`,
   the acquire/adjust/hold lever, the July 26-27 publish window.
-- **Output files in `output/` are v1 artifacts** (half-season, 182 games). Do not
-  overwrite them. New offseason outputs go in `output/offseason/`.
+- **Paths come from `R/00_config.R`.** Offseason processed data goes to
+  `data/processed/full2026/`, offseason outputs to `output/offseason/`. Files directly in
+  `output/` are v1 artifacts; never overwrite them. R/05 to R/14 still hard-code v1 paths
+  and must be wired to `R/00_config.R` before they are re-run.
+- **v1 modeling decisions are defaults, not accidents:** ICC >= 0.15 identity-anchor rule,
+  garbage-time flag (period >= 4 and |margin| >= 20, flag not exclude), `pace_per40` for
+  pace, `is_home` fixed effect, transition-possession weighting, R/13 200-minute floor.
+  Change one only with a logged reason in PLAN.md (the full season may justify it).
+- **Analysis-ready tables** are the interface for offseason questions: see
+  `docs/data_dictionary.md` and `R/load_tables.R`. New questions should start from these
+  tables, not from raw files.
 
 ## Standing rules
 
@@ -38,10 +48,13 @@ the standing rules and orientation only.
 - **Data pin discipline:** the pinned `shufinskiy/nba_data` commit is recorded in
   `R/01_download.R`, `README.md` and PLAN.md. v1 pin: `773ce29` (182 games, through
   2026-07-16). Offseason target: `46488f0` (2026-11-06, regular season plus playoffs).
-  Re-pinning changes the baseline counts in `tests/testthat/test-baseline-table.R`;
-  update them deliberately, with the new counts and the reconciliation result in PLAN.md,
-  and do not let tests silently pass on stale numbers. Check the upstream `loading/utils.R`
-  change in `46488f0` before reusing `01_download.R` loaders.
+  Expected counts for the current pin live in `data/reference/pipeline_baseline.csv`
+  (one row per season_type: games, cdn rows, v2 rows, shotdetail rows, team-games). Re-pinning
+  means regenerating that file deliberately and recording old vs new counts in PLAN.md; tests
+  never silently pass on stale numbers. The v1 half-season checks (handoff §4 8-team table,
+  182 games) are kept as a regression test on the v1 game subset, not deleted. `R/01_download.R`
+  fetches tarballs directly from raw.githubusercontent.com, not via upstream's
+  `loading/utils.R`; on re-pin, check the new files' column schema and dataset names.
 - **Regular season and playoffs are separate populations.** Never pool them in a model or
   baseline without an explicit flag and a stated reason; playoff samples are small and
   selected.
@@ -57,7 +70,9 @@ the standing rules and orientation only.
   on any full write-up draft; `gm-agent` on any decision table or recommendation;
   `coach-agent` on drafted case-study or fit sections. Give agents artifacts, not
   descriptions. Triage feedback (accept / reject with one-line reason / defer) and log it
-  in PLAN.md. Feedback is triaged, not obeyed.
+  in PLAN.md. Feedback is triaged, not obeyed. The agent definitions in `.claude/agents/` are still
+  written for the deadline; update them once the offseason scope is set, and until then tell
+  the agent in the prompt that the deadline framing does not apply.
 - **Vocabulary discipline:** descriptor-derived features are "shot-creation profiles,"
   never "play types." The expected-points layer is a "stratified expected-points
   baseline," never a "shot-quality model."
