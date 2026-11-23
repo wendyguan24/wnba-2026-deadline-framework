@@ -14,7 +14,7 @@ Last updated: 2026-11-23 (external validation added).
 - [x] v1 publish blockers complete (Synergy case studies + §3d structural paragraph, coach-agent gate, cap/CBA verification checklist), confirmed by Wendy 2026-11-23.
 - [x] Re-pin to full-season data and clear the reconciliation gate (Phase 1; two open test items below)
 
-## Scope (OPEN, must be settled before Phase 2)
+## Scope (SET 2026-11-23: full-season re-read of v1, candidate 1)
 
 Decision 2026-11-23: build the data pipeline first, settle the question later.
 
@@ -33,8 +33,35 @@ Wendy. Pick before building anything new:
 
 Hypotheses for the chosen question go here before results are viewed:
 
-- H-offseason-1: _TBD_
-- H-null: report what the data does not support.
+**Chosen 2026-11-23 (Wendy): candidate 1, full-season re-read of v1.** Candidates 2 and 3
+stay parked.
+
+**Design: v1 as a forecast.** Regular-season games 1 to 182 (gameIds 1022600001 to
+1022600182) are exactly the v1 sample ("first half"). Games 183 to 330 are out of sample
+("second half"). Score each v1 read against the second half. Rosters changed at the
+Aug 2 trade deadline: teams with material trades are flagged and analyzed with and without
+them. Playoffs are descriptive only (23 games, selected sample); never pooled with the
+regular season.
+
+**Pre-registered hypotheses (recorded and committed before any full-season or second-half
+model output was computed):**
+
+- **H-R1 (identity stable):** the ICC >= 0.15 identity-anchor metrics rank teams similarly in
+  the second half as in the first. Prediction: Spearman >= 0.7 for most anchor metrics.
+- **H-R2 (generation holds, making regresses):** first-half shot generation predicts
+  second-half generation better than first-half making predicts second-half making. Sharpest
+  case: LVA (generation 7th pctile, making 100th, declining) sees making fall in the second
+  half.
+- **H-R3 (reads beyond the record):** first-half generation and making add information about
+  second-half results (point differential per game, win pct) beyond first-half record. This
+  is v1's core claim; a failure is the headline finding.
+- **H-R4 (trajectory labels weak):** v1 improving/declining labels, most with intervals
+  spanning zero, do not predict second-half direction better than chance. Expected null.
+- **H1, H2, H3 re-run on the full season:** H1 (transition rises with reps) and H2
+  (chemistry proxies improve, strongest for TOR and PDX) were published v1 nulls; do they
+  hold with twice the sample? H3 (GSV's low FG% is making below expectation on an acceptable
+  diet): GSV won the title, so report whether its making moved toward expectation.
+- **H-null:** report what the data does not support. A null is a finding.
 
 ## Phase 1: Re-pin and reconcile (first work, independent of the scope choice)
 
@@ -157,9 +184,5 @@ Carried from v1's post-deadline list, none prioritized:
 
 ## Next session should
 
-1. Ask Wendy to pick the offseason scope (1, 2, 3 or other) and write the full-season re-read
-   hypotheses here before looking at any full-season model output (CLAUDE.md hypotheses discipline).
-2. Wire the `R/05` to `R/07`, `R/11`, `R/13`, `R/14` scripts the chosen scope needs to
-   `R/00_config.R` (they still hard-code v1 paths), and start questions from `load_table()`.
-3. Optional: note in the write-up that Finals Game 7 is absent from ESPN's current snapshot; re-run
-   `Rscript R/04c_validate_external.R` after a wehoop refresh to cross-check it.
+1. Execute the re-read (see plan dispatched 2026-11-23): wire R/05-R/07, R/11, R/13 to
+   R/00_config.R, run first half / second half / full season, score the 15 v1 reads.
