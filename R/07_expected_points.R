@@ -22,6 +22,12 @@
 #            the 06_models.R trajectory layer).
 
 library(tidyverse)
+source(file.path(if (exists("PROJECT_ROOT")) PROJECT_ROOT else ".", "R", "00_config.R"))
+source(file.path(PROJECT_ROOT, "R", "load_tables.R"))
+
+# Offseason wiring (full-season re-read): inputs are read from PROCESSED_DIR and filtered to
+# the ANALYSIS_WINDOW; outputs go to WINDOW_PROCESSED_DIR / WINDOW_OUTPUT_DIR. Each window
+# builds its own stratified expected-points baseline from its own shots, as v1 did.
 
 # The baseline is computed from 2026 in-season shots only; 2024-25
 # historicals were available as priors but were not used, to keep the
@@ -155,8 +161,9 @@ compute_shot_generation <- function(shots, xpts_table, possessions) {
 # possessions"); the xpts lookup itself stays per-shot.
 
 main <- function() {
-  pbp <- readRDS("data/processed/pbp_events.rds")
-  possessions <- readRDS("data/processed/possessions.rds")
+  ids <- window_game_ids(load_table("games", "all"), ANALYSIS_WINDOW)
+  pbp <- readRDS(file.path(PROCESSED_DIR, "pbp_events.rds")) %>% filter(gameId %in% ids)
+  possessions <- readRDS(file.path(PROCESSED_DIR, "possessions.rds")) %>% filter(gameId %in% ids)
 
   # FG-only: free throws are excluded because they are foul-triggered, not
   # a shot chosen from a diet, so they do not belong in an expected-points
@@ -194,18 +201,18 @@ main <- function() {
   team_game  <- compute_shot_making(shots, xpts_table, possessions)
   season     <- compute_shot_generation(shots, xpts_table, possessions)
 
-  dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
-  dir.create("output", recursive = TRUE, showWarnings = FALSE)
-  saveRDS(xpts_table, "data/processed/expected_points_baseline.rds")
-  saveRDS(season,     "data/processed/team_generation_making.rds")
-  saveRDS(team_game,  "data/processed/team_game_shot_making.rds")
+  dir.create(WINDOW_PROCESSED_DIR, recursive = TRUE, showWarnings = FALSE)
+  dir.create(WINDOW_OUTPUT_DIR, recursive = TRUE, showWarnings = FALSE)
+  saveRDS(xpts_table, file.path(WINDOW_PROCESSED_DIR, "expected_points_baseline.rds"))
+  saveRDS(season,     file.path(WINDOW_PROCESSED_DIR, "team_generation_making.rds"))
+  saveRDS(team_game,  file.path(WINDOW_PROCESSED_DIR, "team_game_shot_making.rds"))
   # Readable export of the season generation/making table so downstream prose
   # can cite shot_making_per100 (its sign is what makes the H3 read) without
   # opening the binary .rds.
-  readr::write_csv(season, "output/team_generation_making.csv")
+  readr::write_csv(season, file.path(WINDOW_OUTPUT_DIR, "team_generation_making.csv"))
 
-  message("Wrote expected_points_baseline.rds (", nrow(xpts_table), " strata), ",
-          "team_generation_making.rds + output/team_generation_making.csv (", nrow(season), " teams), ",
+  message("Window ", ANALYSIS_WINDOW, ": wrote expected_points_baseline.rds (", nrow(xpts_table), " strata), ",
+          "team_generation_making.rds + team_generation_making.csv (", nrow(season), " teams), ",
           "team_game_shot_making.rds (", nrow(team_game), " team-games)")
 
   invisible(list(xpts_table = xpts_table, season = season, team_game = team_game))

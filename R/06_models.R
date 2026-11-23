@@ -31,6 +31,12 @@
 
 library(tidyverse)
 library(lme4)
+source(file.path(if (exists("PROJECT_ROOT")) PROJECT_ROOT else ".", "R", "00_config.R"))
+source(file.path(PROJECT_ROOT, "R", "load_tables.R"))
+
+# Offseason wiring (full-season re-read): inputs are read from PROCESSED_DIR (filtered to the
+# ANALYSIS_WINDOW) and from WINDOW_PROCESSED_DIR (R/05 and R/07 outputs); outputs go to
+# WINDOW_PROCESSED_DIR / WINDOW_OUTPUT_DIR. Modeling logic is unchanged from v1.
 
 # Full identity-layer metric list (HANDOFF §5b, matches the EDA gate's
 # 21-metric ICC preview minus pace_formula, which is a secondary cross-check
@@ -499,9 +505,9 @@ render_trajectory_sensitivity_report <- function(sens, garbage_share) {
 }
 
 main <- function() {
-  features <- readRDS("data/processed/team_game_features.rds")
+  features <- readRDS(file.path(WINDOW_PROCESSED_DIR, "team_game_features.rds"))
 
-  tg_making <- readRDS("data/processed/team_game_shot_making.rds")
+  tg_making <- readRDS(file.path(WINDOW_PROCESSED_DIR, "team_game_shot_making.rds"))
   features <- features %>%
     left_join(select(tg_making, gameId, team, shot_making_residual),
               by = c("gameId", "team"))
@@ -509,13 +515,14 @@ main <- function() {
   identity <- fit_all_identity_models(features)
   trajectory <- fit_all_trajectory_models(features)
 
-  dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
-  dir.create("output", recursive = TRUE, showWarnings = FALSE)
+  dir.create(WINDOW_PROCESSED_DIR, recursive = TRUE, showWarnings = FALSE)
+  dir.create(WINDOW_OUTPUT_DIR, recursive = TRUE, showWarnings = FALSE)
 
   # AMENDMENT_01 2c garbage-time sensitivity pass (pre-registered, eda_notes 6)
-  possessions <- readRDS("data/processed/possessions.rds")
-  pbp <- readRDS("data/processed/pbp_events.rds")
-  xpts_baseline <- readRDS("data/processed/expected_points_baseline.rds")
+  ids <- window_game_ids(load_table("games", "all"), ANALYSIS_WINDOW)
+  possessions <- readRDS(file.path(PROCESSED_DIR, "possessions.rds")) %>% filter(gameId %in% ids)
+  pbp <- readRDS(file.path(PROCESSED_DIR, "pbp_events.rds")) %>% filter(gameId %in% ids)
+  xpts_baseline <- readRDS(file.path(WINDOW_PROCESSED_DIR, "expected_points_baseline.rds"))
   features_ng <- recompute_trajectory_metrics_excluding_garbage(pbp, possessions, features, xpts_baseline)
   trajectory_ng <- fit_all_trajectory_models(features_ng)
   sens <- compare_trajectory_sensitivity(trajectory, trajectory_ng)
@@ -526,22 +533,20 @@ main <- function() {
     summarise(s = mean(period >= 4 & abs(scoreHome - scoreAway) >= 20, na.rm = TRUE)) %>%
     pull(s)
   writeLines(render_trajectory_sensitivity_report(sens, garbage_share),
-             "output/trajectory_sensitivity.md")
-  message("Wrote output/trajectory_sensitivity.md")
+             file.path(WINDOW_OUTPUT_DIR, "trajectory_sensitivity.md"))
+  message("Wrote ", WINDOW_OUTPUT_DIR, "/trajectory_sensitivity.md")
 
-  saveRDS(identity$blups, "data/processed/team_blups.rds")
-  write_csv(identity$icc_table, "output/icc_table.csv")
-  saveRDS(identity$rank_deltas, "data/processed/team_rank_deltas.rds")
-  write_csv(identity$rank_deltas, "output/team_rank_deltas.csv")
-  saveRDS(trajectory$team_trajectories, "data/processed/team_trajectories.rds")
-  write_csv(trajectory$team_trajectories, "output/team_trajectories.csv")
-  write_csv(trajectory$league_trends, "output/trajectory_league_trends.csv")
+  saveRDS(identity$blups, file.path(WINDOW_PROCESSED_DIR, "team_blups.rds"))
+  write_csv(identity$icc_table, file.path(WINDOW_OUTPUT_DIR, "icc_table.csv"))
+  saveRDS(identity$rank_deltas, file.path(WINDOW_PROCESSED_DIR, "team_rank_deltas.rds"))
+  write_csv(identity$rank_deltas, file.path(WINDOW_OUTPUT_DIR, "team_rank_deltas.csv"))
+  saveRDS(trajectory$team_trajectories, file.path(WINDOW_PROCESSED_DIR, "team_trajectories.rds"))
+  write_csv(trajectory$team_trajectories, file.path(WINDOW_OUTPUT_DIR, "team_trajectories.csv"))
+  write_csv(trajectory$league_trends, file.path(WINDOW_OUTPUT_DIR, "trajectory_league_trends.csv"))
 
-  message("Wrote data/processed/team_blups.rds (", nrow(identity$blups), " rows)")
-  message("Wrote output/icc_table.csv (", nrow(identity$icc_table), " metrics)")
-  message("Wrote data/processed/team_rank_deltas.rds + output/team_rank_deltas.csv (", nrow(identity$rank_deltas), " rows)")
-  message("Wrote data/processed/team_trajectories.rds + output/team_trajectories.csv (", nrow(trajectory$team_trajectories), " rows)")
-  message("Wrote output/trajectory_league_trends.csv (", nrow(trajectory$league_trends), " metrics)")
+  message("Window ", ANALYSIS_WINDOW, ": wrote identity (", nrow(identity$blups), " BLUP rows, ",
+          nrow(identity$icc_table), " metrics) and trajectory (", nrow(trajectory$team_trajectories),
+          " rows) outputs to ", WINDOW_OUTPUT_DIR)
 
   invisible(list(identity = identity, trajectory = trajectory))
 }

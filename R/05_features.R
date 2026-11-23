@@ -26,11 +26,17 @@
 #   the primary rate-stat denominator (tov_rate, live_ball_tov_rate,
 #   transition_share), unchanged.
 #
-# Inputs:  data/processed/pbp_events.rds, data/processed/possessions.rds,
-#          data/raw/wnba_shotdetail_2026.csv (HTM/VTM home/away join only)
-# Outputs: data/processed/team_game_features.rds — one row per team-game
+# Inputs:  PROCESSED_DIR/pbp_events.rds, PROCESSED_DIR/possessions.rds (filtered to the
+#          ANALYSIS_WINDOW from R/00_config.R), `games` table (home team, via R/load_tables.R)
+# Outputs: WINDOW_PROCESSED_DIR/team_game_features.rds — one row per team-game
+#
+# Offseason wiring (full-season re-read): paths come from R/00_config.R, inputs are
+# filtered to the analysis window, and is_home comes from the `games` table instead of
+# shotdetail HTM/VTM (shotdetail has no Toronto rows). Same semantics; no modeling change.
 
 library(tidyverse)
+source(file.path(if (exists("PROJECT_ROOT")) PROJECT_ROOT else ".", "R", "00_config.R"))
+source(file.path(PROJECT_ROOT, "R", "load_tables.R"))
 
 #' Each team's own chronological game number (1..N), not calendar date, plus
 #' the game's timestamp (min timeActual across its events).
@@ -209,14 +215,12 @@ compute_rate_stats <- function(pbp, pace_tbl) {
 #'
 #' @param possessions tibble
 #' @param pbp tibble
-#' @param shotdetail_raw tibble, raw wnba_shotdetail_2026.csv
+#' @param games_tbl tibble, the `games` analysis table (game_id, home_team)
 #' @return tibble: gameId, team, opponent, is_home, is_ot, game_minutes
-compute_game_context_flags <- function(possessions, pbp, shotdetail_raw) {
+compute_game_context_flags <- function(possessions, pbp, games_tbl) {
   team_opponent <- possessions %>% distinct(gameId, team, opponent)
 
-  home_away <- shotdetail_raw %>%
-    distinct(GAME_ID, HTM, VTM) %>%
-    distinct(GAME_ID, .keep_all = TRUE)
+  home_away <- games_tbl %>% distinct(game_id, home_team)
 
   ot_games <- pbp %>% filter(periodType == "OVERTIME") %>% distinct(gameId) %>% mutate(is_ot = TRUE)
 
@@ -226,8 +230,8 @@ compute_game_context_flags <- function(possessions, pbp, shotdetail_raw) {
     mutate(game_minutes = 40 + 5 * n_ot_periods)
 
   team_opponent %>%
-    left_join(home_away, by = c("gameId" = "GAME_ID")) %>%
-    mutate(is_home = team == HTM) %>%
+    left_join(home_away, by = c("gameId" = "game_id")) %>%
+    mutate(is_home = team == home_team) %>%
     left_join(ot_games, by = "gameId") %>%
     mutate(is_ot = replace_na(is_ot, FALSE)) %>%
     left_join(game_minutes_tbl, by = "gameId") %>%
@@ -238,17 +242,17 @@ compute_game_context_flags <- function(possessions, pbp, shotdetail_raw) {
 #'
 #' @param possessions tibble
 #' @param pbp tibble
-#' @param shotdetail_raw tibble, raw wnba_shotdetail_2026.csv (home/away join only)
+#' @param games_tbl tibble, the `games` analysis table (home/away join only)
 #' @return tibble, one row per team-game, all HANDOFF §5b features plus the
 #'   EDA-gate spec additions (is_ot, is_home, garbage_time_poss_share,
 #'   game_minutes, pace_per40)
-build_team_game_features <- function(possessions, pbp, shotdetail_raw) {
+build_team_game_features <- function(possessions, pbp, games_tbl) {
   game_index_tbl <- compute_game_index(pbp, possessions)
   pace_tbl <- compute_pace(possessions, pbp)
   shot_profile_tbl <- compute_shot_profile(pbp)
   context_tbl <- compute_context_shares(possessions, pbp)
   rate_tbl <- compute_rate_stats(pbp, pace_tbl)
-  context_flags_tbl <- compute_game_context_flags(possessions, pbp, shotdetail_raw)
+  context_flags_tbl <- compute_game_context_flags(possessions, pbp, games_tbl)
 
   game_index_tbl %>%
     left_join(context_flags_tbl, by = c("gameId", "team")) %>%
@@ -261,11 +265,13 @@ build_team_game_features <- function(possessions, pbp, shotdetail_raw) {
 }
 
 main <- function() {
-  pbp <- readRDS("data/processed/pbp_events.rds")
-  possessions <- readRDS("data/processed/possessions.rds")
-  shotdetail_raw <- read_csv("data/raw/wnba_shotdetail_2026.csv", show_col_types = FALSE)
+  games_all <- load_table("games", "all")
+  ids <- window_game_ids(games_all, ANALYSIS_WINDOW)
+  pbp <- readRDS(file.path(PROCESSED_DIR, "pbp_events.rds")) %>% filter(gameId %in% ids)
+  possessions <- readRDS(file.path(PROCESSED_DIR, "possessions.rds")) %>% filter(gameId %in% ids)
+  message("Window ", ANALYSIS_WINDOW, ": ", length(ids), " games")
 
-  features <- build_team_game_features(possessions, pbp, shotdetail_raw)
+  features <- build_team_game_features(possessions, pbp, games_all)
 
   n_missing <- features %>%
     select(-game_time) %>%
@@ -277,9 +283,9 @@ main <- function() {
             paste(n_missing$col, collapse = ", "))
   }
 
-  dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
-  saveRDS(features, "data/processed/team_game_features.rds")
-  message("Wrote data/processed/team_game_features.rds (", nrow(features), " team-games, ",
+  dir.create(WINDOW_PROCESSED_DIR, recursive = TRUE, showWarnings = FALSE)
+  saveRDS(features, file.path(WINDOW_PROCESSED_DIR, "team_game_features.rds"))
+  message("Wrote ", WINDOW_PROCESSED_DIR, "/team_game_features.rds (", nrow(features), " team-games, ",
           n_distinct(features$gameId), " games)")
   invisible(features)
 }

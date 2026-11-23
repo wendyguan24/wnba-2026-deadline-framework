@@ -3,7 +3,8 @@
 # Purpose: single source of truth for the data pin, season, and paths used by
 #   the offseason pipeline (R/01 to R/04b). Run scripts from the repo root, or
 #   set PROJECT_ROOT before sourcing (tests/testthat/setup.R does this).
-#   R/05 to R/14 still hard-code v1 paths and are not yet wired to this file.
+#   R/05 to R/07 (re-read of v1) are wired to this file through the analysis
+#   windows below; R/08 to R/14 still hard-code v1 paths.
 
 # Pinned shufinskiy/nba_data commit (short hash 46488f0, 2026-11-06, regular
 # season plus playoffs). Full SHA resolved from the upstream clone.
@@ -46,3 +47,34 @@ WEHOOP_URLS <- c(
   team_box = "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_wnba_team_boxscores/team_box_2026.parquet",
   schedule = "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_wnba_schedules/wnba_schedule_2026.parquet"
 )
+
+# Analysis windows for the full-season re-read of v1 (PLAN.md "Scope").
+# first_half = regular-season games 1 to 182 (the exact v1 sample), second_half =
+# regular-season games 183 to 330, full = all regular-season games, playoffs = all
+# playoff games. Regular season and playoffs are never pooled. Select with the
+# WNBA_WINDOW environment variable (default "full").
+WINDOWS <- c("first_half", "second_half", "full", "playoffs")
+ANALYSIS_WINDOW <- Sys.getenv("WNBA_WINDOW", "full")
+if (!ANALYSIS_WINDOW %in% WINDOWS) {
+  stop("WNBA_WINDOW must be one of: ", paste(WINDOWS, collapse = ", "),
+       " (got '", ANALYSIS_WINDOW, "')")
+}
+V1_LAST_GAME_ID <- 1022600182
+
+#' Game IDs belonging to an analysis window
+#'
+#' @param games_tbl tibble with game_id and season_type (the `games` table)
+#' @param window one of WINDOWS
+window_game_ids <- function(games_tbl, window = ANALYSIS_WINDOW) {
+  reg <- games_tbl$season_type == "regular"
+  ids <- switch(window,
+    first_half  = games_tbl$game_id[reg & games_tbl$game_id <= V1_LAST_GAME_ID],
+    second_half = games_tbl$game_id[reg & games_tbl$game_id >  V1_LAST_GAME_ID],
+    full        = games_tbl$game_id[reg],
+    playoffs    = games_tbl$game_id[games_tbl$season_type == "playoffs"],
+    stop("unknown window: ", window))
+  sort(unique(ids))
+}
+
+WINDOW_PROCESSED_DIR <- file.path(PROCESSED_DIR, "windows", ANALYSIS_WINDOW)
+WINDOW_OUTPUT_DIR <- file.path(OUTPUT_DIR, "reread", ANALYSIS_WINDOW)
