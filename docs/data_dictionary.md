@@ -24,7 +24,7 @@ load_table("player_games", "regular")   # "regular", "playoffs" or "all"
 - Toronto has no shotdetail rows in the regular season (known source gap). Nothing in these
   tables depends on shotdetail except `game_date`, which falls back to the cdn UTC date.
 - Minutes are reconstructed from substitution events (R/13 method), not taken from an
-  official box score. A few team-periods fail the 5-on-court check; see the report.
+  official box score. A few team-periods fail the 5-on-court check; affected team-games carry `minutes_reconciled == FALSE`.
 
 ## games
 
@@ -53,6 +53,7 @@ Grain: one row per team per game. Primary key: `game_id` + `team`.
 | win | logical | pts > opp_pts |
 | possessions | integer | possession rows for the team, excluding out-of-band technical/flagrant FT rows (R/03) |
 | FGA, FGM, AST, FG3A | integer | from `compute_team_game_counts_cdn()` (R/04) |
+| minutes_reconciled | logical | TRUE when summed reconstructed player minutes for the team-game are within 1 minute of 200 + 25*(n_periods-4). FALSE for 10 of 706 team-games (8 regular, 2 playoffs). Cause: starter inference misses a player who plays a full period with no substitution event, so deviations are 5 or 10 minutes. Filter on it before using minutes or per-minute rates. Counts are stored in `data/reference/pipeline_baseline.csv` (`minutes_unreconciled_team_games`, written by R/04b). |
 | FG3M, FTM, FTA, OREB, DREB, STL, BLK, TOV, PF | integer | counted from cdn events by the event's team; OREB, DREB and TOV include team rebounds and team turnovers; PF is personal plus offensive fouls (no technicals) |
 
 ## player_games
@@ -70,6 +71,7 @@ Primary key: `game_id` + `team` + `person_id`. Source: `build_box()` and `build_
 | FG2M, FG3M, FGM, FGA, FTM, FTA, OREB, DREB, AST, STL, BLK, TOV, PF, PTS | integer | box counts as in R/13; AST is credited via `assistPersonId` |
 | poss_used | double | FGA + 0.44 FTA + TOV |
 | game_score | double | Hollinger Game Score (NBA weights, unvalidated for the WNBA) |
+| minutes_reconciled | logical | the team-game flag from `team_games`; rows with FALSE have unreliable `minutes` for that team |
 
 Caveat: a player with only an assist and no other event in a game gets no row, so AST can be
 undercounted by that case. Points reconcile to team points in every team-game.

@@ -74,11 +74,13 @@ Hypotheses for the chosen question go here before results are viewed:
 - [x] `output/offseason/reconciliation_report.md` written
 - [x] Analysis-ready tables (`R/04b`, `R/load_tables.R`, `docs/data_dictionary.md`,
       `output/offseason/tables_report.md`)
-- [ ] OPEN: `test-analysis-tables.R` minutes invariant fails for 10 of 706 team-games (the R/13
-      starter inference misses a team-period; deviations of 5 or 10 minutes; list in tables_report).
-      Decide: fix the reconstruction, accept a stated tolerance, or exclude those team-games.
-- [ ] OPEN: `test-player-value.R` (v1 test) reads the v1 `data/processed/pbp_events.rds`, which
-      does not exist in a fresh checkout; it fails here independent of this work.
+- [x] Minutes invariant: `build_minutes()` left unchanged (v1 R/13 logic). Team-games where summed
+      minutes miss 200 + 25*(n_periods-4) by more than 1 minute are flagged
+      `minutes_reconciled == FALSE` (8 regular, 2 playoffs; deviations 5 or 10 minutes), the invariant
+      is tested on the rest, and the counts are stored in `pipeline_baseline.csv`.
+- [x] `test-player-value.R` (v1 test) now skips when the v1 `data/processed/pbp_events.rds` is absent.
+      Note: R/13 and the R/05+ scripts still use v1 paths and must be wired to `R/00_config.R`
+      before re-running.
 
 ## Phase 2: Features and models on the full season (after Phase 1 and scope)
 
@@ -116,6 +118,8 @@ Carried from v1's post-deadline list, none prioritized:
 - Defense and lineup-flexibility layer (mentor roadmap, v1 PLAN "Mentor-informed v2")
 - Fit-vs-cost target scoring and trade-outcome model (need to-the-dollar cap data and an
   asset-valuation model; v1 kept both out)
+- Improve starter inference in `build_minutes()` (a player who plays a full period with no
+  substitution event is missed); candidate fix: v2 or boxscore minutes cross-check
 - Deferred R/13 and R/14 items: full per-(game,period,team) minutes invariant test,
   creation-class fit bucket, garbage-time bench sensitivity, sorting `player_value.csv`
   by team, capped-min cap-mechanic citation
@@ -127,6 +131,5 @@ Carried from v1's post-deadline list, none prioritized:
 ## Next session should
 
 1. Ask Wendy to pick the offseason scope (1, 2, 3 or other) and write hypotheses.
-2. Resolve the two OPEN items in Phase 1 (minutes invariant, v1 player-value test).
-3. Wire the `R/05` to `R/07`, `R/11`, `R/13`, `R/14` scripts the chosen scope needs to
+2. Wire the `R/05` to `R/07`, `R/11`, `R/13`, `R/14` scripts the chosen scope needs to
    `R/00_config.R` (they still hard-code v1 paths), and start questions from `load_table()`.

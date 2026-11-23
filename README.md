@@ -101,6 +101,12 @@ used. Run 2026-07-18 against `773ce292bb2cd9bc6ec98d70de95176607ccbaeb`: 89,735 
 23,163 / 74,224 rows, 182 games each — matches handoff §4 exactly. A `--latest` flag
 swaps the pin for `main` for the planned July 23 data-refresh check (handoff §3, §6).
 
+Offseason update: the offseason pipeline is pinned to
+`46488f0f8e1cab58fc1256511ea808166a443a15` (2026-11-06), regular season 330 games plus
+playoffs 23 games. The v1 pin `773ce29` is retained for the published deadline framework at
+commit `4b78e2e`. Run order: `R/01`, `R/02`, `R/03`, `R/04`, `R/04b`. Tables are documented in
+`docs/data_dictionary.md`.
+
 ## Known issue: shotdetail is missing Toronto Tempo (confirmed 2026-07-18)
 
 `wnba_shotdetail_2026.csv` contains **zero rows for Toronto Tempo** — 14 of 15 teams

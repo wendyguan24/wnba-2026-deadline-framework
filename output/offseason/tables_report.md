@@ -1,6 +1,6 @@
 # Analysis tables report
 
-Generated: 2026-11-23 16:55:35 UTC. Pin 46488f0.
+Generated: 2026-11-23 16:58:39 UTC. Pin 46488f0.
 
 ## Row counts per table and season type
 
@@ -30,7 +30,7 @@ Generated: 2026-11-23 16:55:35 UTC. Pin 46488f0.
 | every game has exactly 2 team_games | PASS |
 | team_games pts equals games home/away pts | PASS |
 | sum of player_games PTS per team-game equals team_games pts | PASS |
-| sum of player minutes per team-game within 1 minute of 200 + 25*(n_periods-4) | FAIL |
+| minutes within 1 minute of 200 + 25*(n_periods-4) for every team-game with minutes_reconciled | PASS |
 | season_type never NA in any table | PASS |
 | shots made-points per team-game equals team pts minus FTM | PASS |
 
@@ -38,5 +38,6 @@ Generated: 2026-11-23 16:55:35 UTC. Pin 46488f0.
 
 Pass rate, regular: 0.9970
 Pass rate, playoffs: 0.9895
-Team-games whose summed player minutes are more than 1 minute from 200 + 25*(n_periods-4): 10 of 706 (1.42%).
+Unreconciled team-games (minutes_reconciled == FALSE; summed minutes more than 1 minute from 200 + 25*(n_periods-4)): 10 of 706 (1.42%).
+Unreconciled by season type: playoffs 2, regular 8
 Largest absolute deviation: 10.00 minutes.

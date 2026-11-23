@@ -15,7 +15,9 @@ test_that("reconstructed player-minutes sum to 5 on court per team-period", {
   skip_if_not(all(pv$minutes_method == "reconstructed"),
               "minutes fell back to per-game rate; invariant does not apply")
 
-  pbp <- readRDS(proj_path("data", "processed", "pbp_events.rds"))
+  v1_pbp_path <- proj_path("data", "processed", "pbp_events.rds")
+  skip_if_not(file.exists(v1_pbp_path), "v1 processed data not built")
+  pbp <- readRDS(v1_pbp_path)
 
   # expected total on-court minutes = 5 players * period length, summed over every
   # (game, period, team) that actually occurred

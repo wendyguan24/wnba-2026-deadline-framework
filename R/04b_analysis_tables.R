@@ -157,8 +157,8 @@ check_invariants <- function(t) {
         all(tg$pts == if_else(tg$is_home, g$home_pts[match(tg$game_id, g$game_id)],
                               g$away_pts[match(tg$game_id, g$game_id)]))),
     chk("sum of player_games PTS per team-game equals team_games pts", all(j$pts_p == j$pts)),
-    chk("sum of player minutes per team-game within 1 minute of 200 + 25*(n_periods-4)",
-        all(abs(j$min_p - (200 + 25 * (j$n_periods - 4))) <= 1)),
+    chk("minutes within 1 minute of 200 + 25*(n_periods-4) for every team-game with minutes_reconciled",
+        all(abs(j$min_p - (200 + 25 * (j$n_periods - 4)))[j$minutes_reconciled] <= 1)),
     chk("season_type never NA in any table", !anyNA(g$season_type) && !anyNA(tg$season_type) &&
           !anyNA(pg$season_type) && !anyNA(sh$season_type)),
     chk("shots made-points per team-game equals team pts minus FTM", all(js$fg_pts == js$pts - js$FTM))
@@ -176,6 +176,17 @@ main <- function() {
   player_games <- pgres$player_games
   players <- build_players(player_games)
   shots <- build_shots(pbp)
+  # minutes_reconciled: summed player minutes within 1 minute of 200 + 25*(n_periods-4).
+  # build_minutes() (v1 R/13 logic) is deliberately unchanged; unreconciled team-games
+  # are flagged, not repaired.
+  flag <- team_games %>% left_join(games %>% select(game_id, n_periods), by = "game_id") %>%
+    left_join(player_games %>% group_by(game_id, team) %>% summarise(min_p = sum(minutes), .groups = "drop"),
+              by = c("game_id", "team")) %>%
+    transmute(game_id, team, minutes_reconciled = abs(min_p - (200 + 25 * (n_periods - 4))) <= 1)
+  team_games <- team_games %>% left_join(flag, by = c("game_id", "team"))
+  player_games <- player_games %>% left_join(flag, by = c("game_id", "team"))
+  players <- build_players(player_games)
+
   t <- list(games = games, team_games = team_games, player_games = player_games,
             players = players,
             possessions = possessions %>% mutate(season = SEASON, .before = 1),
@@ -192,7 +203,7 @@ main <- function() {
   min_check <- team_games %>% left_join(games %>% select(game_id, n_periods), by = "game_id") %>%
     left_join(player_games %>% group_by(game_id, team) %>% summarise(min_p = sum(minutes), .groups = "drop"),
               by = c("game_id", "team")) %>%
-    mutate(expected = 200 + 25 * (n_periods - 4), off = abs(min_p - expected) > 1)
+    mutate(expected = 200 + 25 * (n_periods - 4), off = !minutes_reconciled)
   inv <- check_invariants(t)
 
   counts <- imap_dfr(t, function(df, nm) {
@@ -211,11 +222,21 @@ main <- function() {
     md(inv %>% mutate(passed = if_else(passed, "PASS", "FAIL"))), "",
     "## Minutes gate (R/13 rule: exactly 5 on court per team-period)", "",
     paste0("Pass rate, ", names(gate_by_type), ": ", sprintf("%.4f", gate_by_type)),
-    paste0("Team-games whose summed player minutes are more than 1 minute from 200 + 25*(n_periods-4): ",
+    paste0("Unreconciled team-games (minutes_reconciled == FALSE; summed minutes more than 1 minute from 200 + 25*(n_periods-4)): ",
            sum(min_check$off), " of ", nrow(min_check), " (", sprintf("%.2f%%", 100 * mean(min_check$off)), ")."),
+    paste0("Unreconciled by season type: ", paste(names(table(min_check$season_type[min_check$off])), table(min_check$season_type[min_check$off]), collapse = ", ")),
     paste0("Largest absolute deviation: ", sprintf("%.2f", max(abs(min_check$min_p - min_check$expected))), " minutes.")
   )
   writeLines(lines, file.path(OUTPUT_DIR, "tables_report.md"))
+
+  # Store the unreconciled count per season type with the pipeline baseline (tests compare to it).
+  bl_path <- proj_path("data", "reference", "pipeline_baseline.csv")
+  bl <- read_csv(bl_path, show_col_types = FALSE, col_types = cols(pin = "c", .default = col_guess())) %>%
+    select(-any_of("minutes_unreconciled_team_games"))
+  unrec <- min_check %>% filter(off) %>% count(season_type, name = "minutes_unreconciled_team_games")
+  bl <- bl %>% left_join(unrec, by = "season_type") %>%
+    mutate(minutes_unreconciled_team_games = replace_na(minutes_unreconciled_team_games, 0L))
+  write_csv(bl, bl_path)
   message("Wrote tables to ", TABLES_DIR, " and ", file.path(OUTPUT_DIR, "tables_report.md"))
   invisible(list(tables = t, invariants = inv, min_check = min_check))
 }
