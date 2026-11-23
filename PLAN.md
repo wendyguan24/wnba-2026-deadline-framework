@@ -12,7 +12,7 @@ Last updated: 2026-11-23.
 - [x] CLAUDE.md and PLAN.md rewritten for the offseason phase
 - [ ] Offseason question(s) written down (see "Scope", currently OPEN)
 - [x] v1 publish blockers complete (Synergy case studies + §3d structural paragraph, coach-agent gate, cap/CBA verification checklist), confirmed by Wendy 2026-11-23.
-- [ ] Re-pin to full-season data and clear the reconciliation gate (Phase 1)
+- [x] Re-pin to full-season data and clear the reconciliation gate (Phase 1; two open test items below)
 
 ## Scope (OPEN, must be settled before Phase 2)
 
@@ -38,18 +38,47 @@ Hypotheses for the chosen question go here before results are viewed:
 
 ## Phase 1: Re-pin and reconcile (first work, independent of the scope choice)
 
-- [ ] Read upstream `loading/utils.R` change in commit `46488f0` and confirm
-      `R/01_download.R` loaders still work (or adapt, noting the change)
-- [ ] Pin `shufinskiy/nba_data` to `46488f0`; download full 2026 regular season and
-      playoff files (`cdnnba`, `nbastats` v2, `nbastatsv3`, `shotdetail`, `_po_2026`)
-- [ ] Report counts: games, rows per source, date range, games per team, regular season
-      vs playoffs separately
-- [ ] Update baseline expectations in `tests/testthat/test-baseline-table.R` deliberately
-      (v1 values: 89,735 / 23,163 / 74,224 rows, 182 games) and record the new numbers here
-- [ ] Re-run `R/01` to `R/04`; possession points must equal final score in every
-      team-game; confirm the technical-FT fix still holds on the new games
-- [ ] Toronto has no shotdetail rows (v1 finding); `is_home` comes from shotdetail HTM/VTM. Confirm home/away comes from cdn or the games table instead, and check Toronto playoff games if any.
-- [ ] Write `output/offseason/reconciliation_report.md` and show it before proceeding
+- [x] Upstream `loading/utils.R` change in `46488f0`: not used. `R/01_download.R` fetches
+      tarballs directly from raw.githubusercontent.com; dataset names
+      `wnba_{cdnnba,nbastats,shotdetail}[_po]_2026` confirmed at the pin.
+- [x] Pin `shufinskiy/nba_data` to `46488f0` (full SHA in `R/00_config.R`); regular season and
+      playoff files downloaded for cdnnba, nbastats v2, shotdetail (nbastatsv3 excluded as in v1)
+- [x] Counts (also in `data/reference/pipeline_baseline.csv`):
+
+      | | v1 (773ce29) | regular (46488f0) | playoffs (46488f0) |
+      |---|---|---|---|
+      | games | 182 | 330 | 23 |
+      | cdn rows | 89,735 | 161,135 | 10,776 |
+      | v2 rows | 74,224 | 133,244 | 9,052 |
+      | shotdetail rows | 23,163 | 42,297 | 3,067 |
+      | team-games | 364 | 660 | 46 |
+      | dates | 2026-05-08 to 07-16 | 2026-05-08 to 09-24 | 2026-09-27 to 10-31 |
+
+      Regular season: 44 games per team. Playoffs: ATL 12, GSV 13, LVA 6, NYL 5, DAL 3, IND 3,
+      MIN 2, WAS 2 (Toronto, Connecticut, Seattle, Phoenix, Chicago, Portland, Los Angeles did not play).
+- [x] Baseline expectations: `test-baseline-table.R` now runs on the v1 subset (regular-season
+      gameIds 1 to 182; game 182 is 2026-07-16, game 183 is 2026-07-20) and reproduces the
+      handoff 8-team table with 0 delta. Full-season expectations live in `pipeline_baseline.csv`.
+- [x] Re-run `R/01` to `R/04`: possession points equal final score in all 660 regular and
+      all 46 playoff team-games. First run had one playoff mismatch (game 1042600112, DAL vs GSV,
+      +-2): flagrant FTs listed under the shooter while cdn `possession` stays with the other team.
+      Fix (approved by planner): `R/03` treats a made flagrant FT as out-of-band, like a technical FT,
+      only when the shooter's team differs from the possession holder. v1-subset possession rows are
+      byte-identical before and after; only game 1042600112 changed. Unit test added.
+- [x] cdn vs v2: regular season sum |FGA| 3, |FGM| 2, |AST| 5, |FG3A| 1 (games 1022600004,
+      1022600022, 1022600065, 1022600199, 1022600210); playoffs all 0. Stored as known source
+      disagreement in `pipeline_baseline.csv` and tested for equality.
+- [x] Toronto has no shotdetail rows in the regular season (confirmed); home/away now comes from cdn
+      scoring events and matches shotdetail HTM/VTM in 330 of 330 regular and 23 of 23 playoff games.
+      Toronto played no playoff games.
+- [x] `output/offseason/reconciliation_report.md` written
+- [x] Analysis-ready tables (`R/04b`, `R/load_tables.R`, `docs/data_dictionary.md`,
+      `output/offseason/tables_report.md`)
+- [ ] OPEN: `test-analysis-tables.R` minutes invariant fails for 10 of 706 team-games (the R/13
+      starter inference misses a team-period; deviations of 5 or 10 minutes; list in tables_report).
+      Decide: fix the reconstruction, accept a stated tolerance, or exclude those team-games.
+- [ ] OPEN: `test-player-value.R` (v1 test) reads the v1 `data/processed/pbp_events.rds`, which
+      does not exist in a fresh checkout; it fails here independent of this work.
 
 ## Phase 2: Features and models on the full season (after Phase 1 and scope)
 
@@ -98,6 +127,6 @@ Carried from v1's post-deadline list, none prioritized:
 ## Next session should
 
 1. Ask Wendy to pick the offseason scope (1, 2, 3 or other) and write hypotheses.
-2. Start Phase 1: check the `46488f0` loader change, then re-pin and report full-season
-   counts. Install R packages first if the setup script failed (network host now allowed
-   for new sessions; this one may need `install.packages` by hand).
+2. Resolve the two OPEN items in Phase 1 (minutes invariant, v1 player-value test).
+3. Wire the `R/05` to `R/07`, `R/11`, `R/13`, `R/14` scripts the chosen scope needs to
+   `R/00_config.R` (they still hard-code v1 paths), and start questions from `load_table()`.
