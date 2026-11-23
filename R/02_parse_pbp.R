@@ -6,9 +6,9 @@
 #   mapping so teams are never silently swapped.
 #   See HANDOFF §4 (cdn PBP section, "Tricode trap").
 #
-# Inputs:  data/raw/wnba_cdnnba_2026.csv
-# Outputs: data/processed/pbp_events.rds — one row per PBP event, ordered by
-#   gameId, orderNumber, with parsed_clock_seconds, qualifier flag columns
+# Inputs:  raw cdn CSVs, regular season and playoffs (paths via R/00_config.R)
+# Outputs: <PROCESSED_DIR>/pbp_events.rds — one row per PBP event, ordered by
+#   gameId, orderNumber, with season_type (regular/playoffs), parsed_clock_seconds, qualifier flag columns
 #   (is_fastbreak, is_fromturnover, is_2ndchance, is_pointsinthepaint), and
 #   team_full_name added.
 
@@ -91,7 +91,18 @@ apply_team_mapping <- function(pbp) {
 }
 
 main <- function() {
-  cdn <- read_csv("data/raw/wnba_cdnnba_2026.csv", show_col_types = FALSE, guess_max = 100000)
+  if (!exists("PROCESSED_DIR")) source(file.path("R", "00_config.R"))
+
+  cdn <- purrr::imap_dfr(names(SEASON_TYPES) %>% setNames(names(SEASON_TYPES)), function(st, nm) {
+    read_csv(raw_csv("cdnnba", st), show_col_types = FALSE, guess_max = 100000) %>%
+      mutate(season_type = st)
+  })
+
+  ids_by_type <- split(cdn$gameId, cdn$season_type)
+  overlap <- intersect(unique(ids_by_type$regular), unique(ids_by_type$playoffs))
+  if (length(overlap) > 0) {
+    stop("gameId overlap between regular season and playoffs: ", paste(overlap, collapse = ", "))
+  }
 
   cdn <- cdn %>%
     mutate(parsed_clock_seconds = parse_clock(clock)) %>%
@@ -100,9 +111,9 @@ main <- function() {
   cdn <- apply_team_mapping(cdn)
   cdn <- cdn %>% arrange(gameId, orderNumber)
 
-  dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
-  saveRDS(cdn, "data/processed/pbp_events.rds")
-  message("Wrote data/processed/pbp_events.rds (", nrow(cdn), " rows, ",
+  dir.create(PROCESSED_DIR, recursive = TRUE, showWarnings = FALSE)
+  saveRDS(cdn, file.path(PROCESSED_DIR, "pbp_events.rds"))
+  message("Wrote ", file.path(PROCESSED_DIR, "pbp_events.rds"), " (", nrow(cdn), " rows, ",
           n_distinct(cdn$gameId), " games)")
   invisible(cdn)
 }

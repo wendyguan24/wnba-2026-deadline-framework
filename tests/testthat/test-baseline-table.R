@@ -9,11 +9,18 @@
 
 library(testthat)
 
-pbp_path <- proj_path("data/processed/pbp_events.rds")
+pbp_path <- file.path(PROCESSED_DIR, "pbp_events.rds")
+
+# The HANDOFF section 4 targets describe the v1 half-season (regular-season
+# gameIds 1 to 182, pin 773ce29). After the re-pin to 46488f0 the table is only
+# valid on that game subset, so this is a regression test on the v1 subset, not
+# a full-season check. Full-season counts live in data/reference/pipeline_baseline.csv.
 
 get_baseline <- function() {
   pbp <- readRDS(pbp_path)
-  validate_baseline_table(pbp)
+  v1_ids <- pbp %>% dplyr::filter(season_type == "regular") %>% dplyr::distinct(gameId) %>%
+    dplyr::arrange(gameId) %>% dplyr::slice_head(n = V1_CUTOFF_GAMES) %>% dplyr::pull(gameId)
+  validate_baseline_table(pbp %>% dplyr::filter(gameId %in% v1_ids))
 }
 
 test_that("team FGA matches HANDOFF §4 baseline table exactly", {

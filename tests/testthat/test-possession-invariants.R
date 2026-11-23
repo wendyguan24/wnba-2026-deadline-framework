@@ -1,19 +1,19 @@
-# Tests: possession-table invariants. See HANDOFF §5a and R/03_possessions.R.
+# Tests: possession-table invariants, all games, both season types. See HANDOFF §5a and R/03_possessions.R.
 
 library(testthat)
 
-poss_path <- proj_path("data/processed/possessions.rds")
-sd_path <- proj_path("data/raw/wnba_shotdetail_2026.csv")
-pbp_path <- proj_path("data/processed/pbp_events.rds")
-data_available <- file.exists(poss_path) && file.exists(sd_path) && file.exists(pbp_path)
+poss_path <- file.path(PROCESSED_DIR, "possessions.rds")
+pbp_path <- file.path(PROCESSED_DIR, "pbp_events.rds")
+sd_paths <- vapply(names(SEASON_TYPES), function(st) raw_csv("shotdetail", st), character(1))
+data_available <- file.exists(poss_path) && all(file.exists(sd_paths)) && file.exists(pbp_path)
 
-test_that("summed possession points equal each team's final box score, for all 182 games", {
+test_that("summed possession points equal each team's final box score, every game, both season types", {
   skip_if_not(data_available, "required data files not built/downloaded yet")
   possessions <- readRDS(poss_path)
   pbp <- readRDS(pbp_path)
-  sd <- readr::read_csv(sd_path, show_col_types = FALSE)
+  sd <- purrr::map_dfr(sd_paths, readr::read_csv, show_col_types = FALSE)
 
-  # Home/away per game from shotdetail (covers all 182 games, including
+  # Home/away per game from shotdetail (covers every game, including
   # Toronto's, via the opponent's rows) -- independent of this pipeline's
   # own point computation, so this is a genuine external check, not a
   # tautology.
@@ -22,20 +22,25 @@ test_that("summed possession points equal each team's final box score, for all 1
     dplyr::group_by(gameId) %>%
     dplyr::filter(orderNumber == max(orderNumber)) %>%
     dplyr::ungroup() %>%
-    dplyr::select(gameId, scoreHome, scoreAway) %>%
+    dplyr::select(gameId, season_type, scoreHome, scoreAway) %>%
     dplyr::left_join(home_away, by = c("gameId" = "GAME_ID"))
 
   final_long <- dplyr::bind_rows(
-    final_scores %>% dplyr::transmute(gameId, team = HTM, final_score = scoreHome),
-    final_scores %>% dplyr::transmute(gameId, team = VTM, final_score = scoreAway)
+    final_scores %>% dplyr::transmute(gameId, season_type, team = HTM, final_score = scoreHome),
+    final_scores %>% dplyr::transmute(gameId, season_type, team = VTM, final_score = scoreAway)
   )
   poss_points <- possessions %>% dplyr::group_by(gameId, team) %>%
     dplyr::summarise(pts = sum(points), .groups = "drop")
 
   check <- final_long %>% dplyr::left_join(poss_points, by = c("gameId", "team"))
-  expect_equal(nrow(check), 364)
+  base <- readr::read_csv(proj_path("data/reference/pipeline_baseline.csv"), show_col_types = FALSE, col_types = readr::cols(pin = "c", .default = readr::col_guess()))
+  expect_equal(nrow(check), sum(base$team_games))
   expect_true(all(!is.na(check$pts)))
   expect_true(all(check$pts == check$final_score))
+  for (st in names(SEASON_TYPES)) {
+    chk <- check %>% dplyr::filter(season_type == st)
+    expect_true(all(chk$pts == chk$final_score), info = st)
+  }
 })
 
 test_that("possession_id is unique within a game and live-ball possessions do not overlap in start_event", {
@@ -82,4 +87,25 @@ test_that("every possession has exactly one team and one opponent, and they diff
   expect_true(all(!is.na(possessions$team)))
   expect_true(all(!is.na(possessions$opponent)))
   expect_true(all(possessions$team != possessions$opponent))
+})
+
+test_that("flagrant FTs shot by the team not holding `possession` are credited to the shooter (game 1042600112)", {
+  # Synthetic game: GSV holds `possession` throughout, but the cdn feed lists the
+  # flagrant FT under a DAL shooter (the case seen in playoff game 1042600112).
+  # A flagrant FT shot by the possession holder stays inside the possession.
+  mk <- function(order, type, team, tid, desc, result = NA_character_, poss = 2) {
+    tibble::tibble(gameId = 1, orderNumber = order, period = 1, actionType = type,
+                   shotResult = result, teamTricode = team, teamId = tid, possession = poss,
+                   description = desc, parsed_clock_seconds = 100 - order,
+                   is_fastbreak = FALSE, is_2ndchance = FALSE, is_fromturnover = FALSE)
+  }
+  ev <- dplyr::bind_rows(
+    mk(1, "2pt", "GSV", 2, "GSV jumper", "Made"),
+    mk(2, "freethrow", "DAL", 1, "X flagrant Free Throw 1 of 2", "Made"),
+    mk(3, "freethrow", "GSV", 2, "Y flagrant Free Throw 1 of 1", "Made")
+  )
+  p <- segment_possessions(ev)
+  expect_equal(sum(p$points[p$team == "DAL"]), 1)
+  expect_equal(sum(p$points[p$team == "GSV"]), 3)
+  expect_equal(sum(p$outcome == "technical_ft"), 1)
 })

@@ -25,8 +25,8 @@ test_that("parse_clock errors loudly on an unrecognized format rather than silen
 })
 
 test_that("parsed clock values are monotonically non-increasing within a period, ordered by orderNumber", {
-  skip_if_not(file.exists(proj_path("data/processed/pbp_events.rds")), "pbp_events.rds not built yet")
-  pbp <- readRDS(proj_path("data/processed/pbp_events.rds"))
+  skip_if_not(file.exists(file.path(PROCESSED_DIR, "pbp_events.rds")), "pbp_events.rds not built yet")
+  pbp <- readRDS(file.path(PROCESSED_DIR, "pbp_events.rds"))
   sample_game <- pbp %>%
     dplyr::filter(gameId == dplyr::first(gameId), period == 1) %>%
     dplyr::arrange(orderNumber)

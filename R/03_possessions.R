@@ -20,11 +20,11 @@
 #   regression (e.g. back to the 699 false positives from the pre-refinement
 #   heuristic) is caught, not silently accepted.
 #
-# Inputs:  data/processed/pbp_events.rds
-# Outputs: data/processed/possessions.rds with columns:
+# Inputs:  <PROCESSED_DIR>/pbp_events.rds (R/00_config.R)
+# Outputs: <PROCESSED_DIR>/possessions.rds with columns:
 #   possession_id, gameId, team, opponent, period, start_event, end_event,
 #   start_clock, end_clock, outcome, points, is_transition, is_2ndchance,
-#   is_off_turnover
+#   is_off_turnover, season_type
 
 library(tidyverse)
 
@@ -65,6 +65,17 @@ compute_event_points <- function(actionType, shotResult) {
 #' possession's own total and emitted as separate single-event possession
 #' rows (outcome = "technical_ft"), credited to the actual shooting team.
 #'
+#' Flagrant free throws get the same treatment (added at the 46488f0 re-pin):
+#' in playoff game 1042600112 (DAL vs GSV, period 5, 02:26) the cdn feed lists
+#' flagrant FTs under the DAL shooter while `possession` stays with GSV, and the
+#' description says "flagrant", not "technical". A made flagrant FT whose
+#' shooter's team differs from the `possession` holder is treated like a
+#' technical FT and credited to the shooting team (teamTricode of the FT
+#' event). Flagrant FTs shot by the possession-holding team are already
+#' correct and are left inside their possession (splitting them changed
+#' possession counts in 34 v1 team-games with no point change).
+#' Outcome label stays "technical_ft" so downstream filters are unchanged.
+#'
 #' @param game_events tibble, one game's PBP events (from pbp_events.rds),
 #'   already ordered by orderNumber
 #' @return tibble, one row per possession (including technical-FT rows)
@@ -77,7 +88,9 @@ segment_possessions <- function(game_events) {
         (period != lag(period, default = dplyr::first(period))),
       possession_seg = cumsum(seg_change),
       is_technical_ft_made = actionType == "freethrow" & shotResult == "Made" &
-        str_detect(coalesce(description, ""), regex("technical", ignore_case = TRUE))
+        (str_detect(coalesce(description, ""), regex("technical", ignore_case = TRUE)) |
+           (str_detect(coalesce(description, ""), regex("flagrant", ignore_case = TRUE)) &
+              teamId != possession_filled))
     )
 
   teams_in_game <- ge %>% filter(!is.na(teamTricode)) %>% distinct(teamTricode) %>% pull(teamTricode)
@@ -201,12 +214,13 @@ handle_and_ones <- function(pbp) {
 }
 
 main <- function() {
-  pbp <- readRDS("data/processed/pbp_events.rds")
+  if (!exists("PROCESSED_DIR")) source(file.path("R", "00_config.R"))
+  pbp <- readRDS(file.path(PROCESSED_DIR, "pbp_events.rds"))
 
   and_one_violations <- handle_and_ones(pbp)
   if (nrow(and_one_violations) != EXPECTED_AND_ONE_VIOLATIONS) {
     warning(nrow(and_one_violations), " and-one possession-continuity violation(s) found, expected ",
-            EXPECTED_AND_ONE_VIOLATIONS, " — see handle_and_ones() docstring and output for detail")
+            EXPECTED_AND_ONE_VIOLATIONS, " -- see handle_and_ones() docstring and output for detail")
   } else {
     message(nrow(and_one_violations), " and-one violation(s) found, matches documented baseline")
   }
@@ -215,9 +229,13 @@ main <- function() {
     split(.$gameId) %>%
     map_dfr(segment_possessions)
 
-  dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
-  saveRDS(possessions, "data/processed/possessions.rds")
-  message("Wrote data/processed/possessions.rds (", nrow(possessions), " possessions, ",
+  # Carry season_type through (one value per game).
+  game_type <- pbp %>% distinct(gameId, season_type)
+  possessions <- possessions %>% left_join(game_type, by = "gameId")
+
+  dir.create(PROCESSED_DIR, recursive = TRUE, showWarnings = FALSE)
+  saveRDS(possessions, file.path(PROCESSED_DIR, "possessions.rds"))
+  message("Wrote ", file.path(PROCESSED_DIR, "possessions.rds"), " (", nrow(possessions), " possessions, ",
           n_distinct(possessions$gameId), " games)")
   invisible(possessions)
 }

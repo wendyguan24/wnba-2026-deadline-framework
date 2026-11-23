@@ -24,8 +24,8 @@ test_that("apply_team_mapping errors on an unmapped tricode instead of silently 
 })
 
 test_that("real parsed data: LAS rows are tagged Los Angeles Sparks and LVA rows are tagged Las Vegas Aces (never swapped)", {
-  skip_if_not(file.exists(proj_path("data/processed/pbp_events.rds")), "pbp_events.rds not built yet")
-  pbp <- readRDS(proj_path("data/processed/pbp_events.rds"))
+  skip_if_not(file.exists(file.path(PROCESSED_DIR, "pbp_events.rds")), "pbp_events.rds not built yet")
+  pbp <- readRDS(file.path(PROCESSED_DIR, "pbp_events.rds"))
   # dplyr::filter (not base-R bracket indexing) to correctly drop NA
   # teamTricode rows rather than inserting a spurious NA element -- vec[cond]
   # with an NA in cond includes an NA in the result, which base-R bracket
