@@ -109,6 +109,23 @@ commit `4b78e2e`. Run order: `R/01`, `R/02`, `R/03`, `R/04`, `R/04b`, `R/04c`. T
 (wehoop) box scores, schedule and standings and writes `output/offseason/external_validation.md`;
 ESPN is a validator only and never enters the tables or models.
 
+Full-season re-read of v1 (PLAN.md "Scope"): after `R/04b`, run `R/05`, `R/07`, `R/06` (in that order) once
+per analysis window, selected with the `WNBA_WINDOW` environment variable (`first_half`, `second_half`,
+`full`, `playoffs`; default `full`). Intermediates go to `data/processed/full2026/windows/<window>/`, outputs to
+`output/offseason/reread/<window>/`. R/06 is not run for `playoffs`. Then `R/15a_regression_check.R`
+(first_half vs the committed v1 outputs), `R/15_reread.R` (trade flags, hypothesis tests, scorecard,
+playoffs table) and `R/15b_reread_report.R` (renders `reread_results.md` and `scorecard.md`):
+
+```sh
+for w in first_half second_half full; do
+  WNBA_WINDOW=$w Rscript R/05_features.R && WNBA_WINDOW=$w Rscript R/07_expected_points.R && WNBA_WINDOW=$w Rscript R/06_models.R
+done
+WNBA_WINDOW=playoffs Rscript R/05_features.R && WNBA_WINDOW=playoffs Rscript R/07_expected_points.R
+Rscript R/15a_regression_check.R && Rscript R/15_reread.R && Rscript R/15b_reread_report.R
+```
+
+`R/06` needs `lme4` (installed here from the distribution package `r-cran-lme4`, 1.1-35.1, because CRAN was not reachable).
+
 ## Known issue: shotdetail is missing Toronto Tempo (confirmed 2026-07-18)
 
 `wnba_shotdetail_2026.csv` contains **zero rows for Toronto Tempo** — 14 of 15 teams

@@ -339,11 +339,10 @@ test_h1h2 <- function(flags) {
   keep13 <- pop_teams(flags, "no_trade13")
   t_full <- read_trends("full") %>% mutate(window = "full", population = "all15")
   t_fh <- read_trends("first_half") %>% mutate(window = "first_half (v1 sample)", population = "all15")
-  t_sh <- read_trends("second_half") %>% mutate(window = "second_half", population = "all15")
   sub <- refit_trends_subset("full", keep13)
   t_sub <- sub$league_trends %>% mutate(window = "full", population = "no_trade13")
   team_sub <- sub$team_trajectories %>% mutate(window = "full", population = "no_trade13")
-  trends <- bind_rows(t_fh, t_sh, t_full, t_sub) %>%
+  trends <- bind_rows(t_fh, t_full, t_sub) %>%
     filter(metric %in% c("transition_share", "transition_pts_per_poss", "assisted_rate",
                          "live_ball_tov_rate")) %>%
     select(population, window, metric, league_trend, league_trend_p, fallback_used)

@@ -4,13 +4,13 @@ Successor to the deadline framework. The v1 plan, with its full review-gate tria
 is archived at `docs/archive/PLAN_v1_deadline.md`. v1 is tagged `v1-deadline`
 (pinned `shufinskiy/nba_data` `773ce29`, 182 games, May 8 to July 16, 2026).
 
-Last updated: 2026-11-23 (external validation added).
+Last updated: 2026-11-23 (full-season re-read of v1 executed).
 
 ## Status
 
 - [x] v1 tagged `v1-deadline`; old PLAN.md and CLAUDE.md archived to `docs/archive/`
 - [x] CLAUDE.md and PLAN.md rewritten for the offseason phase
-- [ ] Offseason question(s) written down (see "Scope", currently OPEN)
+- [x] Offseason question written down: full-season re-read of v1 (see "Scope"; hypotheses pre-registered in b0c3c80)
 - [x] v1 publish blockers complete (Synergy case studies + §3d structural paragraph, coach-agent gate, cap/CBA verification checklist), confirmed by Wendy 2026-11-23.
 - [x] Re-pin to full-season data and clear the reconciliation gate (Phase 1; two open test items below)
 
@@ -138,15 +138,34 @@ model output was computed):**
       Note: R/13 and the R/05+ scripts still use v1 paths and must be wired to `R/00_config.R`
       before re-running.
 
-## Phase 2: Features and models on the full season (after Phase 1 and scope)
+## Phase 2: Features and models on the full season (re-read of v1)
 
-- [ ] Decide which of `R/05` to `R/07`, `R/11`, `R/13`, `R/14` the chosen question needs
-- [ ] Keep regular season and playoffs separate populations (CLAUDE.md rule)
-- [ ] Revisit v1 choices that were half-season shortcuts: minutes floor in `R/13`,
-      trajectory fallback (random-slope models hit singular fits at 23 to 26 games per
-      team; the full season may support the real model), `MIN_CELL_N` in `R/07`
-- [ ] Any new EDA that changes the plan is noted here, not absorbed silently
-- [ ] `analytics-reviewer` on model results; log triage below
+- [x] Scripts needed: `R/05`, `R/07`, `R/06` (wired to `R/00_config.R` with analysis windows `first_half`,
+      `second_half`, `full`, `playoffs`); `R/11`, `R/13`, `R/14` not needed for this question (parked)
+- [x] Regular season and playoffs kept separate; hypotheses use regular-season windows only
+- [x] Regression check: `first_half` outputs equal the committed v1 `icc_table`, `team_generation_making`,
+      `team_trajectories`, `trajectory_league_trends`, `team_rank_deltas` (max abs diff 0);
+      `output/offseason/reread/regression_check_v1.md`, `R/15a_regression_check.R`
+- [x] Trade flags (`trade_flags.csv`, `player_moves.csv`): LAS, PHX flagged
+- [x] Hypothesis tests H-R1 to H-R4, H1, H2, H3, scorecard, playoffs table (`R/15_reread.R`,
+      `R/15b_reread_report.R`); results in `output/offseason/reread/reread_results.md`, `scorecard.md`
+- [x] `tests/testthat/test-reread.R`; full suite 0 failures (1 expected skip: v1 player-value test)
+- [ ] Revisit v1 choices that were half-season shortcuts (R/13 minutes floor, `MIN_CELL_N`): not
+      needed for the re-read; the trajectory random-slope model still falls back to random intercepts
+      for 3 of 4 H1/H2 metrics at 44 games per team (see results)
+- [ ] `analytics-reviewer` on `reread_results.md`; `gm-agent` on `scorecard.md`; log triage below
+      (the deadline framing does not apply; tell the agents the scope is a re-read of v1 as a forecast)
+
+Execution notes (2026-11-23):
+- Design choices recorded: each window builds its own stratified expected-points baseline (as v1 did);
+  `is_home` in R/05 now comes from the `games` table (shotdetail lacks Toronto), same values as v1;
+  game_index is each team's chronological game number within the window.
+- R/06 was not run for the `playoffs` window (8 teams, 2 to 13 games each, mixed models degenerate); R/05 and R/07 only.
+- `lme4` came from the distribution package (`r-cran-lme4` 1.1-35.1); CRAN was unreachable.
+- Trade-flag rule as written in the plan: moved = appears for 2+ teams; share out = first-half minutes of
+  players whose stint with the team was followed by a stint elsewhere; share in = second-half minutes of
+  players whose stint was preceded by a stint elsewhere; flag at >= 10 percent. PHX and LAS flags include
+  moves well before and after the Aug 2 deadline (see `player_moves.csv`).
 
 ## Phase 3: Write-up
 
@@ -184,5 +203,8 @@ Carried from v1's post-deadline list, none prioritized:
 
 ## Next session should
 
-1. Execute the re-read (see plan dispatched 2026-11-23): wire R/05-R/07, R/11, R/13 to
-   R/00_config.R, run first half / second half / full season, score the 15 v1 reads.
+1. Run `analytics-reviewer` on `output/offseason/reread/reread_results.md` and `gm-agent` on
+   `output/offseason/reread/scorecard.md` (tell them the deadline framing does not apply: this is a
+   re-read of v1 as a forecast). Triage feedback (accept / reject with a reason / defer) in the log above.
+2. Then write up (Phase 3), keeping every number reproducible from `R/15_reread.R` and `R/15b_reread_report.R`.
+3. Decide whether to push tag `v1-deadline` and rename the repo (housekeeping).

@@ -3,10 +3,6 @@ all15,first_half (v1 sample),transition_share,-8.229620481684165e-5,0.7285269898
 all15,first_half (v1 sample),transition_pts_per_poss,0.00381370726358139,0.213835757955754,TRUE
 all15,first_half (v1 sample),assisted_rate,-2.114400006382604e-4,0.7723009564208767,TRUE
 all15,first_half (v1 sample),live_ball_tov_rate,2.1757100099545592e-4,0.3643952240416345,TRUE
-all15,second_half,transition_share,6.938114506231366e-4,0.03965745465353106,TRUE
-all15,second_half,transition_pts_per_poss,-0.00617188153477412,0.1524556782799514,TRUE
-all15,second_half,assisted_rate,5.223443150201798e-4,0.58064055731068,FALSE
-all15,second_half,live_ball_tov_rate,7.07452459683274e-4,0.03875777198154514,TRUE
 all15,full,transition_share,2.108395967654595e-5,0.8330552842886243,TRUE
 all15,full,transition_pts_per_poss,-6.75525978458198e-4,0.6003240894217695,TRUE
 all15,full,assisted_rate,4.769611703015059e-4,0.0992717157064578,TRUE
