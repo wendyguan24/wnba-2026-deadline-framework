@@ -23,8 +23,15 @@ load_table("player_games", "regular")   # "regular", "playoffs" or "all"
   from shotdetail. It agrees with shotdetail HTM/VTM in every game that has shotdetail rows.
 - Toronto has no shotdetail rows in the regular season (known source gap). Nothing in these
   tables depends on shotdetail except `game_date`, which falls back to the cdn UTC date.
-- Minutes are reconstructed from substitution events (R/13 method), not taken from an
-  official box score. A few team-periods fail the 5-on-court check; affected team-games carry `minutes_reconciled == FALSE`.
+- Minutes are reconstructed from substitution events, not taken from an official box score.
+  The source has no period-start lineups, so starters are inferred per team-period
+  (`build_minutes()` in `R/lib_player_box.R`): seed with players whose first substitution is
+  "out" or who have a non-substitution event earlier in the game clock than their first
+  sub-in (technical fouls and same-clock events do not count); if fewer than 5, fill from the
+  previous period's end-of-period on-court set (players with no sub-in first), only when that
+  gives exactly 5. This differs from the v1 R/13 rule, which missed players with zero events
+  in a period. One team-period (1042600304 ATL, period 1) still has 4 inferred starters and
+  is flagged via `minutes_reconciled`.
 
 ## games
 
@@ -53,7 +60,7 @@ Grain: one row per team per game. Primary key: `game_id` + `team`.
 | win | logical | pts > opp_pts |
 | possessions | integer | possession rows for the team, excluding out-of-band technical/flagrant FT rows (R/03) |
 | FGA, FGM, AST, FG3A | integer | from `compute_team_game_counts_cdn()` (R/04) |
-| minutes_reconciled | logical | TRUE when summed reconstructed player minutes for the team-game are within 1 minute of 200 + 25*(n_periods-4). FALSE for 10 of 706 team-games (8 regular, 2 playoffs). Cause: starter inference misses a player who plays a full period with no substitution event, so deviations are 5 or 10 minutes. Filter on it before using minutes or per-minute rates. Counts are stored in `data/reference/pipeline_baseline.csv` (`minutes_unreconciled_team_games`, written by R/04b). |
+| minutes_reconciled | logical | TRUE when summed reconstructed player minutes for the team-game are within 1 minute of 200 + 25*(n_periods-4). Kept as a guard: FALSE for 1 of 706 team-games (playoff game 1042600304, ATL: the fifth period-1 starter has no events and no earlier period to infer from, so 10 minutes are missing). Counts are stored in `data/reference/pipeline_baseline.csv` (`minutes_unreconciled_team_games`, written by R/04b, preserved by R/04). |
 | FG3M, FTM, FTA, OREB, DREB, STL, BLK, TOV, PF | integer | counted from cdn events by the event's team; OREB, DREB and TOV include team rebounds and team turnovers; PF is personal plus offensive fouls (no technicals) |
 
 ## player_games

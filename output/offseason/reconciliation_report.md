@@ -1,6 +1,6 @@
 # Reconciliation Report (offseason pin)
 
-Generated: 2026-11-23 16:52:01 UTC
+Generated: 2026-11-23 17:09:45 UTC
 Pinned commit: 46488f0f8e1cab58fc1256511ea808166a443a15
 
 Regular season and playoffs are separate populations; every section is per season type.

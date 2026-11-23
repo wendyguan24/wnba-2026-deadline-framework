@@ -1,6 +1,6 @@
 # Analysis tables report
 
-Generated: 2026-11-23 16:58:39 UTC. Pin 46488f0.
+Generated: 2026-11-23 17:10:36 UTC. Pin 46488f0.
 
 ## Row counts per table and season type
 
@@ -34,10 +34,14 @@ Generated: 2026-11-23 16:58:39 UTC. Pin 46488f0.
 | season_type never NA in any table | PASS |
 | shots made-points per team-game equals team pts minus FTM | PASS |
 
-## Minutes gate (R/13 rule: exactly 5 on court per team-period)
+## Minutes gate (exactly 5 inferred starters per team-period; see build_minutes())
 
-Pass rate, regular: 0.9970
-Pass rate, playoffs: 0.9895
-Unreconciled team-games (minutes_reconciled == FALSE; summed minutes more than 1 minute from 200 + 25*(n_periods-4)): 10 of 706 (1.42%).
-Unreconciled by season type: playoffs 2, regular 8
+Pass rate, regular: 1.0000
+Pass rate, playoffs: 0.9947
+Unreconciled team-games (minutes_reconciled == FALSE; summed minutes more than 1 minute from 200 + 25*(n_periods-4)): 1 of 706 (0.14%).
+Unreconciled by season type: playoffs 1
+Team-periods without exactly 5 inferred starters (left as inferred, not guessed): 1
+| gameId | period | team | n_starters | season_type |
+|---|---|---|---|---|
+| 1042600304 | 1 | ATL | 4 | playoffs |
 Largest absolute deviation: 10.00 minutes.

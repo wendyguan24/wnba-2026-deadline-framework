@@ -74,10 +74,13 @@ Hypotheses for the chosen question go here before results are viewed:
 - [x] `output/offseason/reconciliation_report.md` written
 - [x] Analysis-ready tables (`R/04b`, `R/load_tables.R`, `docs/data_dictionary.md`,
       `output/offseason/tables_report.md`)
-- [x] Minutes invariant: `build_minutes()` left unchanged (v1 R/13 logic). Team-games where summed
-      minutes miss 200 + 25*(n_periods-4) by more than 1 minute are flagged
-      `minutes_reconciled == FALSE` (8 regular, 2 playoffs; deviations 5 or 10 minutes), the invariant
-      is tested on the rest, and the counts are stored in `pipeline_baseline.csv`.
+- [x] Minutes: starter inference in `build_minutes()` replaced (seed from first-sub-out and earlier-clock
+      events, technical fouls ignored, fill from the previous period's end-of-period set when that gives
+      exactly 5). Team-periods without 5 starters went from 45 to 1; team-games with unreconciled minutes
+      from 10 to 1 (0 regular, 1 playoff: 1042600304 ATL period 1, fifth starter has zero events and no
+      prior period). 9 player-games changed minutes (max change 10 minutes); box columns unchanged.
+      The `minutes_reconciled` flag stays as a guard, counts in `pipeline_baseline.csv`.
+      R/13 v1 outputs in `output/` are unchanged, but re-running R/13 would now use the improved minutes.
 - [x] `test-player-value.R` (v1 test) now skips when the v1 `data/processed/pbp_events.rds` is absent.
       Note: R/13 and the R/05+ scripts still use v1 paths and must be wired to `R/00_config.R`
       before re-running.
@@ -118,8 +121,7 @@ Carried from v1's post-deadline list, none prioritized:
 - Defense and lineup-flexibility layer (mentor roadmap, v1 PLAN "Mentor-informed v2")
 - Fit-vs-cost target scoring and trade-outcome model (need to-the-dollar cap data and an
   asset-valuation model; v1 kept both out)
-- Improve starter inference in `build_minutes()` (a player who plays a full period with no
-  substitution event is missed); candidate fix: v2 or boxscore minutes cross-check
+- Last unreconciled team-period (1042600304 ATL, period 1): needs v2 or boxscore minutes cross-check
 - Deferred R/13 and R/14 items: full per-(game,period,team) minutes invariant test,
   creation-class fit bucket, garbage-time bench sensitivity, sorting `player_value.csv`
   by team, capped-min cap-mechanic citation

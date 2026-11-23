@@ -96,7 +96,7 @@ build_player_games <- function(pbp) {
               across(c(FG2M, FG3M, FGM, FGA, FTM, FTA, OREB, DREB, AST, STL, BLK, TOV, PF,
                        PTS, poss_used, game_score))) %>%
     arrange(game_id, team, desc(minutes))
-  list(player_games = out, gate_pass_rate = mn$gate_pass_rate, pev = pev)
+  list(player_games = out, gate_pass_rate = mn$gate_pass_rate, starter_counts = mn$starter_counts, pev = pev)
 }
 
 #' players: one row per person_id
@@ -198,8 +198,10 @@ main <- function() {
 
   # minutes gate (R/13's 5-on-court gate), per season type, and the per-team-game
   # minutes check; reported, not enforced here
+  sc <- pgres$starter_counts %>% left_join(games %>% select(gameId = game_id, season_type), by = "gameId")
   gate_by_type <- map_dbl(names(SEASON_TYPES), function(st)
-    build_minutes(pgres$pev %>% filter(season_type == st))$gate_pass_rate) %>% set_names(names(SEASON_TYPES))
+    mean(sc$n_starters[sc$season_type == st] == 5)) %>% set_names(names(SEASON_TYPES))
+  bad_tp <- sc %>% filter(n_starters != 5)
   min_check <- team_games %>% left_join(games %>% select(game_id, n_periods), by = "game_id") %>%
     left_join(player_games %>% group_by(game_id, team) %>% summarise(min_p = sum(minutes), .groups = "drop"),
               by = c("game_id", "team")) %>%
@@ -220,11 +222,13 @@ main <- function() {
     md(counts %>% mutate(across(everything(), as.character))), "",
     "## Invariant results", "",
     md(inv %>% mutate(passed = if_else(passed, "PASS", "FAIL"))), "",
-    "## Minutes gate (R/13 rule: exactly 5 on court per team-period)", "",
+    "## Minutes gate (exactly 5 inferred starters per team-period; see build_minutes())", "",
     paste0("Pass rate, ", names(gate_by_type), ": ", sprintf("%.4f", gate_by_type)),
     paste0("Unreconciled team-games (minutes_reconciled == FALSE; summed minutes more than 1 minute from 200 + 25*(n_periods-4)): ",
            sum(min_check$off), " of ", nrow(min_check), " (", sprintf("%.2f%%", 100 * mean(min_check$off)), ")."),
     paste0("Unreconciled by season type: ", paste(names(table(min_check$season_type[min_check$off])), table(min_check$season_type[min_check$off]), collapse = ", ")),
+    paste0("Team-periods without exactly 5 inferred starters (left as inferred, not guessed): ", nrow(bad_tp)),
+    if (nrow(bad_tp) > 0) md(bad_tp %>% transmute(gameId, period, team = teamTricode, n_starters, season_type) %>% mutate(across(everything(), as.character))) else NULL,
     paste0("Largest absolute deviation: ", sprintf("%.2f", max(abs(min_check$min_p - min_check$expected))), " minutes.")
   )
   writeLines(lines, file.path(OUTPUT_DIR, "tables_report.md"))

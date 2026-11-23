@@ -372,7 +372,16 @@ main <- function() {
            pin = PIN_SHORT)
   })
   dir.create(proj_path("data", "reference"), recursive = TRUE, showWarnings = FALSE)
-  write_csv(baseline_csv, proj_path("data", "reference", "pipeline_baseline.csv"))
+  # preserve the column owned by R/04b (minutes_unreconciled_team_games) if it already exists
+  bl_path <- proj_path("data", "reference", "pipeline_baseline.csv")
+  if (file.exists(bl_path)) {
+    old <- read_csv(bl_path, show_col_types = FALSE, col_types = cols(pin = "c", .default = col_guess()))
+    if ("minutes_unreconciled_team_games" %in% names(old)) {
+      baseline_csv <- baseline_csv %>%
+        left_join(old %>% select(season_type, minutes_unreconciled_team_games), by = "season_type")
+    }
+  }
+  write_csv(baseline_csv, bl_path)
   message("Wrote data/reference/pipeline_baseline.csv")
 
   invisible(list(res = res, v1 = v1))
