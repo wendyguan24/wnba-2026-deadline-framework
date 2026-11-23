@@ -1,5 +1,5 @@
-population,subset,n_teams,n_agree,agreement,p_two_sided,ci_low,ci_high,verdict
-all15,all_labels,15,6,0.4,0.6072387695312503,0.16336432385951344,0.6771302337937184,supported (null)
-all15,interval_excludes_zero,2,1,0.5,1,0.012579117093425058,0.9874208829065749,supported (null)
-no_trade13,all_labels,13,5,0.38461538461538464,0.5810546874999997,0.1385793388901606,0.6842223970859369,supported (null)
-no_trade13,interval_excludes_zero,2,1,0.5,1,0.012579117093425058,0.9874208829065749,supported (null)
+population,subset,n_teams,n_ties,n_agree,agreement,p_two_sided,ci_low,ci_high,verdict
+all15,all_labels,14,1,6,0.42857142857142855,0.7905273437499996,0.17661108998211789,0.7113905999616925,supported (null)
+all15,interval_excludes_zero,2,0,1,0.5,1,0.012579117093425058,0.9874208829065749,supported (null)
+no_turnover13,all_labels,12,1,5,0.4166666666666667,0.7744140625000002,0.1516522298084301,0.7233303143178942,supported (null)
+no_turnover13,interval_excludes_zero,2,0,1,0.5,1,0.012579117093425058,0.9874208829065749,supported (null)

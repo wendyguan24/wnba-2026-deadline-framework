@@ -4,7 +4,7 @@ Successor to the deadline framework. The v1 plan, with its full review-gate tria
 is archived at `docs/archive/PLAN_v1_deadline.md`. v1 is tagged `v1-deadline`
 (pinned `shufinskiy/nba_data` `773ce29`, 182 games, May 8 to July 16, 2026).
 
-Last updated: 2026-11-23 (full-season re-read of v1 executed).
+Last updated: 2026-11-23 (full-season re-read of v1 executed; review-triage revision pass applied).
 
 ## Status
 
@@ -153,8 +153,9 @@ model output was computed):**
 - [ ] Revisit v1 choices that were half-season shortcuts (R/13 minutes floor, `MIN_CELL_N`): not
       needed for the re-read; the trajectory random-slope model still falls back to random intercepts
       for 3 of 4 H1/H2 metrics at 44 games per team (see results)
-- [ ] `analytics-reviewer` on `reread_results.md`; `gm-agent` on `scorecard.md`; log triage below
-      (the deadline framing does not apply; tell the agents the scope is a re-read of v1 as a forecast)
+- [x] `analytics-reviewer` on `reread_results.md`; `gm-agent` on `scorecard.md`; triage logged below and
+      applied (revision pass, `docs/plans/reread_revision_plan.md`)
+- [ ] `analytics-reviewer` re-run on the revised `reread_results.md` (see "Next session should")
 
 Execution notes (2026-11-23):
 - Design choices recorded: each window builds its own stratified expected-points baseline (as v1 did);
@@ -210,9 +211,36 @@ run on `output/offseason/reread/`. Execution plan: `docs/plans/reread_revision_p
   framing (description, not forecast; headline the null); 5-7 ACCEPT; 8 one-line caveats only,
   cap-feasibility analysis PARKED.
 
-(Empty for the offseason phase. v1 triage history is in the archived plan.)
+Revision pass applied 2026-11-23 (all accepted items implemented; outputs under `output/offseason/reread/`):
+- [x] B1 header reworded (hypotheses pre-registered in b0c3c80; decision rules in the execution plan, first
+      committed at cd66cc0); "pre-registered rule" phrasing removed; A' and the scorecard labeled EXPLORATORY;
+      `docs/plans/` committed as audit trail.
+- [x] B2 H-R3: both outcomes equal; verdict "mixed / inconclusive" with RMSE change stated; per-team paired
+      LOO squared-error differences (B minus A) with team-bootstrap CI (`hr3_paired_loo.csv`); making
+      coefficient sign and regression-to-the-mean reading; fh_win_pct coefficient shift read with
+      collinearity (`hr3_collinearity.csv`); A' relabeled "alternative baseline (point differential)".
+- [x] W1 H-R2 decomposition (diet, volume, generation, making; `hr2_decomposition.csv`), EXPLORATORY.
+- [x] W2 full-window baseline sensitivity (`sensitivity_full_baseline.csv`), EXPLORATORY.
+- [x] W3 raw per100 (H-R2) vs schedule-adjusted BLUPs (H-R1) caveat. W4 see B2. W5 scorecard percentiles, change,
+      `boundary_sensitive`, verdict range under one-rank swaps, chance rate 1/9, record-tertile benchmark
+      (`scorecard_summary.csv`). W6 H-R1 leads with median rho and states the flip condition.
+- [x] W7 H3 verdict line. W8 playoffs diff columns dropped, common-baseline caveat. W9 all report values
+      computed. W10 fallback inference limits, mixed interval types (`interval_type` column), full-window
+      overlap, second-half league-trend rows added.
+- [x] N1 ties (|delta| < 0.01 per100) excluded from H-R4 (LVA). N2 label vs outcome line. N3 trade flag renamed
+      roster-turnover flag (`trade_flags.csv` is now `roster_turnover_flags.csv`; population `no_turnover13`).
+      N4 regenerate pointer to README run order. N5 `session_info.txt`. N7 "--" removed from copied v1 text.
+      N6 (bootstrap determinism test) DEFERRED.
+- [x] GM 1, 2, 7 EXPLORATORY advice outcome (`advice_outcome.csv`); GM 3 via W1; GM 4 framing carried to the
+      write-up (below); GM 5, 6 via W5; GM 8 one-line caveats added, cap feasibility PARKED.
+- Reinterpretations: (a) deadline action date window applied to observable first-game dates plus a spanning
+  rule (gap contains Aug 2 and is at most 14 days), threshold 2 percent of second-half minutes; (b) one-rank
+  swap range varies each team's four tier readings independently (conservative); (c) record-tertile benchmark
+  breaks win pct ties with point differential per game.
 
 ## Next session should
 
-1. Dispatch `docs/plans/reread_revision_plan.md` (approved triage) to a Sonnet executor.
-2. Re-run analytics-reviewer on the revised reread_results.md, then start the write-up.
+1. Re-run analytics-reviewer on the revised `output/offseason/reread/reread_results.md` (tell it the deadline
+   framing does not apply; give it the file, not a description), triage and log.
+2. Then start the write-up (Phase 3). Framing per GM 4: description, not forecast; headline the nulls
+   (H-R2 not supported, H-R3 mixed / inconclusive, H-R4 and H1/H2 nulls); keep EXPLORATORY sections labeled.

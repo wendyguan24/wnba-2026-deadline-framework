@@ -1,0 +1,17 @@
+item,value
+main_count_held,7
+main_count_partly_held,3
+main_count_failed,5
+range_min_held,2
+range_min_partly_held,1
+range_min_failed,1
+range_max_held,9
+range_max_partly_held,12
+range_max_failed,5
+n_boundary_sensitive,12
+n_teams,15
+chance_rate_held,0.1111111111111111
+chance_expected_held,1.6666666666666667
+benchmark_record_tier_kept,7
+benchmark_record_tier_chance_rate,0.3333333333333333
+benchmark_record_tier_chance_expected,5

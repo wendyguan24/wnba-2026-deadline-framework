@@ -1,13 +1,13 @@
-population,window,metric,team,slope,ci_low,ci_high,trajectory,interval_spans_zero
-all15,first_half (v1 sample),assisted_rate,PDX,0.00338177934554342,-0.00245053101428762,0.00921408970537447,improving,TRUE
-all15,first_half (v1 sample),assisted_rate,TOR,0.0048558298523518,-8.628567280401432e-4,0.01057451643274375,improving,TRUE
-all15,first_half (v1 sample),live_ball_tov_rate,PDX,6.658143778049562e-4,-0.00147943054144597,0.00281105929705588,improving,TRUE
-all15,first_half (v1 sample),live_ball_tov_rate,TOR,2.4644234181367793e-4,-0.00134333793001563,0.00183622261364299,improving,TRUE
-all15,full,assisted_rate,PDX,8.446343766068233e-5,-0.00238015755075765,0.00254908442607902,improving,TRUE
-all15,full,assisted_rate,TOR,3.1596892994149314e-4,-0.00189207985592892,0.0025240177158119,improving,TRUE
-all15,full,live_ball_tov_rate,PDX,-1.1584105826235324e-4,-5.657282662546873e-4,3.3404614972998075e-4,declining,TRUE
-all15,full,live_ball_tov_rate,TOR,2.88167131704268e-4,-1.608924489143785e-4,7.372267123229145e-4,improving,TRUE
-no_trade13,full,assisted_rate,PDX,1.6498587932952335e-4,-0.0023160551381350477,0.002646026896794094,improving,TRUE
-no_trade13,full,assisted_rate,TOR,2.322302498179563e-4,-0.001966650735229742,0.0024311112348656544,improving,TRUE
-no_trade13,full,live_ball_tov_rate,PDX,-1.7333829542449751e-4,-6.7877811057048e-4,3.321015197214849e-4,declining,TRUE
-no_trade13,full,live_ball_tov_rate,TOR,3.606830122018733e-4,-1.4329953122561097e-4,8.646655556293575e-4,improving,TRUE
+population,window,metric,team,slope,ci_low,ci_high,trajectory,interval_spans_zero,interval_type
+all15,first_half (v1 sample),assisted_rate,PDX,0.00338177934554342,-0.00245053101428762,0.00921408970537447,improving,TRUE,residual_OLS_slope
+all15,first_half (v1 sample),assisted_rate,TOR,0.0048558298523518,-8.628567280401432e-4,0.01057451643274375,improving,TRUE,residual_OLS_slope
+all15,first_half (v1 sample),live_ball_tov_rate,PDX,6.658143778049562e-4,-0.00147943054144597,0.00281105929705588,improving,TRUE,residual_OLS_slope
+all15,first_half (v1 sample),live_ball_tov_rate,TOR,2.4644234181367793e-4,-0.00134333793001563,0.00183622261364299,improving,TRUE,residual_OLS_slope
+all15,full,assisted_rate,PDX,8.446343766068233e-5,-0.00238015755075765,0.00254908442607902,improving,TRUE,residual_OLS_slope
+all15,full,assisted_rate,TOR,3.1596892994149314e-4,-0.00189207985592892,0.0025240177158119,improving,TRUE,residual_OLS_slope
+all15,full,live_ball_tov_rate,PDX,-1.1584105826235324e-4,-5.657282662546873e-4,3.3404614972998075e-4,declining,TRUE,random_slope_posterior
+all15,full,live_ball_tov_rate,TOR,2.88167131704268e-4,-1.608924489143785e-4,7.372267123229145e-4,improving,TRUE,random_slope_posterior
+no_turnover13,full,assisted_rate,PDX,1.6498587932952335e-4,-0.0023160551381350477,0.002646026896794094,improving,TRUE,residual_OLS_slope
+no_turnover13,full,assisted_rate,TOR,2.322302498179563e-4,-0.001966650735229742,0.0024311112348656544,improving,TRUE,residual_OLS_slope
+no_turnover13,full,live_ball_tov_rate,PDX,-1.7333829542449751e-4,-6.7877811057048e-4,3.321015197214849e-4,declining,TRUE,random_slope_posterior
+no_turnover13,full,live_ball_tov_rate,TOR,3.606830122018733e-4,-1.4329953122561097e-4,8.646655556293575e-4,improving,TRUE,random_slope_posterior

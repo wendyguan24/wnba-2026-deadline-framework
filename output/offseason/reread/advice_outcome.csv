@@ -1,0 +1,16 @@
+team,v1_window,lean,v1_recommendation,deadline_action,net_minutes_share,n_moves_in,n_moves_out,sh_record,sh_win_pct,made_playoffs,playoff_result,roster_turnover_flag,advice_outcome
+DAL,buyer,NA,"amplify: extend the edge; add on-style depth, protect the shot hierarchy",stood pat,0,0,0,11-9,0.55,TRUE,lost in series 1,FALSE,right
+GSV,buyer,NA,"amplify: extend the edge; add on-style depth, protect the shot hierarchy",stood pat,0,0,0,14-5,0.7368421052631579,TRUE,won title,FALSE,right
+IND,buyer,NA,"adjust: offense is roughly league-average; tune, not a splash; offense is not the primary lever",stood pat,0,0,0,14-6,0.7,TRUE,lost in series 1,FALSE,right
+LVA,buyer,NA,reassess: bottom-tier shot generation propped up by top-tier but declining making; address the shot diet / identity before spending an asset on a new piece (trajectory directional),stood pat,0.014020703933747413,1,0,14-6,0.7,TRUE,lost in series 2,FALSE,right
+MIN,buyer,NA,"amplify: extend the edge; add on-style depth, protect the shot hierarchy",stood pat,0,0,0,14-5,0.7368421052631579,TRUE,lost in series 1,FALSE,right
+ATL,bubble,lean hold or sell,judgment (lean hold or sell): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional),stood pat,0,0,0,16-4,0.8,TRUE,lost Finals,FALSE,wrong
+NYL,bubble,lean hold or sell,judgment (lean hold or sell): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional),stood pat,0,0,0,13-7,0.65,TRUE,lost in series 2,FALSE,wrong
+TOR,bubble,lean buy,judgment (lean buy): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving (trajectory directional),bought,0.03398958333333334,1,0,1-19,0.05,FALSE,missed playoffs,FALSE,wrong
+WAS,bubble,lean hold or sell,judgment (lean hold or sell): the late-August World Cup break favors hold-and-reassess unless the trajectory is clearly improving,stood pat,0,0,0,16-5,0.7619047619047619,TRUE,lost in series 1,FALSE,wrong
+CHI,seller,NA,sell / accumulate: out of the race; deal expirings and prioritize asset value over a deadline buy,stood pat,0,0,0,8-12,0.4,FALSE,missed playoffs,FALSE,right
+CON,seller,NA,sell / accumulate: out of the race; deal expirings and prioritize asset value over a deadline buy,sold,-0.03398958333333334,0,1,5-15,0.25,FALSE,missed playoffs,FALSE,right
+LAS,seller,NA,sell / accumulate: out of the race; deal expirings and prioritize asset value over a deadline buy,bought,0.036270634920634925,1,1,6-15,0.2857142857142857,FALSE,missed playoffs,TRUE,not scored
+PDX,seller,NA,sell / accumulate: out of the race; deal expirings and prioritize asset value over a deadline buy,stood pat,0,0,0,6-13,0.3157894736842105,FALSE,missed playoffs,FALSE,right
+PHX,seller,NA,sell / accumulate: out of the race; deal expirings and prioritize asset value over a deadline buy,sold,-0.05493947368421053,0,1,8-11,0.42105263157894735,FALSE,missed playoffs,TRUE,not scored
+SEA,seller,NA,sell / accumulate: out of the race; deal expirings and prioritize asset value over a deadline buy,stood pat,0,0,0,2-16,0.1111111111111111,FALSE,missed playoffs,FALSE,right

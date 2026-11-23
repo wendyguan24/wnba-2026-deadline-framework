@@ -1,4 +1,4 @@
-team,minutes_share_out,minutes_share_in,n_players_out,n_players_in,players_out,players_in,trade_flag
+team,minutes_share_out,minutes_share_in,n_players_out,n_players_in,players_out,players_in,roster_turnover_flag
 ATL,0.003996180555555555,0.03548778467908903,3,2,Okonkwo; Sherrod; Nye,Bonner; Walker-Kimbrough,FALSE
 CHI,0.015134020618556702,0.006395833333333334,3,1,Bibby; Westbeld; Poffenbarger,Martin,FALSE
 CON,0.07994438687392055,0,1,0,Morrow,,FALSE

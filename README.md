@@ -113,8 +113,9 @@ Full-season re-read of v1 (PLAN.md "Scope"): after `R/04b`, run `R/05`, `R/07`, 
 per analysis window, selected with the `WNBA_WINDOW` environment variable (`first_half`, `second_half`,
 `full`, `playoffs`; default `full`). Intermediates go to `data/processed/full2026/windows/<window>/`, outputs to
 `output/offseason/reread/<window>/`. R/06 is not run for `playoffs`. Then `R/15a_regression_check.R`
-(first_half vs the committed v1 outputs), `R/15_reread.R` (trade flags, hypothesis tests, scorecard,
-playoffs table) and `R/15b_reread_report.R` (renders `reread_results.md` and `scorecard.md`):
+(first_half vs the committed v1 outputs), `R/15_reread.R` (roster-turnover flags, hypothesis tests, EXPLORATORY
+additions, scorecard, advice outcome, playoffs table) and `R/15b_reread_report.R` (renders `reread_results.md`,
+`scorecard.md` and `session_info.txt`):
 
 ```sh
 for w in first_half second_half full; do
