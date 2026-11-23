@@ -91,7 +91,12 @@ build_box <- function(pev) {
 #'  2. If |S| < 5 and period > 1: add players from the previous period's
 #'     end-of-period on-court set who are not in S and whose first sub action
 #'     this period is not "in". Used only if that yields exactly 5.
-#'  3. Anything still not exactly 5 is left as inferred (not guessed) and is
+#'  3. Backward fill: if a period is still short of 5 and the next period has 5,
+#'     the missing player is in the next period's starting lineup, absent from
+#'     this period's partial closing lineup, and had no sub-in this period
+#'     (between-period subs are logged at the start of the next period). Used
+#'     only if that yields exactly 5.
+#'  4. Anything still not exactly 5 is left as inferred (not guessed) and is
 #'     listed in the `starter_counts` element (n_starters != 5).
 #'
 #' Minutes: on-clocks = c(period_len if starter, sub-in clocks); off-clocks =
@@ -129,8 +134,15 @@ build_minutes <- function(pev) {
   stint_rows <- list()
   count_rows <- list()
   groups <- pp %>% group_by(gameId, teamTricode) %>% group_split()
+  finalize_period <- function(p, S) {
+    p$started <- p$personId %in% S
+    n_on <- p$started + lengths(p$in_clocks)
+    p$ends_on <- n_on > lengths(p$out_clocks)
+    p
+  }
   for (grp in groups) {
     prev_end <- numeric(0)
+    prev <- NULL   # state of the previous period: row indices, p (without extras), S
     for (per in sort(unique(grp$period))) {
       p <- grp[grp$period == per, ]
       S <- p$personId[p$seed]
@@ -139,20 +151,46 @@ build_minutes <- function(pev) {
         add <- add[!(add %in% p$personId[!is.na(p$first_sub) & p$first_sub == "in"])]
         if (length(S) + length(add) == 5) S <- c(S, add)
       }
+      # Backward fill: if the previous period is still short of 5 starters, the
+      # missing one is on this period's starting lineup (between-period subs are
+      # logged at the start of the next period), is not on the previous period's
+      # partial closing lineup, and had no sub-in in the previous period.
+      if (!is.null(prev) && length(prev$S) < 5 && length(S) == 5) {
+        cand <- setdiff(S, prev$end)
+        cand <- cand[!(cand %in% prev$p$personId[!is.na(prev$p$first_sub) & prev$p$first_sub == "in"])]
+        if (length(prev$S) + length(cand) == 5) {
+          pp_prev <- prev$p
+          extra <- setdiff(cand, pp_prev$personId)
+          if (length(extra) > 0) {
+            pp_prev <- bind_rows(pp_prev, tibble(gameId = pp_prev$gameId[1], period = pp_prev$period[1],
+                                 teamTricode = pp_prev$teamTricode[1], personId = extra,
+                                 period_len = pp_prev$period_len[1],
+                                 in_clocks = list(numeric(0)), out_clocks = list(numeric(0))))
+          }
+          S_prev <- c(prev$S, cand)
+          pp_prev <- finalize_period(pp_prev, S_prev)
+          stint_rows[[prev$idx]] <- pp_prev
+          count_rows[[prev$idx]]$n_starters <- length(S_prev)
+          prev_end <- NULL
+          # this period's step-3 fill (if any) used the partial lineup; it was not needed
+          # when S already had 5 starters, so S stands.
+        }
+      }
       # rows for starters with no events this period (carried from prior period)
       extra <- setdiff(S, p$personId)
+      p0 <- p
       if (length(extra) > 0) {
         p <- bind_rows(p, tibble(gameId = p$gameId[1], period = per, teamTricode = p$teamTricode[1],
                                  personId = extra, period_len = p$period_len[1],
                                  in_clocks = list(numeric(0)), out_clocks = list(numeric(0))))
       }
-      p$started <- p$personId %in% S
-      n_on <- p$started + lengths(p$in_clocks)
-      p$ends_on <- n_on > lengths(p$out_clocks)
+      p <- finalize_period(p, S)
       prev_end <- p$personId[p$ends_on]
-      stint_rows[[length(stint_rows) + 1]] <- p
-      count_rows[[length(count_rows) + 1]] <- tibble(gameId = p$gameId[1], period = per,
+      idx <- length(stint_rows) + 1
+      stint_rows[[idx]] <- p
+      count_rows[[idx]] <- tibble(gameId = p$gameId[1], period = per,
         teamTricode = p$teamTricode[1], n_starters = length(S))
+      prev <- list(idx = idx, p = p0, S = S, end = prev_end)
     }
   }
   stints <- bind_rows(stint_rows)

@@ -76,9 +76,11 @@ Hypotheses for the chosen question go here before results are viewed:
       `output/offseason/tables_report.md`)
 - [x] Minutes: starter inference in `build_minutes()` replaced (seed from first-sub-out and earlier-clock
       events, technical fouls ignored, fill from the previous period's end-of-period set when that gives
-      exactly 5). Team-periods without 5 starters went from 45 to 1; team-games with unreconciled minutes
-      from 10 to 1 (0 regular, 1 playoff: 1042600304 ATL period 1, fifth starter has zero events and no
-      prior period). 9 player-games changed minutes (max change 10 minutes); box columns unchanged.
+      exactly 5; then a backward fill from the next period's starting lineup for a period still short).
+      Team-periods without 5 starters went from 45 to 0; team-games with unreconciled minutes from 10 to 0
+      (all 706 reconcile). 10 player-games changed minutes vs the first build (max change 10 minutes; the
+      last case, 1042600304 ATL period 1, is Hillmon, who has zero period-1 events and early period-2 events);
+      box columns unchanged.
       The `minutes_reconciled` flag stays as a guard, counts in `pipeline_baseline.csv`.
       R/13 v1 outputs in `output/` are unchanged, but re-running R/13 would now use the improved minutes.
 - [x] `test-player-value.R` (v1 test) now skips when the v1 `data/processed/pbp_events.rds` is absent.
@@ -121,7 +123,6 @@ Carried from v1's post-deadline list, none prioritized:
 - Defense and lineup-flexibility layer (mentor roadmap, v1 PLAN "Mentor-informed v2")
 - Fit-vs-cost target scoring and trade-outcome model (need to-the-dollar cap data and an
   asset-valuation model; v1 kept both out)
-- Last unreconciled team-period (1042600304 ATL, period 1): needs v2 or boxscore minutes cross-check
 - Deferred R/13 and R/14 items: full per-(game,period,team) minutes invariant test,
   creation-class fit bucket, garbage-time bench sensitivity, sorting `player_value.csv`
   by team, capped-min cap-mechanic citation

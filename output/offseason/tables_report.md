@@ -1,6 +1,6 @@
 # Analysis tables report
 
-Generated: 2026-11-23 17:10:36 UTC. Pin 46488f0.
+Generated: 2026-11-23 17:13:22 UTC. Pin 46488f0.
 
 ## Row counts per table and season type
 
@@ -37,11 +37,8 @@ Generated: 2026-11-23 17:10:36 UTC. Pin 46488f0.
 ## Minutes gate (exactly 5 inferred starters per team-period; see build_minutes())
 
 Pass rate, regular: 1.0000
-Pass rate, playoffs: 0.9947
-Unreconciled team-games (minutes_reconciled == FALSE; summed minutes more than 1 minute from 200 + 25*(n_periods-4)): 1 of 706 (0.14%).
-Unreconciled by season type: playoffs 1
-Team-periods without exactly 5 inferred starters (left as inferred, not guessed): 1
-| gameId | period | team | n_starters | season_type |
-|---|---|---|---|---|
-| 1042600304 | 1 | ATL | 4 | playoffs |
-Largest absolute deviation: 10.00 minutes.
+Pass rate, playoffs: 1.0000
+Unreconciled team-games (minutes_reconciled == FALSE; summed minutes more than 1 minute from 200 + 25*(n_periods-4)): 0 of 706 (0.00%).
+Unreconciled by season type: 
+Team-periods without exactly 5 inferred starters (left as inferred, not guessed): 0
+Largest absolute deviation: 0.00 minutes.

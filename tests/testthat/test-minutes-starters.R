@@ -42,3 +42,25 @@ test_that("an event at the same clock as the player's own sub-in does not make t
   expect_equal(m$starter_counts$n_starters, 5)
   expect_equal(m$minutes$minutes[m$minutes$personId == 6], 5)  # 300 seconds
 })
+
+test_that("backward fill: a period-1 starter with zero events is recovered from period 2's starting lineup", {
+  ev <- dplyr::bind_rows(
+    purrr::map_dfr(1:4, ~ mk(.x, 1, .x)),          # period 1: only players 1-4 have events
+    purrr::map_dfr(1:5, ~ mk(100 + .x, 2, .x))     # period 2: players 1-5 all have events
+  )
+  m <- build_minutes(ev)
+  expect_equal(m$starter_counts$n_starters, c(5, 5))
+  expect_equal(m$gate_pass_rate, 1)
+  expect_equal(m$minutes$minutes[m$minutes$personId == 5], 20)
+})
+
+test_that("backward fill is not used when it would not give exactly 5", {
+  ev <- dplyr::bind_rows(
+    purrr::map_dfr(1:3, ~ mk(.x, 1, .x)),                      # 3 starters with events
+    mk(10, 1, 4, type = "substitution", sub = "in", clock = 200),  # player 4 enters mid-period
+    purrr::map_dfr(1:5, ~ mk(100 + .x, 2, .x))
+  )
+  m <- build_minutes(ev)
+  # only player 5 is a candidate, giving 4 starters, so period 1 stays at 3
+  expect_equal(m$starter_counts$n_starters[m$starter_counts$period == 1], 3)
+})

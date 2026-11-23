@@ -29,9 +29,12 @@ load_table("player_games", "regular")   # "regular", "playoffs" or "all"
   "out" or who have a non-substitution event earlier in the game clock than their first
   sub-in (technical fouls and same-clock events do not count); if fewer than 5, fill from the
   previous period's end-of-period on-court set (players with no sub-in first), only when that
-  gives exactly 5. This differs from the v1 R/13 rule, which missed players with zero events
-  in a period. One team-period (1042600304 ATL, period 1) still has 4 inferred starters and
-  is flagged via `minutes_reconciled`.
+  gives exactly 5; a period still short of 5 is then filled backward from the next period's
+  starting lineup (between-period subs are logged at the start of the next period), minus the
+  partial closing lineup and anyone with a sub-in, again only if that gives exactly 5. This
+  differs from the v1 R/13 rule, which missed players with zero events in a period. At the
+  current pin every team-period has exactly 5 inferred starters; `minutes_reconciled` stays as
+  a guard.
 
 ## games
 
@@ -60,7 +63,7 @@ Grain: one row per team per game. Primary key: `game_id` + `team`.
 | win | logical | pts > opp_pts |
 | possessions | integer | possession rows for the team, excluding out-of-band technical/flagrant FT rows (R/03) |
 | FGA, FGM, AST, FG3A | integer | from `compute_team_game_counts_cdn()` (R/04) |
-| minutes_reconciled | logical | TRUE when summed reconstructed player minutes for the team-game are within 1 minute of 200 + 25*(n_periods-4). Kept as a guard: FALSE for 1 of 706 team-games (playoff game 1042600304, ATL: the fifth period-1 starter has no events and no earlier period to infer from, so 10 minutes are missing). Counts are stored in `data/reference/pipeline_baseline.csv` (`minutes_unreconciled_team_games`, written by R/04b, preserved by R/04). |
+| minutes_reconciled | logical | TRUE when summed reconstructed player minutes for the team-game are within 1 minute of 200 + 25*(n_periods-4). Kept as a guard: TRUE for all 706 team-games at the current pin. Counts of FALSE are stored in `data/reference/pipeline_baseline.csv` (`minutes_unreconciled_team_games`, 0 and 0; written by R/04b, preserved by R/04). |
 | FG3M, FTM, FTA, OREB, DREB, STL, BLK, TOV, PF | integer | counted from cdn events by the event's team; OREB, DREB and TOV include team rebounds and team turnovers; PF is personal plus offensive fouls (no technicals) |
 
 ## player_games
