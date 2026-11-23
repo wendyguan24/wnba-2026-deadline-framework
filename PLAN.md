@@ -199,12 +199,20 @@ Carried from v1's post-deadline list, none prioritized:
 
 ## Review triage log
 
+**Re-read review gates (2026-11-23), triage APPROVED by Wendy.** analytics-reviewer and gm-agent
+run on `output/offseason/reread/`. Execution plan: `docs/plans/reread_revision_plan.md`.
+- analytics-reviewer: B1 ACCEPT (decision rules were in the uncommitted execution plan, first
+  committed at cd66cc0; reword, commit plans to docs/plans/, A' and scorecard exploratory);
+  B2 ACCEPT (H-R3 mixed/inconclusive, no primary outcome); W1-W10 ACCEPT; N1-N5, N7 ACCEPT;
+  N6 (bootstrap determinism test) DEFER.
+- gm-agent: 1-2 ACCEPT as an EXPLORATORY "advice outcome" section, separate from registered
+  verdicts; 3 ACCEPT refined by W1 (instability is volume, not diet); 4 ACCEPT for write-up
+  framing (description, not forecast; headline the null); 5-7 ACCEPT; 8 one-line caveats only,
+  cap-feasibility analysis PARKED.
+
 (Empty for the offseason phase. v1 triage history is in the archived plan.)
 
 ## Next session should
 
-1. Run `analytics-reviewer` on `output/offseason/reread/reread_results.md` and `gm-agent` on
-   `output/offseason/reread/scorecard.md` (tell them the deadline framing does not apply: this is a
-   re-read of v1 as a forecast). Triage feedback (accept / reject with a reason / defer) in the log above.
-2. Then write up (Phase 3), keeping every number reproducible from `R/15_reread.R` and `R/15b_reread_report.R`.
-3. Decide whether to push tag `v1-deadline` and rename the repo (housekeeping).
+1. Dispatch `docs/plans/reread_revision_plan.md` (approved triage) to a Sonnet executor.
+2. Re-run analytics-reviewer on the revised reread_results.md, then start the write-up.
