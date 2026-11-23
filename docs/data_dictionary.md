@@ -130,3 +130,35 @@ Grain: one row per cdn field-goal attempt. Key: `game_id` + `order_number`.
 | is_fastbreak, is_2ndchance, is_fromturnover, is_pointsinthepaint | logical | cdn qualifier flags |
 
 Made-shot points per team-game equal team points minus FTM.
+
+## External validation (R/04c)
+
+`R/04c_validate_external.R` checks the tables against ESPN data from the wehoop / sportsdataverse-data
+releases (`player_box_2026`, `team_box_2026`, `wnba_schedule_2026`, downloaded 2026-11-23 to
+`data/raw/wehoop/`, hashes in `manifest.csv`). ESPN is a validator only: it is never merged into the
+tables or used in models. Full results: `output/offseason/external_validation.md`. Maps (tracked):
+`data/reference/espn_team_map.csv`, `espn_game_map.csv`, `espn_player_map.csv`. Accepted source
+disagreements: `data/reference/external_validation_exceptions.csv` (50 rows, each with a reason).
+Test: `tests/testthat/test-external-validation.R`.
+
+Results at pin `46488f0`:
+
+- Games: 352 of 353 matched on (date, home, away), all on the exact date. The unmatched game is the
+  Finals Game 7 (1042600307, 2026-10-31, GSV 68 ATL 63), which ESPN still lists as scheduled with no
+  box score. ESPN also has an All-Star game, the Commissioner's Cup final and a postponed July 16 game,
+  none of which is among our 330 regular-season games.
+- Team-games (704 compared): pts, FGM, FG3M, FTM, FTA, BLK, PF exact in all; FGA, FG3A, OREB, DREB,
+  AST, STL, TOV differ in 1 to 2 team-games each (10 cells in 7 games, all in the exceptions file).
+  ESPN team rebounds exclude team-credited rebounds, so OREB and DREB are compared as the sum of
+  player-credited rebounds. ESPN `total_turnovers` includes team turnovers, like ours.
+- Players: 7,009 of 7,009 of our player-game rows matched to ESPN (name match, then an elimination
+  pass for name changes such as cdn Coffey and ESPN Nia Brodie). Count stats are exact in 99.8 to
+  100 percent of player-games; 40 mismatching cells in 13 games, all within 2, all excepted. Where
+  nbastats v2 can be computed (35 of 40 cells) it agrees with ESPN, not with cdn: the differences are
+  single-event attribution errors in the cdn feed that our box score reproduces.
+- Minutes: all 7,009 player-games within 0.51 minutes of ESPN (ESPN rounds to whole minutes); the 10
+  player-games changed by the starter-inference fix all agree with ESPN (old values: 0 of 10 agree).
+- Standings: W-L for all 15 teams equals the ESPN counting games (330 games, 44 per team).
+- Playoffs: 23 games in 7 series (round 1 best of 3, round 2 best of 5, finals best of 7); Golden State
+  beat Atlanta 4-3. No eliminated team plays again.
+

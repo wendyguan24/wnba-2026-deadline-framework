@@ -1,0 +1,51 @@
+level,game_id,team,person_id,stat,ours,espn,reason
+player_game,1022600002,TOR,1629576,FGA,5,4,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600002,TOR,1643420,FGA,5,6,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600022,IND,1642286,AST,8,10,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600065,MIN,1643426,AST,9,10,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600113,ATL,1631009,OREB,3,2,source disagreement: cdn differs from ESPN; OREB/DREB split not checkable in v2 but REB total matches ESPN in v2
+player_game,1022600113,ATL,1631009,REB,5,4,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600113,ATL,1631009,STL,2,3,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600113,IND,1628881,DREB,0,1,source disagreement: cdn differs from ESPN; OREB/DREB split not checkable in v2 but REB total matches ESPN in v2
+player_game,1022600113,IND,1628881,REB,2,3,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600113,IND,1628881,TOV,1,2,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600116,MIN,1628269,OREB,2,3,source disagreement: cdn differs from ESPN; OREB/DREB split not checkable in v2 but REB total matches ESPN in v2
+player_game,1022600116,MIN,1628269,REB,5,6,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600169,LVA,203855,AST,2,1,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600169,LVA,1643495,AST,1,2,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600169,LVA,203855,FGA,4,5,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600169,LVA,1643495,FGA,8,7,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600169,LVA,203855,FGM,1,2,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600169,LVA,1643495,FGM,7,6,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600169,LVA,203855,pts,2,4,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600169,LVA,1643495,pts,19,17,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600172,WAS,1631022,OREB,1,2,source disagreement: cdn differs from ESPN; OREB/DREB split not checkable in v2 but REB total matches ESPN in v2
+player_game,1022600172,WAS,1642792,OREB,6,5,source disagreement: cdn differs from ESPN; OREB/DREB split not checkable in v2 but REB total matches ESPN in v2
+player_game,1022600172,WAS,1631022,REB,5,6,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600172,WAS,1642792,REB,13,12,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600210,MIN,1643489,FG3A,3,2,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600210,MIN,1643489,FGA,6,5,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600255,PDX,1628317,FG3A,4,3,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600255,PDX,1643494,FG3A,2,3,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600255,PDX,1628317,FGA,4,3,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600255,PDX,1643494,FGA,5,6,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600301,ATL,1631009,AST,8,7,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600301,ATL,1628277,AST,5,4,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600301,ATL,1628886,AST,1,2,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600301,ATL,1642804,AST,2,3,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600310,ATL,1628886,AST,10,9,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600310,ATL,1642804,AST,0,1,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600314,WAS,1642785,AST,9,10,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1022600314,WAS,1642781,AST,4,3,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1042600112,GSV,1628931,STL,4,3,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+player_game,1042600112,GSV,1631007,STL,2,3,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+team_game,1022600022,IND,,AST,21,23,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+team_game,1022600065,MIN,,AST,27,28,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+team_game,1022600074,CON,,TOV,15,10,ESPN-side error: ESPN team_turnovers is -5 so total_turnovers is 10; ESPN turnovers (15) and player turnovers match ours
+team_game,1022600113,ATL,,OREB,9,8,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+team_game,1022600113,ATL,,STL,10,11,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+team_game,1022600113,IND,,DREB,20,21,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+team_game,1022600113,IND,,TOV,17,18,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+team_game,1022600116,MIN,,OREB,11,12,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+team_game,1022600210,MIN,,FG3A,29,28,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed
+team_game,1022600210,MIN,,FGA,83,82,source disagreement: cdn differs from ESPN and nbastats v2 (see Appendix of external_validation.md); ours reproduces the cdn feed

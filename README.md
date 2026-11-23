@@ -104,8 +104,10 @@ swaps the pin for `main` for the planned July 23 data-refresh check (handoff §3
 Offseason update: the offseason pipeline is pinned to
 `46488f0f8e1cab58fc1256511ea808166a443a15` (2026-11-06), regular season 330 games plus
 playoffs 23 games. The v1 pin `773ce29` is retained for the published deadline framework at
-commit `4b78e2e`. Run order: `R/01`, `R/02`, `R/03`, `R/04`, `R/04b`. Tables are documented in
-`docs/data_dictionary.md`.
+commit `4b78e2e`. Run order: `R/01`, `R/02`, `R/03`, `R/04`, `R/04b`, `R/04c`. Tables are documented in
+`docs/data_dictionary.md`. `R/04c_validate_external.R` cross-checks the tables against ESPN
+(wehoop) box scores, schedule and standings and writes `output/offseason/external_validation.md`;
+ESPN is a validator only and never enters the tables or models.
 
 ## Known issue: shotdetail is missing Toronto Tempo (confirmed 2026-07-18)
 

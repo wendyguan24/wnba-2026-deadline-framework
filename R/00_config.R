@@ -37,3 +37,12 @@ dataset_name <- function(source, season_type) {
 raw_csv <- function(source, season_type) {
   file.path(RAW_DIR, paste0(dataset_name(source, season_type), ".csv"))
 }
+
+# External validator (wehoop/ESPN via sportsdataverse-data releases). Used only by
+# R/04c_validate_external.R; never merged into the analysis tables or models.
+WEHOOP_DIR <- proj_path("data", "raw", "wehoop")
+WEHOOP_URLS <- c(
+  player_box = "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_wnba_player_boxscores/player_box_2026.parquet",
+  team_box = "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_wnba_team_boxscores/team_box_2026.parquet",
+  schedule = "https://github.com/sportsdataverse/sportsdataverse-data/releases/download/espn_wnba_schedules/wnba_schedule_2026.parquet"
+)

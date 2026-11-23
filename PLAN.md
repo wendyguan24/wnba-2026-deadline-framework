@@ -4,7 +4,7 @@ Successor to the deadline framework. The v1 plan, with its full review-gate tria
 is archived at `docs/archive/PLAN_v1_deadline.md`. v1 is tagged `v1-deadline`
 (pinned `shufinskiy/nba_data` `773ce29`, 182 games, May 8 to July 16, 2026).
 
-Last updated: 2026-11-23.
+Last updated: 2026-11-23 (external validation added).
 
 ## Status
 
@@ -83,6 +83,30 @@ Hypotheses for the chosen question go here before results are viewed:
       box columns unchanged.
       The `minutes_reconciled` flag stays as a guard, counts in `pipeline_baseline.csv`.
       R/13 v1 outputs in `output/` are unchanged, but re-running R/13 would now use the improved minutes.
+- [x] External validation against ESPN (wehoop), `R/04c_validate_external.R`, report
+      `output/offseason/external_validation.md`, test `tests/testthat/test-external-validation.R`
+      (ESPN files downloaded 2026-11-23; validator only, never merged). Results:
+      games 352 of 353 matched on (date, home, away), 0 needing a date shift; the one unmatched game is Finals
+      Game 7 (1042600307, 2026-10-31), which ESPN still lists as scheduled with no box score (so G7 and the
+      title are checked only against our own reconciliation). All 15 ESPN franchise abbreviations mapped
+      (`data/reference/espn_team_map.csv`); ESPN All-Star teams COOP and SPO are not franchises.
+      None of our 330 regular-season games is a non-counting game (the ESPN All-Star game and Commissioner's
+      Cup final are not in our table; the postponed July 16 DAL-NYL game was replayed July 20 and is ours).
+      Team-games (704): pts, FGM, FG3M, FTM, FTA, BLK, PF exact in all; FGA 1, FG3A 1, OREB 2, DREB 1, AST 2,
+      STL 1, TOV 2 mismatches (10 cells, 7 games). ESPN team rebounds exclude team-credited rebounds, so OREB
+      and DREB are compared on player-credited sums. One cell is an ESPN-side error (game 1022600074 CON,
+      ESPN team_turnovers is -5). Players: 7,009 of 7,009 matched (6,925 by name, 84 by an elimination plus id link for name changes: Coffey/Brodie,
+      Gustafson/DiLeo, Hamzova/Joklova, Florez, and two repeated surnames); 40 count-stat cells in 13 games differ by at most 2, and where nbastats v2 can be recomputed
+      (35 of 40 cells) it agrees with ESPN, not cdn (cdn credits a single event to the wrong player; ours
+      reproduces cdn). All 50 mismatching cells are recorded in `data/reference/external_validation_exceptions.csv`
+      with reasons and the test fails on any new or stale exception. Minutes: 7,009 of 7,009 within 0.51 of
+      ESPN (whole-minute rounding); the 10 starter-fix player-games all agree with ESPN (old values 0 of 10).
+      Standings: W-L for all 15 teams equals ESPN counting games. Playoffs: 23 games, 7 series (best of 3,
+      5, 7), GSV beat ATL 4-3 in the Finals, no eliminated team plays again. Spot checks (OT game 1022600008,
+      1042600112, 1022600312, 1022600237, 1042600304): only disagreements are the two cdn steal-attribution
+      cells in 1042600112 (Williams 4/3, Burton 2/3, excepted).
+      Consequence for later work: individual counting stats carry about 0.1 percent cdn attribution noise
+      (14 games); not material for season-level reads, worth knowing for single-game claims.
 - [x] `test-player-value.R` (v1 test) now skips when the v1 `data/processed/pbp_events.rds` is absent.
       Note: R/13 and the R/05+ scripts still use v1 paths and must be wired to `R/00_config.R`
       before re-running.
@@ -133,6 +157,9 @@ Carried from v1's post-deadline list, none prioritized:
 
 ## Next session should
 
-1. Ask Wendy to pick the offseason scope (1, 2, 3 or other) and write hypotheses.
+1. Ask Wendy to pick the offseason scope (1, 2, 3 or other) and write the full-season re-read
+   hypotheses here before looking at any full-season model output (CLAUDE.md hypotheses discipline).
 2. Wire the `R/05` to `R/07`, `R/11`, `R/13`, `R/14` scripts the chosen scope needs to
    `R/00_config.R` (they still hard-code v1 paths), and start questions from `load_table()`.
+3. Optional: note in the write-up that Finals Game 7 is absent from ESPN's current snapshot; re-run
+   `Rscript R/04c_validate_external.R` after a wehoop refresh to cross-check it.
